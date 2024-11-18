@@ -927,6 +927,8 @@ Review: Schedule regular review meetings to assess progress and make adjustments
 >>>>>>> 2463e0a (Update README.md)
 ||||||| parent of 3be8ba7 (New changes made)
 #### Review: Schedule regular review meetings to assess progress and make adjustments.
+
+checking the working part2
 =======
 >>>>>>> 99b165970298eede61133c3ab68af7f12e3559f5
 =======
