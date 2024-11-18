@@ -1,6 +1,7 @@
 # EnvEng-WebApp-Development
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ---
 `gtags`
 `autoreconf -vfi`
@@ -781,6 +782,10 @@ Development of the EnvEng web application using 5S methodology for project manag
 <<<<<<< HEAD
 =======
 >>>>>>> 3be8ba7 (New changes made)
+||||||| parent of ec4456f (Update README.md)
+<<<<<<< HEAD
+=======
+>>>>>>> ec4456f (Update README.md)
 ## Project Plan Framework
 ### 1. Introduction
 Project Overview: 
