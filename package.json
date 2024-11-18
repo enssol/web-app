@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "dotenv-vault": "^1.26.2"
+    "dotenv-vault": "latest"
   }
 }

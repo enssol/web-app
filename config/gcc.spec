@@ -1,5 +1,5 @@
 *cc1:
-  %{!std=c99: -std=iso9899:2024} \
+  %{!std=iso9899:2024: -std=iso9899:2024} \
   %{!D_POSIX_C_SOURCE: -D_POSIX_C_SOURCE=2024L} \
   %{!D_XOPEN_SOURCE: -D_XOPEN_SOURCE=800} \
   %{!O3: -O3} \
@@ -17,6 +17,7 @@
   %{!fomit-frame-pointer: -fomit-frame-pointer} \
   %{!Wall: -Wall} \
   %{!Wextra: -Wextra} \
+  %{!pedantic: -pedantic} \
   %{!Wconversion: -Wconversion} \
   %{!Wfloat-equal: -Wfloat-equal} \
   %{!fvisibility=hidden: -fvisibility=hidden} \

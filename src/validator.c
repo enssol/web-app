@@ -16,42 +16,44 @@ int validate_config(const char *key, const char *value) {
         if (validate_string(value) != 0) {
             return -1; // Invalid value
         }
-        // Assign value to config
+        strcpy(config.app_name, value);
     } else if (strcmp(key, "version") == 0) {
         if (validate_double(value) != 0) {
             return -1; // Invalid value
         }
-        // Assign value to config
+        config.version = atof(value);
     } else if (strcmp(key, "log_level") == 0) {
         if (strcmp(value, "INFO") != 0 && strcmp(value, "DEBUG") != 0 && strcmp(value, "ERROR") != 0) {
             return -1; // Invalid value
         }
-        // Assign value to config
+        strcpy(config.log_level, value);
     } else if (strcmp(key, "enable_feature_x") == 0) {
         if (validate_boolean(value) != 0) {
             return -1; // Invalid value
         }
-        // Assign value to config
+        config.enable_feature_x = strcmp(value, "true") == 0;
     } else if (strcmp(key, "enable_feature_y") == 0) {
         if (validate_boolean(value) != 0) {
             return -1; // Invalid value
         }
-        // Assign value to config
+        config.enable_feature_y = strcmp(value, "true") == 0;
     } else if (strcmp(key, "max_retries") == 0) {
         if (validate_integer(value) != 0) {
             return -1; // Invalid value
         }
-        // Assign value to config
-    } else if (strcmp(key, "APP_MODE") == 0) {
+        config.max_retries = atoi(value);
+    } else if (strcmp(key, "app_mode") == 0) {
         if (validate_string(value) != 0) {
             return -1; // Invalid value
         }
-        // Assign value to config
-    } else if (strcmp(key, "ENABLE_FEATURE_Z") == 0) {
+        strcpy(config.app_mode, value);
+    } else if (strcmp(key, "enable_feature_z") == 0) {
         if (validate_boolean(value) != 0) {
             return -1; // Invalid value
         }
-        // Assign value to config
+        config.enable_feature_z = strcmp(value, "true") == 0;
+    } else {
+        return -1; // Unknown key
     }
 
     return 0; // Valid value
