@@ -52,12 +52,14 @@ Mkfile.old
 dkms.conf
 
 # Ignore build artifacts
-build/
-lib/
-deps/
-bin/
-logs/
-tmp/
+#build/
+#lib/
+#deps/
+#bin/
+#logs/
+#tmp/
+#debug/
+#obj/
 
 # Ignore configuration files
 # config/*
