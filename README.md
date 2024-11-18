@@ -1,5 +1,6 @@
 # EnvEng-WebApp-Development
 
+<<<<<<< HEAD
 ---
 `gtags`
 `autoreconf -vfi`
@@ -776,9 +777,14 @@ rm objects/*.o
 Development of the EnvEng web application using 5S methodology for project management and Data-Oriented Programming (DOP) for development.
 <<<<<<< HEAD
 
+||||||| parent of 3be8ba7 (New changes made)
+<<<<<<< HEAD
+=======
+>>>>>>> 3be8ba7 (New changes made)
 ## Project Plan Framework
 ### 1. Introduction
-Project Overview: Briefly describe the project and its objectives.
+Project Overview: 
+The project is created to create a Web Development platform for Enveng company.
 Methodologies: Explain the use of 5S for project management and DOP for development.
 ### 2. 5S Methodology Implementation
 Sort
@@ -842,6 +848,7 @@ Regularly review and update processes based on feedback and performance metrics.
 #### Accountability: Assign specific tasks and ensure accountability.
 ### 7. Monitoring and Evaluation
 #### Metrics: Define metrics to measure the success of 5S and DOP implementation.
+<<<<<<< HEAD
 ||||||| parent of 2463e0a (Update README.md)
 =======
 
@@ -913,3 +920,10 @@ Accountability: Assign specific tasks and ensure accountability.
 Metrics: Define metrics to measure the success of 5S and DOP implementation.
 Review: Schedule regular review meetings to assess progress and make adjustments.
 >>>>>>> 2463e0a (Update README.md)
+||||||| parent of 3be8ba7 (New changes made)
+#### Review: Schedule regular review meetings to assess progress and make adjustments.
+=======
+>>>>>>> 99b165970298eede61133c3ab68af7f12e3559f5
+=======
+#### Review: Schedule regular review meetings to assess progress and make adjustments.
+>>>>>>> 3be8ba7 (New changes made)
