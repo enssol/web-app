@@ -52,20 +52,33 @@ Mkfile.old
 dkms.conf
 
 # Ignore build artifacts
-#build/
-#lib/
-#deps/
-#bin/
-#logs/
-#tmp/
-#debug/
-#obj/
+build/
+lib/
+obj/
+bin/
+logs/
+tmp/
+debug/
 
 # Ignore configuration files
-# config/*
+config.log
+config.status
+config.h
+config.h.in~
+config.h.in
+config.cache
+config.guess
+config.sub
+configure
+configure~
+configure.ac~
+aclocal.m4
+autom4te.cache/
 
 # Ignore tests
-# tests/*
+tests/Makefile
+tests/Makefile.in
+tests/Makefile.am
 
 # Ignore other unnecessary files
 *.log

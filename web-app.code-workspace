@@ -121,11 +121,6 @@
     "github.copilot.chat.reviewSelection.enabled": true,
     "github.copilot.editor.enableCodeActions": true,
     "github.copilot.renameSuggestions.triggerAutomatically": true,
-    "github.copilot.chat.codeGeneration.instructions": [
-      {
-        "file": ".copilot-instructions.md"
-      }
-    ],
     "github.copilot.chat.codeGeneration.useInstructionFiles": true,
     "github.copilot.chat.temporalContext.enabled": true,
     "github.gitProtocol": "ssh",

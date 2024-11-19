@@ -1,378 +1,505 @@
 # EnvEng-WebApp-Development
 
+https://en.wikipedia.org/wiki/GNU_toolchain
+Projects in the GNU toolchain are:
+
+GNU Emacs – Extensible, customizable text editor with a real-time display
+
+GNU Core Utilities – Basic file, shell and text manipulation utilities of the GNU operating system
+
+GNU Autotools (build system) – GNU software packaging tools
+
+aclocal
+autoconf
+automake --add-missing
+./configure
+
+Autotools consists of the GNU utilities 
+Autoconf
+Automake
+Libtool.
+
+GNU Binutils – GNU software development tools for executable code
+The tools include:
+as	assembler popularly known as GAS (GNU Assembler)
+ld	linker
+gprof	profiler
+addr2line	convert address to file and line
+ar	create, modify, and extract from archives
+c++filt	demangling filter for C++ symbols
+dlltool	creation of Windows dynamic-link libraries
+gold	alternative linker for ELF files
+nlmconv	object file conversion to a NetWare Loadable Module
+nm	list symbols exported by object files
+objcopy	copy object files, possibly making changes
+objdump	dump information about object files
+ranlib	generate indices for archives (for compatibility; same as ar -s)
+readelf	display contents of ELF files
+size	list section sizes and total size of binary files
+strings	list printable strings
+strip	remove symbols from object files
+windmc	generates Windows message resources
+windres	compiler for Windows resource files
+
+GNU Bison – Yacc-compatible parser generator program
+GNU C Library – GNU implementation of the standard C library
+GNU Compiler Collection – Free and open-source compiler for various programming languages
+GNU Debugger – Source-level debugger
+GNU m4 – General-purpose macro processor
+GNU make – Software build automation tool
+
+CFEngine – Configuration management software
+
 Development of the EnvEng web application using 5S methodology for project management and Data-Oriented Programming (DOP) for development.
 
-To combine your directory structure with the **step-by-step breakdown** of the static build process, we'll walk through each step, linking it to your existing directory structure, file types, and the output generated at each stage.
+```md
+project/
+├── src/
+│   ├── main.c
+│   ├── utils.c
+│   └── utils.h
+├── build/
+│   ├── main.i
+│   ├── utils.i
+│   ├── main.s
+│   ├── utils.s
+│   ├── main.asm
+│   ├── utils.asm
+│   ├── main.d
+│   ├── utils.d
+│   ├── main.gch
+│   ├── utils.gch
+│   ├── main.lst
+│   ├── utils.lst
+│   ├── main.map
+│   ├── utils.map
+│   ├── main.dbg
+│   ├── utils.dbg
+│   └── main.tmp
+├── obj/
+│   ├── main.o
+│   ├── utils.o
+│   └── utils.obj
+├── lib/
+│   ├── libmylib.a
+│   └── libmylib.so
+├── bin/
+│   ├── myprogram.out
+│   └── myprogram.exe
+├── include/
+│   └── mylib.h
+├── docs/
+│   ├── README.md
+│   ├── manual.pdf
+│   └── guide.txt
+├── scripts/
+│   ├── build.sh
+│   └── clean.sh
+├── config/
+│   ├── build.cfg
+│   └── settings.conf
+├── logs/
+│   └── build.log
+└── Makefile
+```
 
-Here’s how your **directory structure** and **build process** integrate at each step of creating a **completely static executable**:
+# Project Build Process
+
+## 1. Preprocessing
+   - File Inclusion: Replace #include directives with the contents of the specified header files.
+     - **Tool**: `gcc -E`
+     - **Input File Extension**: `.c`, `.h`
+     - **Output File Extension**: `.i`
+     - **Input Directory**: `src/`
+     - **Output Directory**: `build/`
+   - Macro Expansion: Replace macros defined with #define with their corresponding values.
+     - **Tool**: `gcc -E`
+     - **Input File Extension**: `.c`, `.h`
+     - **Output File Extension**: `.i`
+     - **Input Directory**: `src/`
+     - **Output Directory**: `build/`
+   - Conditional Compilation: Evaluate #if, #ifdef, #ifndef, #else, and #endif directives to include or exclude parts of the code.
+     - **Tool**: `gcc -E`
+     - **Input File Extension**: `.c`, `.h`
+     - **Output File Extension**: `.i`
+     - **Input Directory**: `src/`
+     - **Output Directory**: `build/`
+   - Line Control: Process #line directives to control line numbers and filenames in error messages and debugging information.
+     - **Tool**: `gcc -E`
+     - **Input File Extension**: `.c`, `.h`
+     - **Output File Extension**: `.i`
+     - **Input Directory**: `src/`
+     - **Output Directory**: `build/`
+   - Removing Comments: Strip out all comments from the source code.
+     - **Tool**: `gcc -E`
+     - **Input File Extension**: `.c`, `.h`
+     - **Output File Extension**: `.i`
+     - **Input Directory**: `src/`
+     - **Output Directory**: `build/`
+
+## 2. Compilation
+   - Lexical Analysis: Convert the sequence of characters in the source code into a sequence of tokens.
+     - **Tool**: `gcc -S`
+     - **Input File Extension**: `.i`
+     - **Output File Extension**: `.s`
+     - **Input Directory**: `build/`
+     - **Output Directory**: `build/`
+   - Syntax Analysis: Parse the tokens to generate an Abstract Syntax Tree (AST) based on the grammar of the language.
+     - **Tool**: `gcc -S`
+     - **Input File Extension**: `.i`
+     - **Output File Extension**: `.s`
+     - **Input Directory**: `build/`
+     - **Output Directory**: `build/`
+   - Semantic Analysis: Check the AST for semantic errors (e.g., type checking, variable declaration).
+     - **Tool**: `gcc -S`
+     - **Input File Extension**: `.i`
+     - **Output File Extension**: `.s`
+     - **Input Directory**: `build/`
+     - **Output Directory**: `build/`
+   - Intermediate Code Generation: Translate the AST into an intermediate representation (IR), which is a lower-level code that is easier to optimize.
+     - **Tool**: `gcc -S`
+     - **Input File Extension**: `.i`
+     - **Output File Extension**: `.s`
+     - **Input Directory**: `build/`
+     - **Output Directory**: `build/`
+   - Optimization: Perform optimizations on the IR to improve performance (e.g., constant folding, dead code elimination).
+     - **Tool**: `gcc -S`
+     - **Input File Extension**: `.i`
+     - **Output File Extension**: `.s`
+     - **Input Directory**: `build/`
+     - **Output Directory**: `build/`
+   - Code Generation: Convert the optimized IR into assembly code.
+     - **Tool**: `gcc -S`
+     - **Input File Extension**: `.i`
+     - **Output File Extension**: `.s`, `.asm`
+     - **Input Directory**: `build/`
+     - **Output Directory**: `build/`
+
+## 3. Assembly
+   - Assembly Translation: Translate the assembly code into machine code (binary instructions).
+     - **Tool**: `as`
+     - **Input File Extension**: `.s`, `.asm`
+     - **Output File Extension**: `.o`
+     - **Input Directory**: `build/`
+     - **Output Directory**: `obj/`
+   - Object File Creation: Package the machine code into an object file (.o), including metadata such as symbol tables and relocation information.
+     - **Tool**: `as`
+     - **Input File Extension**: `.s`, `.asm`
+     - **Output File Extension**: `.o`
+     - **Input Directory**: `build/`
+     - **Output Directory**: `obj/`
+
+## 4. Linking
+   - Combining Object Files: Merge multiple object files into a single executable.
+     - **Tool**: `ld`
+     - **Input File Extension**: `.o`
+     - **Output File Extension**: `.out`, `.exe`
+     - **Input Directory**: `obj/`
+     - **Output Directory**: `bin/`
+   - Symbol Resolution: Resolve references to symbols (functions, variables) across object files.
+     - **Tool**: `ld`
+     - **Input File Extension**: `.o`
+     - **Output File Extension**: `.out`, `.exe`
+     - **Input Directory**: `obj/`
+     - **Output Directory**: `bin/`
+   - Library Linking: Link against static or dynamic libraries, resolving references to library functions.
+     - **Tool**: `ld`
+     - **Input File Extension**: `.o`, `.a`, `.so`
+     - **Output File Extension**: `.out`, `.exe`
+     - **Input Directory**: `obj/`, `lib/`
+     - **Output Directory**: `bin/`
+   - Relocation: Adjust addresses in the code and data sections to reflect their final positions in memory.
+     - **Tool**: `ld`
+     - **Input File Extension**: `.o`
+     - **Output File Extension**: `.out`, `.exe`
+     - **Input Directory**: `obj/`
+     - **Output Directory**: `bin/`
+   - Executable Creation: Generate the final executable file, including headers and metadata required for execution.
+     - **Tool**: `ld`
+     - **Input File Extension**: `.o`
+     - **Output File Extension**: `.out`, `.exe`
+     - **Input Directory**: `obj/`
+     - **Output Directory**: `bin/`
+
+## 5. Dependency Generation
+   - Dependency Generation: Generate dependency files to track which files need to be recompiled when a source file changes.
+     - **Tool**: `gcc -M`
+     - **Input File Extension**: `.c`, `.h`
+     - **Output File Extension**: `.d`
+     - **Input Directory**: `src/`
+     - **Output Directory**: `build/`
+
+## 6. Optimization Tools and Techniques
+   - Compiler Optimization Flags: Improve performance and efficiency of the generated code.
+     - **Tool**: `gcc`
+     - **Flags**: `-O0`, `-O1`, `-O2`, `-O3`, `-Os`, `-Ofast`, `-flto`
+   - Profile-Guided Optimization (PGO): Use profiling data to optimize the program.
+     - **Tool**: `gcc`
+     - **Steps**: `-fprofile-generate`, `-fprofile-use`
+   - Interprocedural Optimization (IPO): Perform optimizations across function and file boundaries.
+     - **Tool**: `gcc`
+     - **Flag**: `-flto`
+   - Vectorization: Enable automatic vectorization of loops.
+     - **Tool**: `gcc`
+     - **Flags**: `-ftree-vectorize`, `-march=native`
+   - Inlining: Enable function inlining.
+     - **Tool**: `gcc`
+     - **Flags**: `-finline-functions`, `-finline-limit=N`
+   - Loop Optimization: Improve performance of loops.
+     - **Tool**: `gcc`
+     - **Flags**: `-funroll-loops`, `-floop-interchange`, `-floop-block`, `-floop-parallelize-all`
+   - Dead Code Elimination: Remove code that does not affect the program's output.
+     - **Tool**: `gcc`
+     - **Flag**: `-fdce`
+   - Constant Folding: Evaluate constant expressions at compile time.
+     - **Tool**: `gcc`
+     - **Flag**: `-ftree-ccp`
+
+## 7. Other Common Tools
+   - **Tool**: `make`
+     - **Command**: `make`
+     - **Description**: Automates the build process by reading `Makefile` instructions.
+   - **Tool**: `gdb`
+     - **Command**: `gdb`
+     - **Description**: Debugs the executable, providing source-level debugging information.
+   - **Tool**: `strip`
+     - **Command**: `strip`
+     - **Description**: Removes symbols from the executable to reduce its size.
+   - **Tool**: `objdump`
+     - **Command**: `objdump`
+     - **Description**: Displays information about object files.
+   - **Tool**: `nm`
+     - **Command**: `nm`
+     - **Description**: Lists symbols from object files.
+   - **Tool**: `ranlib`
+     - **Command**: `ranlib`
+     - **Description**: Generates an index to the contents of an archive.
+
+8. Other Common File Types
+   - Precompiled Headers: Speed up compilation by precompiling frequently included headers.
+     - **File Extension**: `.gch`
+     - **Directory**: `build/`
+   - Assembly Listings: Human-readable versions of the assembly code, often used for debugging and analysis.
+     - **File Extension**: `.lst`
+     - **Directory**: `build/`
+   - Map Files: Provide detailed information about the memory layout of the program.
+     - **File Extension**: `.map`
+     - **Directory**: `build/`
+   - Debug Information: Contain additional information used by debuggers to provide source-level debugging.
+     - **File Extension**: `.dbg`
+     - **Directory**: `build/`
+   - Intermediate Object Files: Similar to `.o` files but may be used in different contexts or by different tools.
+     - **File Extension**: `.obj`
+     - **Directory**: `obj/`
+   - Configuration Files: Store settings and parameters for the build process or the application.
+     - **File Extension**: `.cfg`, `.conf`
+     - **Directory**: `config/`
+   - Log Files: Record the output of the build process or the execution of the application.
+     - **File Extension**: `.log`
+     - **Directory**: `logs/`
+   - Temporary Files: Created during the build process, often used for intermediate steps.
+     - **File Extension**: `.tmp`
+     - **Directory**: `tmp/`
+   - Documentation Files: Provide information about the project, such as README files, manuals, and guides.
+     - **File Extension**: `.md`, `.txt`, `.pdf`
+     - **Directory**: `docs/`
+   - Script Files: Used to automate the build process or other tasks.
+     - **File Extension**: `.sh`, `.bat`, `.ps1`
+     - **Directory**: `scripts/`
+
+## Summary
+- Preprocessing:
+  - File Inclusion
+  - Macro Expansion
+  - Conditional Compilation
+  - Line Control
+  - Removing Comments
+- Compilation:
+  - Lexical Analysis
+  - Syntax Analysis
+  - Semantic Analysis
+  - Intermediate Code Generation
+  - Optimization
+  - Code Generation
+- Assembly:
+  - Assembly Translation
+  - Object File Creation
+- Linking:
+  - Combining Object Files
+  - Symbol Resolution
+  - Library Linking
+  - Relocation
+  - Executable Creation
+- Dependency Generation:
+  - Dependency Generation
+- Optimization Tools and Techniques:
+  - Compiler Optimization Flags
+  - Profile-Guided Optimization (PGO)
+  - Interprocedural Optimization (IPO)
+  - Vectorization
+  - Inlining
+  - Loop Optimization
+  - Dead Code Elimination
+  - Constant Folding
+- Other Common Tools:
+  - make
+  - gdb
+  - strip
+  - objdump
+  - nm
+  - ranlib
+
+Each of these micro stages contributes to transforming the high-level C source code into a runnable executable program.
+
+Here is a set of **coding standards** derived from the provided information, aligned with the requirements for ISO/IEC 9899:2024, POSIX.1-2024, and X/Open 800 compliance, and incorporating the principles of 5S methodology and Data-Oriented Programming (DOP):  
 
 ---
 
-### **Step-by-Step Breakdown of the Static Build Process with Directory Integration**
+### **Coding Standards for EnvEng Web Application Development**
 
-#### **1. Preprocessing (Source Code to Preprocessed Code)**
+#### **1. General Standards**
+1.1 **Compliance**  
+- All code must adhere to the ISO/IEC 9899:2024 (C Standard).  
+- Code must be compliant with POSIX.1-2024 and X/Open 800 for portability and interoperability.  
 
-**Command:**
+1.2 **Portability**  
+- Ensure the codebase is compatible across multiple platforms, architectures, and operating systems.  
+- Avoid platform-specific features unless necessary, and encapsulate such dependencies to enable easy replacement.  
 
-```bash
-gcc -E src/source_file.c -o build/source_file.i
-```
-
-- **Description**: The preprocessor expands macros, handles `#include` directives, removes comments, and prepares the source for compilation.
-- **Files**:
-  - **Input**: `src/source_file.c`
-  - **Output**: `build/source_file.i`
-  - **File Type**: `.i` (Preprocessed source file)
-- **Folders**:
-  - **Input**: `src/` (C source code files)
-  - **Output**: `build/` (Intermediate files created by preprocessing)
-    - Example: `build/config_loader.i`, `build/main.i`
+1.3 **Self-Containment**  
+- All modules should be self-contained, with no reliance on external configurations or environment-specific details unless explicitly defined.  
 
 ---
 
-#### **2. Compilation (Preprocessed Code to Assembly)**
+#### **2. File and Repository Structure (Aligned with 5S: Set in Order)**  
+2.1 **Directory Structure**  
+- Use a logical and consistent directory structure, e.g.,:  
+  ```
+  src/         # Source code files  
+  include/     # Header files  
+  tests/       # Unit and integration tests  
+  docs/        # Documentation  
+  build/       # Build outputs  
+  scripts/     # Utility scripts  
+  ```
 
-**Command:**
+2.2 **File Naming**  
+- Use descriptive, snake_case naming for files (e.g., `data_manager.c`, `user_auth.h`).  
 
-```bash
-gcc -S build/source_file.i -o build/source_file.s
-```
-
-- **Description**: This step converts preprocessed code to assembly language, specific to the target architecture.
-- **Files**:
-  - **Input**: `build/source_file.i` (preprocessed file)
-  - **Output**: `build/source_file.s` (assembly code)
-  - **File Type**: `.s` (Assembly source code)
-- **Folders**:
-  - **Input**: `build/` (Preprocessed files)
-  - **Output**: `build/` (Assembly code output)
-    - Example: `build/config_loader.s`, `build/main.s`
-
----
-
-#### **3. Assembling (Assembly to Object Code with Dependency Files)**
-
-**Command:**
-
-```bash
-gcc -c -MMD -MF deps/source_file.d build/source_file.s -o obj/source_file.o
-```
-
-- **Description**: The assembler converts the assembly code into machine code (object code), but without any linking yet. Additionally, it generates dependency files to track header dependencies.
-- **Files**:
-  - **Input**: `build/source_file.s` (assembly file)
-  - **Output**: `obj/source_file.o` (object file), `deps/source_file.d` (dependency file)
-  - **File Type**: `.o` (Object file, machine code), `.d` (Dependency file)
-- **Folders**:
-  - **Input**: `build/` (Assembly files)
-  - **Output**: `obj/` (Object files), `deps/` (Dependency files)
-    - Example: `obj/config_loader.o`, `obj/main.o`, `deps/config_loader.d`, `deps/main.d`
+2.3 **Version Control**  
+- All source code must be tracked using a version control system (e.g., Git).  
+- Commit messages should follow a standardized format:  
+  ```
+  [Type] Short Description (e.g., [Fix] Resolved memory leak in data processing)
+  ```
 
 ---
 
-#### **4. Static Linking (Object Files to Executable)**
+#### **3. Coding Practices (Aligned with DOP and 5S Principles)**
 
-**Command:**
+3.1 **Clarity and Maintainability**  
+- Separate data and logic by defining clear data structures in header files and encapsulating logic in C files.  
+- Write modular and reusable functions.  
 
-```bash
-gcc -static -o bin/executable_name obj/*.o
-```
+3.2 **Coding Style**  
+- Follow a consistent style for readability:  
+  - Indentation: 4 spaces (no tabs).  
+  - Brace style: Place braces on a new line.  
+    ```c
+    if (condition) 
+    {
+        // Code block
+    }
+    ```
+  - Naming:  
+    - Variables: `snake_case` (e.g., `user_id`).  
+    - Functions: `camelCase` (e.g., `processData`).  
+    - Constants: `UPPER_CASE` (e.g., `MAX_BUFFER_SIZE`).  
 
-- **Description**: Links object files into a fully static executable. Ensures that no dynamic/shared libraries are needed at runtime.
-- **Files**:
-  - **Input**: `obj/*.o` (object files)
-  - **Output**: `bin/executable_name` (final static executable)
-  - **File Type**: No extension or `.out` (final executable)
-- **Folders**:
-  - **Input**: `obj/` (Object files)
-  - **Output**: `bin/` (Final executable)
-    - Example: `bin/executable_name`
+3.3 **Data Handling**  
+- Use immutable data structures whenever possible.  
+- Avoid global variables; instead, use well-defined interfaces.  
+- Centralize configuration and constants for reuse (e.g., `config.h`).  
 
----
+3.4 **Error Handling**  
+- Use POSIX-compliant error codes for standardization.  
+- Always check the return value of system calls and library functions. Example:  
+  ```c
+  if ((fd = open(filename, O_RDONLY)) < 0) 
+  {
+      perror("Error opening file");
+      exit(EXIT_FAILURE);
+  }
+  ```
 
-#### **5. Verify Static Linking (Check for Dynamic Dependencies)**
+3.5 **Memory Management**  
+- Allocate and free memory explicitly; avoid memory leaks.  
+- Use tools like `valgrind` to identify leaks during development.  
 
-**Command:**
-
-```bash
-ldd bin/executable_name
-```
-
-- **Description**: This verifies that the final executable has no dependencies on shared libraries. The output should show "not a dynamic executable" if it is fully static.
-- **Files**:
-  - **Input**: `bin/executable_name` (final executable)
-  - **Output**: Output from `ldd`, confirming whether the executable has dynamic dependencies.
-- **Folders**:
-  - **No output files** are generated, but the confirmation appears in the terminal.
-
----
-
-#### **6. Add Debugging Symbols (Optional)**
-
-**Command:**
-
-```bash
-gcc -static -g -o debug/executable_name source_file.c
-```
-
-- **Description**: Adds debugging symbols to the executable, which helps during debugging (e.g., with `gdb`).
-- **Files**:
-  - **Input**: `src/source_file.c` (C source file)
-  - **Output**: `debug/executable_name` (Debuggable executable with debugging symbols)
-  - **File Type**: `.out` or no extension (executable file with debug symbols)
-- **Folders**:
-  - **Input**: `src/` (C source files)
-  - **Output**: `debug/` (Debuggable executable)
-    - Example: `debug/executable_name` with debug symbols
+3.6 **Thread Safety**  
+- Design code to be thread-safe using POSIX threading primitives (e.g., `pthread_mutex_t`).  
 
 ---
 
-#### **7. Optimizing the Executable (Optional)**
+#### **4. Documentation (Aligned with 5S: Standardize)**  
+4.1 **Code Comments**  
+- Use block comments for file headers and function documentation:  
+  ```c
+  /**
+   * Function: calculateSum
+   * ----------------------
+   * Computes the sum of two integers.
+   *
+   * x: First integer
+   * y: Second integer
+   *
+   * returns: The sum of x and y
+   */
+  ```
 
-**Command:**
+4.2 **Standardized Templates**  
+- Create templates for:  
+  - Function definitions  
+  - File headers  
+  - Commit messages  
 
-```bash
-gcc -static -O3 -o bin/executable_name source_file.c
-```
-
-- **Description**: This step uses optimization flags (e.g., `-O3`) to optimize the executable for performance, potentially making it faster but larger.
-- **Files**:
-  - **Input**: `src/source_file.c` (C source file)
-  - **Output**: `bin/executable_name` (Optimized executable)
-  - **File Type**: `.out` or no extension (optimized executable)
-- **Folders**:
-  - **Input**: `src/` (C source files)
-  - **Output**: `bin/` (Optimized executable)
-    - Example: `bin/executable_name`
-
----
-
-#### **8. Cross-compiling (Optional)**
-
-If you are cross-compiling for a different architecture (e.g., ARM, embedded systems), you would use a cross-compiler.
-
-**Command (for ARM):**
-
-```bash
-arm-linux-gnueabihf-gcc -static -o bin/executable_name source_file.c
-```
-
-- **Description**: Compiles the program for a different architecture (e.g., ARM), ensuring that the executable is still statically linked.
-- **Files**:
-  - **Input**: `src/source_file.c` (C source file)
-  - **Output**: `bin/executable_name` (Cross-compiled executable for a different architecture)
-  - **File Type**: `.out` or no extension (cross-compiled executable)
-- **Folders**:
-  - **Input**: `src/` (C source files)
-  - **Output**: `bin/` (Cross-compiled executable)
-    - Example: `bin/executable_name` (ARM architecture)
+4.3 **External Documentation**  
+- Maintain documentation for APIs, data structures, and workflows using Markdown in the `docs/` directory.  
 
 ---
 
-#### **9. Final Verification (Ensure Self-Containment)**
+#### **5. Testing Standards**  
+5.1 **Test-Driven Development (TDD)**  
+- Write tests for every feature and bug fix.  
 
-**Command:**
+5.2 **Unit Testing**  
+- Use a framework like `Unity` or `CMock` for unit tests.  
+- All tests must reside in the `tests/` directory and follow the naming convention `test_<module_name>.c`.  
 
-```bash
-ldd bin/executable_name
-```
-
-- **Description**: Verifies once more that there are no external dynamic dependencies. The result should indicate "not a dynamic executable," confirming that it is fully static.
-- **Files**:
-  - **Input**: `bin/executable_name` (final executable)
-  - **Output**: Confirmation from `ldd` that the executable is statically linked.
-- **Folders**:
-  - **No output files** generated; this step confirms the static nature of the final executable.
+5.3 **Automated Testing**  
+- Implement CI/CD pipelines to automate testing and code quality checks.  
 
 ---
 
-### **Final Directory Structure After Full Build**
+#### **6. Performance Optimization (Aligned with DOP)**  
+6.1 **Efficient Data Structures**  
+- Use data structures optimized for cache efficiency (e.g., arrays over linked lists when sequential access is frequent).  
 
-Here’s what the directory structure would look like, incorporating each of the build steps above:
+6.2 **Profiling**  
+- Profile code regularly using tools like `gprof` or `perf`.  
 
-```plaintext
-web-app/
-├── bin/                # Final executables
-│   ├── executable_name   # Fully static executable
-│   └── (optional) debug/executable_name  # Debuggable or optimized executable
-├── build/              # Intermediate build files
-│   ├── config_loader.i   # Preprocessed file
-│   ├── main.i            # Preprocessed file
-│   ├── config_loader.s   # Assembly file
-│   └── main.s            # Assembly file
-├── config/             # Configuration files
-│   ├── config.conf     # App config
-│   ├── config.ini      # App config
-│   ├── gcc.spec        # GCC build config
-│   ├── sources.txt     # List of source files
-│   └── test_sources.txt# List of test files
-├── deps/               # Dependencies (empty in your case)
-├── include/            # Header files
-│   ├── config.h        # Header files
-│   ├── error_handler.h # Header files
-│   ├── garbage_collector.h # Header files
-│   └── logger.h        # Header files
-├── lib/                # Static libraries (empty in your case)
-├── logs/               # Build/runtime logs
-├── obj/                # Object files
-│   ├── config_loader.o # Object file (from src/config_loader.c)
-│   └── main.o          # Object file (from src/main.c)
-├── package.json        # NodeJS package (not relevant for static build)
-├── package-lock.json   # NodeJS lockfile (not relevant for static build)
-├── README.md           # Project documentation
-├── src/                # Source code files
-│   ├── config_loader.c  # C file for config loader
-│   ├── main.c           # Main entry point
-│   └── hello.c          # Another source file
-├── tests/              # Test files
-│   ├── test_config_loader.c # Test file for config_loader
-│   ├── test_main.c
+---
 
-				# Test file for main
-│   └── test_hello.c       # Test file for hello
-└── tmp/                # Temporary files (intermediate)
-```
+#### **7. 5S Maintenance and Sustainability**  
+7.1 **Regular Reviews**  
+- Conduct code reviews bi-weekly to ensure adherence to standards.  
 
-By following this process, you ensure that your project is properly built as a static executable with all necessary intermediate files and configurations organized into the appropriate folders.
+7.2 **Continuous Training**  
+- Train team members on 5S, DOP, and coding standards.  
 
-```Makefile
-# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: 	AGPL-3.0-or-later
+7.3 **Audits**  
+- Schedule periodic audits to ensure the workspace and codebase remain clean and organized.  
 
-# Variables
-ENV_FILE = .env
-INI = config.ini
-CONF = config.conf
-BUILD_DIR = ../build
-ENV_VARS_MK = $(BUILD_DIR)/env_vars.mk
-CONF_VARS_MK = $(BUILD_DIR)/conf_vars.mk
-COMB_VARS_MK = $(BUILD_DIR)/combined_vars.mk
-SOURCES_FILE = sources.txt
-TEST_SOURCES_FILE = test_sources.txt
-GCC_SPEC_FILE = gcc.spec
-SOURCES_MK = $(BUILD_DIR)/sources.mk
-TESTS_MK = $(BUILD_DIR)/tests.mk
-GCC_SPECS_MK = $(BUILD_DIR)/gcc_specs.mk
+---
 
-# Create build directory
-$(shell mkdir -p $(BUILD_DIR))
-
-# Always run the targets to update .mk files
-.PHONY: all set-env set-conf combine-configs $(ENV_VARS_MK) $(CONF_VARS_MK) $(SOURCES_MK) $(TESTS_MK) $(GCC_SPECS_MK)
-
-# Default target
-all: combine-configs $(SOURCES_MK) $(TESTS_MK) $(GCC_SPECS_MK)
-
-# Read, parse and write key-value pairs from the .env file into the env_vars.mk file
-set-env: $(ENV_VARS_MK)
-
-$(ENV_VARS_MK): $(ENV_FILE)
-	@echo "Writing key-value pairs from $(ENV_FILE) to $(ENV_VARS_MK)"
-	@echo "# Environment variables from .env" > $(ENV_VARS_MK)
-	@grep -v '^#' $(ENV_FILE) | grep -v '^$$' | while IFS='=' read -r key value; do \
-		key_upper=$$(echo $$key | tr '[:lower:]' '[:upper:]'); \
-		echo "$$key_upper := $$value" >> $(ENV_VARS_MK); \
-	done
-
-# Read, parse and write key-value pairs from the config.ini and config.conf files into the conf_vars.mk file
-set-conf: $(CONF_VARS_MK)
-
-$(CONF_VARS_MK): $(INI) $(CONF)
-	@echo "Writing key-value pairs from $(INI) and $(CONF) to $(CONF_VARS_MK)"
-	@echo "# Configuration variables from config.ini and config.conf" > $(CONF_VARS_MK)
-	@cat $(INI) $(CONF) | grep -v '^#' | grep -v '^$$' | grep -v '^\[' | while IFS='=' read -r key value; do \
-		key_upper=$$(echo $$key | tr '[:lower:]' '[:upper:]'); \
-		echo "$$key_upper := $$value" >> $(CONF_VARS_MK); \
-	done
-
-# Write .env variables first, then add config.ini variables if they don't already exist, and lastly overwrite any existing variables with config.conf variables only if they don't already exist
-combine-configs: $(ENV_VARS_MK) $(CONF_VARS_MK)
-	@echo "Combining key-value pairs from $(ENV_FILE), $(INI) and $(CONF) into $(COMB_VARS_MK)"
-	@echo "# Combined environment and configuration variables" > $(COMB_VARS_MK)
-	@cat $(ENV_VARS_MK) >> $(COMB_VARS_MK)
-	@cat $(CONF_VARS_MK) | while IFS='=' read -r key value; do \
-		key_upper=$$(echo $$key | tr '[:lower:]' '[:upper:]'); \
-		sed -i "/^$$key_upper :=/d" $(COMB_VARS_MK); \
-		echo "$$key_upper := $$value" >> $(COMB_VARS_MK); \
-	done
-
-# Include the combined_vars.mk to load the variables
--include $(COMB_VARS_MK)
-
-# Read, parse and then export $(SOURCES_FILE) into build directory as sources.mk
-$(SOURCES_MK): $(SOURCES_FILE)
-	@echo "Writing sources from $(SOURCES_FILE) to $(SOURCES_MK)"
-	@echo "SOURCES = \\" > $(SOURCES_MK)
-	@cat $(SOURCES_FILE) | grep -v '^#' | grep -v '^$$' | while read -r line; do \
-		echo "  $$line \\" >> $(SOURCES_MK); \
-	done
-	@sed -i '$$ s/\\$$//' $(SOURCES_MK) # Remove the trailing backslash from the last line
-
-# For tests: read, parse and then export $(TEST_SOURCES_FILE) into build directory as tests.mk
-$(TESTS_MK): $(TEST_SOURCES_FILE)
-	@echo "Writing test sources from $(TEST_SOURCES_FILE) to $(TESTS_MK)"
-	@echo "TEST_SOURCES = \\" > $(TESTS_MK)
-	@cat $(TEST_SOURCES_FILE) | grep -v '^#' | grep -v '^$$' | while read -r line; do \
-		echo "  $$line \\" >> $(TESTS_MK); \
-	done
-	@sed -i '$$ s/\\$$//' $(TESTS_MK) # Remove the trailing backslash from the last line
-
-# Read, parse and then export $(GCC_SPEC_FILE) into build directory as gcc_specs.mk
-$(GCC_SPECS_MK): $(GCC_SPEC_FILE)
-	@echo "Writing GCC specs from $(GCC_SPEC_FILE) to $(GCC_SPECS_MK)"
-	@echo "GCC_SPECS = \\" > $(GCC_SPECS_MK)
-	@cat $(GCC_SPEC_FILE) | grep -v '^#' | grep -v '^$$' | while read -r line; do \
-		echo "  $$line \\" >> $(GCC_SPECS_MK); \
-	done
-	@sed -i '$$ s/\\$$//' $(GCC_SPECS_MK) # Remove the trailing backslash from the last line
-
-# Include the generated sources.mk, tests.mk, and gcc_specs.mk
--include $(SOURCES_MK)
--include $(TESTS_MK)
--include $(GCC_SPECS_MK)
-
-# Use these flags in the build
-CFLAGS += $(CFLAGS_SPEC) -I$(INCLUDE_DIR) -Wall -Wextra -std=c99 -g
-LDFLAGS += $(LDFLAGS_SPEC) -static
-
-# Load sources dynamically
-SOURCES = $(patsubst %, $(SRC_DIR)/%, $(shell cat $(SOURCES_FILE)))
-TEST_SOURCES = $(patsubst %, $(TESTS_DIR)/%, $(shell cat $(TEST_SOURCES_FILE)))
-OBJECTS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SOURCES))
-TEST_OBJECTS = $(patsubst $(TESTS_DIR)/%.c, $(OBJ_DIR)/%.o, $(TEST_SOURCES))
-DEPENDENCIES = $(patsubst $(OBJ_DIR)/%.o, $(DEPS_DIR)/%.d, $(OBJECTS) $(TEST_OBJECTS))
-
-# Compiler
-CC = gcc
-
-# Build main application
-all: $(BIN_DIR)/$(APP_NAME)
-
-$(BIN_DIR)/$(APP_NAME): $(OBJECTS)
-	mkdir -p $(BIN_DIR)
-	$(CC) $(LDFLAGS) $^ -o $@
-
-# Build individual object files
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	mkdir -p $(OBJ_DIR) $(DEPS_DIR)
-	$(CC) $(CFLAGS) -MMD -MF $(patsubst $(OBJ_DIR)/%.o, $(DEPS_DIR)/%.d, $@) -c $< -o $@
-
-# Build and run tests
-test: $(TEST_OBJECTS)
-	mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) $^ -o $(BIN_DIR)/test_runner
-	@echo "Running tests..."
-	$(BIN_DIR)/test_runner
-
-# Build individual test object files
-$(OBJ_DIR)/%.o: $(TESTS_DIR)/%.c
-	mkdir -p $(OBJ_DIR) $(DEPS_DIR)
-	$(CC) $(CFLAGS) -MMD -MF $(patsubst $(OBJ_DIR)/%.o, $(DEPS_DIR)/%.d, $@) -c $< -o $@
-
-# Clean build artifacts
-clean:
-	rm -rf $(BUILD_DIR) $(OBJ_DIR) $(BIN_DIR) $(DEPS_DIR) $(DEBUG_DIR) $(TMP_DIR)
-
-# Include dependencies
--include $(DEPENDENCIES)
-```
+By adhering to these standards, the team will maintain clarity, ensure high performance, and achieve compliance with industry and project-specific requirements.
