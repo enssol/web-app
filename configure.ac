@@ -1,17 +1,18 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.72])
+AC_PREREQ([2.71])
 AC_INIT([your_project], [1.0], [your_email@example.com])
 AM_INIT_AUTOMAKE([gnu])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([config.h])
 
-# Include Autoconf Archive macros
-m4_include([m4/ax_prog_cc_for_build.m4])
-
 # Check for programs
 AC_PROG_CC
 AC_PROG_RANLIB
+AC_PROG_YACC
+
+# Check for glibc
+AC_CHECK_HEADERS([gnu/libc-version.h])
 
 # Check for C11 support
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[

@@ -1,9 +1,0 @@
-# Copilot Instructions
-
-## Code Standards and Compliance
-
-1. **C Standard**: All generated C code must comply with the ISO/IEC 9899:2024 standard.
-
-2. **POSIX Compliance**: Ensure that all generated code is compliant with POSIX.1-2024.
-
-3. **X/Open Compliance**: Ensure that all generated code is compliant with X/Open 800.

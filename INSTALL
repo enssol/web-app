@@ -1,15 +1,60 @@
 <!--
  Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
- SPDX-License-Identifier: 	AGPL-3.0-or-later
+ SPDX-License-Identifier: AGPL-3.0-or-later
 -->
-
-// Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-// SPDX-License-Identifier: AGPL-3.0-or-later
 
 # Installation Instructions
 
 To install the web-app project, follow these steps:
 
+## Configure the package for your system:
+```sh
 autoreconf -i
 ./configure
+```
 
+or
+
+```sh
+./configure MAKE="gmake" --disable-dependency-tracking
+```
+
+## Build the software:
+```sh
+make
+```
+
+## Run tests to verify the build:
+```sh
+make check
+```
+
+## Install the software (usually requires superuser privileges):
+```sh
+sudo make install
+```
+
+## Clean up the build files (optional, but useful for a fresh build):
+```sh
+make clean
+```
+
+## Summary of Commands
+1. `autoreconf -i`
+2. `./configure`
+3. `make`
+4. `make check`
+5. `sudo make install`
+6. `make clean`
+
+## Additional Notes
+### Environment Variables
+Ensure that any necessary environment variables are set. You can source them from a `.env` file if needed.
+
+### Configuration Files
+Configuration files such as `config.conf`, `config.ini`, and `gcc.spec` are located in the `config` directory and can be customized as needed.
+
+### Documentation
+Refer to the `README.md` and other documentation files in the `docs` directory for more detailed information about the project.
+
+By following these instructions, you can successfully build, test, and install the web-app project.

@@ -9,11 +9,6 @@ GNU Core Utilities – Basic file, shell and text manipulation utilities of the 
 
 GNU Autotools (build system) – GNU software packaging tools
 
-aclocal
-autoconf
-automake --add-missing
-./configure
-
 Autotools consists of the GNU utilities 
 Autoconf
 Automake

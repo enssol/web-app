@@ -1,7 +1,3 @@
-Certainly! Below is a structured body for a `copilot-instructions.md` file that integrates your coding standards in a way Copilot can leverage effectively to guide its suggestions.
-
----
-
 # **Copilot Instructions for EnvEng Web Application Development**
 
 This document outlines coding standards and practices for the EnvEng Web Application development project. These instructions help align Copilot's suggestions with our project's requirements.
@@ -20,12 +16,74 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 ### File Organization
 
 -   Maintain the following directory structure:
-    -   `src/`: Source code files.
-    -   `include/`: Header files.
-    -   `tests/`: Unit and integration tests.
-    -   `docs/`: Documentation.
-    -   `build/`: Build outputs.
-    -   `scripts/`: Utility scripts.
+
+    ```
+    .
+    ├── AUTHORS
+    ├── bin
+    ├── build
+    │   └── in
+    ├── ChangeLog
+    ├── compile -> /opt/homebrew/Cellar/automake/1.17/share/automake-1.17/compile
+    ├── config
+    │   ├── config.conf
+    │   ├── config.ini
+    │   ├── gcc.spec
+    │   ├── header_sources.txt
+    │   ├── sources.txt
+    │   └── test_sources.txt
+    ├── [configure.ac](http://_vscodecontentref_/1)
+    ├── copilotinstructions.txt
+    ├── COPYING
+    ├── depcomp
+    ├── include
+    │   ├── config_loader.h
+    │   ├── env_loader.h
+    │   ├── error_handler.h
+    │   ├── garbage_collector.h
+    │   ├── hello.h
+    │   ├── logger.h
+    │   └── validator.h
+    ├── INSTALL
+    ├── install-sh -> /opt/homebrew/Cellar/automake/1.17/share/automake-1.17/install-sh
+    ├── LICENSE
+    ├── logs
+    ├── Makefile
+    ├── [Makefile.am](http://_vscodecontentref_/2)
+    ├── [Makefile.in](http://_vscodecontentref_/3)
+    ├── missing -> /opt/homebrew/Cellar/automake/1.17/share/automake-1.17/missing
+    ├── NEWS
+    ├── obj
+    ├── [package.json](http://_vscodecontentref_/4)
+    ├── [package-lock.json](http://_vscodecontentref_/5)
+    ├── [README.md](http://_vscodecontentref_/6)
+    ├── src
+    │   ├── config_loader.c
+    │   ├── env_loader.c
+    │   ├── error_handler.c
+    │   ├── garbage_collector.c
+    │   ├── hello.c
+    │   ├── logger.c
+    │   ├── main.c
+    │   ├── Makefile
+    │   ├── [Makefile.am](http://_vscodecontentref_/7)
+    │   ├── [Makefile.in](http://_vscodecontentref_/8)
+    │   └── validator.c
+    ���── stamp-h1
+    ├── test-driver
+    ├── tests
+    │   ├── test_config_loader.c
+    │   ├── test_env_loader.c
+    │   ├── test_error_handler.c
+    │   ├── test_garbage_collector.c
+    │   ├── test_hello.c
+    │   ├── test_logger.c
+    │   ├── test_main.c
+    │   ├── Makefile.am
+    │   └── test_validator.c
+    └── [web-app.code-workspace](http://_vscodecontentref_/9)
+    ```
+
 -   Use **snake_case** for file names, e.g., `data_manager.c`, `user_auth.h`.
 
 ### Naming Conventions
