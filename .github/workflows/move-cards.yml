@@ -1,0 +1,15 @@
+name: Move Cards on Assignment
+
+on:
+  issues:
+    types: [assigned]
+
+jobs:
+  move-card:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move card to In Progress
+        uses: actions/move-linked-project-cards@v1
+        with:
+          project-url: ${{ secrets.PROJECT_URL }}
+          column-name: 'In Progress'
