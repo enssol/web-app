@@ -15,6 +15,7 @@
 # Precompiled Headers
 *.gch
 *.pch
+*.Plo
 
 # Libraries
 *.lib
@@ -58,7 +59,9 @@ obj/
 bin/
 logs/
 tmp/
-debug/
+m4/
+dist/
+deps/
 
 # Ignore configuration files
 config.log
@@ -74,11 +77,11 @@ configure~
 configure.ac~
 aclocal.m4
 autom4te.cache/
+Makefile.in
 
 # Ignore tests
 tests/Makefile
 tests/Makefile.in
-tests/Makefile.am
 
 # Ignore other unnecessary files
 *.log

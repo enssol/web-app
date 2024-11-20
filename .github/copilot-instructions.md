@@ -17,72 +17,81 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 
 -   Maintain the following directory structure:
 
-    ```
-    .
-    ├── AUTHORS
-    ├── bin
-    ├── build
-    │   └── in
-    ├── ChangeLog
-    ├── compile -> /opt/homebrew/Cellar/automake/1.17/share/automake-1.17/compile
-    ├── config
-    │   ├── config.conf
-    │   ├── config.ini
-    │   ├── gcc.spec
-    │   ├── header_sources.txt
-    │   ├── sources.txt
-    │   └── test_sources.txt
-    ├── [configure.ac](http://_vscodecontentref_/1)
-    ├── copilotinstructions.txt
-    ├── COPYING
-    ├── depcomp
-    ├── include
-    │   ├── config_loader.h
-    │   ├── env_loader.h
-    │   ├── error_handler.h
-    │   ├── garbage_collector.h
-    │   ├── hello.h
-    │   ├── logger.h
-    │   └── validator.h
-    ├── INSTALL
-    ├── install-sh -> /opt/homebrew/Cellar/automake/1.17/share/automake-1.17/install-sh
-    ├── LICENSE
-    ├── logs
-    ├── Makefile
-    ├── [Makefile.am](http://_vscodecontentref_/2)
-    ├── [Makefile.in](http://_vscodecontentref_/3)
-    ├── missing -> /opt/homebrew/Cellar/automake/1.17/share/automake-1.17/missing
-    ├── NEWS
-    ├── obj
-    ├── [package.json](http://_vscodecontentref_/4)
-    ├── [package-lock.json](http://_vscodecontentref_/5)
-    ├── [README.md](http://_vscodecontentref_/6)
-    ├── src
-    │   ├── config_loader.c
-    │   ├── env_loader.c
-    │   ├── error_handler.c
-    │   ├── garbage_collector.c
-    │   ├── hello.c
-    │   ├── logger.c
-    │   ├── main.c
-    │   ├── Makefile
-    │   ├── [Makefile.am](http://_vscodecontentref_/7)
-    │   ├── [Makefile.in](http://_vscodecontentref_/8)
-    │   └── validator.c
-    ���── stamp-h1
-    ├── test-driver
-    ├── tests
-    │   ├── test_config_loader.c
-    │   ├── test_env_loader.c
-    │   ├── test_error_handler.c
-    │   ├── test_garbage_collector.c
-    │   ├── test_hello.c
-    │   ├── test_logger.c
-    │   ├── test_main.c
-    │   ├── Makefile.am
-    │   └── test_validator.c
-    └── [web-app.code-workspace](http://_vscodecontentref_/9)
-    ```
+```
+agalloMacbook:web-app adriangallo$ tree -I node_modules
+.
+├── AUTHORS
+├── COPYING
+├── ChangeLog
+├── INSTALL
+├── LICENSE
+├── Makefile.am
+├── NEWS
+├── README.md
+├── bin
+│   └── Makefile.am
+├── build
+│   ├── Makefile.am
+├── configure.ac
+├── deps
+│   └── Makefile.am
+├── dist
+│   └── Makefile.am
+├── docs
+│   └── Makefile.am
+├── etc
+│   ├── Makefile.am
+│   ├── config.conf
+│   ├── config.ini
+│   ├── gcc.spec
+│   ├── header_sources.txt
+│   ├── scan_list.txt
+│   ├── sources.txt
+│   └── test_sources.txt
+├── include
+│   ├── Makefile.am
+│   ├── config_loader.h
+│   ├── env_loader.h
+│   ├── error_handler.h
+│   ├── garbage_collector.h
+│   ├── hello.h
+│   ├── logger.h
+│   └── validator.h
+├── lib
+│   ├── Makefile.am
+│   └── unity.h
+├── logs
+│   └── Makefile.am
+├── obj
+│   └── Makefile.am
+├── package-lock.json
+├── package.json
+├── src
+│   ├── Makefile.am
+│   ├── config_loader.c
+│   ├── env_loader.c
+│   ├── error_handler.c
+│   ├── garbage_collector.c
+│   ├── hello.c
+│   ├── logger.c
+│   ├── main.c
+│   ├── parser.y
+│   └── validator.c
+├── tests
+│   ├── test_config_loader.c
+│   ├── test_env_loader.c
+│   ├── test_error_handler.c
+│   ├── test_garbage_collector.c
+│   ├── test_hello.c
+│   ├── test_logger.c
+│   ├── test_main.c
+│   └── test_validator.c
+├── tmp
+│   └── Makefile.am
+└── web-app.code-workspace
+
+15 directories, 62 files
+```
 
 -   Use **snake_case** for file names, e.g., `data_manager.c`, `user_auth.h`.
 
@@ -189,10 +198,11 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 
 ---
 
-These instructions ensure that Copilot assists with generating consistent, maintainable, and compliant code for the EnvEng Web Application project.
+## **8. Copilot Usage Guidelines**
+-   When generating code, focus on providing code snippets that can be copied into existing files rather than rewriting entire files.
+-   Ensure that the generated snippets adhere to the project's coding standards and practices as outlined in this document.
+-   Provide context-specific suggestions that integrate seamlessly with the existing codebase.
 
 ---
 
-### How to Use:
-
-Paste this into your `copilot-instructions.md` file to guide GitHub Copilot's behavior while assisting in code generation.
+These instructions ensure that Copilot assists with generating consistent, maintainable, and compliant code for the EnvEng Web Application project.

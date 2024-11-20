@@ -7,39 +7,183 @@
 
 To install the web-app project, follow these steps:
 
+## Build Directory
+
+Create a build directory to store the build files:
+
+```sh
+mkdir -p build
+```
+
+## Generate a file list:
+
+Ensure you run this command from the root directory of the project and also run:
+
+```sh
+rm node_modules
+```
+
+After the build, you can reinstall the node_modules with:
+
+```sh
+npm install
+```
+
+```sh
+find . -type d \( -path ./node_modules -o -path ./.github -o -path ./bin -o -path ./build -o -path ./dist -o -path ./logs -o -path ./obj -o -path ./tmp -o -path ./.vscode -o -path ./.git \) -prune -o -type f \( ! -name 'web-app.code-workspace' ! -name '.DS_Store' ! -name '.gitkeep' ! -name '.env' ! -name '.env.me' ! -name '.env.previous' ! -name 'package-lock.json' ! -name 'package.json' ! -name '.editorconfig' \) -print > etc/scan_list.txt
+```
+
+The `scan_list.txt` file will be used to generate the `configure.scan` file.
+
+-   `-type d` specifies directories.
+-   `-path` specifies directories to exclude.
+-   `-type f` specifies files.
+-   `-name` specifies files to exclude.
+-   `-print` prints the file list.
+
+## Autoscan
+
+### Generate a `configure.scan` file:
+
+```sh
+f
+autoscan -B ./include -I ./lib -I ./etc -I ./src -I ./tests  -v -d -f etc/scan_list.txt
+```
+
+-   `-B` specifies the base directory for the project.
+-   `-I` specifies the include directories for the project.
+-   `-v` enables verbose output.
+-   `-d` enables debugging output.
+
+The `configure.scan` file will be generated in the base directory of the project.
+
+The `configure.scan` file will be used to generate the `configure.ac` file.
+
+## Autoreconf
+
+### Generate a `configure.ac` file:
+
+```sh
+# If autoscan.log is empty, then the scan was successful.
+rm autoscan.log
+mv configure.scan configure.ac
+```
+
+### Update the `configure.ac` file:
+
+```makefile
+# Autoconf configuration file for the web-app project.
+# Information about the project is stored in the `configure.ac` file.
+AC_PREREQ([2.72])
+AC_INIT(web-app, 1.0, https://github.com/enssol/web-app/issues/new)
+AC_CONFIG_SRCDIR([include/config.h])
+AC_CONFIG_HEADERS([config.h])
+
+# Specify the auxiliary build directory
+AC_CONFIG_AUX_DIR([build])
+
+# Initialize Automake.
+AM_INIT_AUTOMAKE([gnu subdir-objects dist-xz])
+
+# Initialize Libtool.
+AC_CONFIG_MACRO_DIRS([m4])
+AM_PROG_AR
+LT_INIT
+
+# Check for programs
+AC_PROG_CC
+AC_PROG_YACC
+AC_PROG_MAKE_SET
+AC_CHECK_TOOL([AR], [ar])
+AC_CHECK_TOOL([LD], [ld])
+AC_CHECK_TOOL([RANLIB], [ranlib])
+AC_CHECK_PROG([GDB], [gdb], [gdb])
+AC_CHECK_PROG([M4], [m4], [m4])
+
+# Checks for libraries.
+AC_CHECK_LIB([c], [malloc], [], [AC_MSG_ERROR([glibc is required])])
+AC_CHECK_LIB([pthread], [pthread_create], [], [AC_MSG_ERROR([POSIX threads library is required])])
+
+# Checks for header files.
+AC_CHECK_HEADERS([stdio.h stdlib.h string.h stdarg.h ctype.h sys/stat.h])
+
+# Checks for typedefs
+AC_TYPE_SIZE_T
+
+# Checks for structures
+AC_CHECK_HEADERS([sys/stat.h])
+
+# Checks for compiler characteristics
+AC_PROG_CC
+
+# Checks for library functions.
+AC_CHECK_FUNCS([memset strchr strdup strrchr strtol])
+
+# Checks for system services
+AC_CHECK_FUNCS([fork pipe])
+
+# Specify directories for configuration files, source files, and header files
+AC_CONFIG_FILES([Makefile
+                 src/Makefile
+                 lib/Makefile
+                 include/Makefile
+                 build/Makefile
+                 etc/Makefile
+                 bin/Makefile
+                 obj/Makefile
+                 deps/Makefile
+                 docs/Makefile
+                 dist/Makefile
+                 logs/Makefile
+                 m4/Makefile
+                 tmp/Makefile])
+
+AC_OUTPUT
+```
+
 ## Configure the package for your system:
+
 ```sh
 autoreconf -i
-./configure
 ```
 
 or
 
 ```sh
-./configure MAKE="gmake" --disable-dependency-tracking
+
+./configure --disable-dependency-tracking
+cp config.h to ../include/config.h
+make
+make check
+sudo make install
 ```
 
 ## Build the software:
+
 ```sh
 make
 ```
 
 ## Run tests to verify the build:
+
 ```sh
 make check
 ```
 
 ## Install the software (usually requires superuser privileges):
+
 ```sh
 sudo make install
 ```
 
 ## Clean up the build files (optional, but useful for a fresh build):
+
 ```sh
 make clean
 ```
 
 ## Summary of Commands
+
 1. `autoreconf -i`
 2. `./configure`
 3. `make`
@@ -48,13 +192,17 @@ make clean
 6. `make clean`
 
 ## Additional Notes
+
 ### Environment Variables
+
 Ensure that any necessary environment variables are set. You can source them from a `.env` file if needed.
 
 ### Configuration Files
+
 Configuration files such as `config.conf`, `config.ini`, and `gcc.spec` are located in the `config` directory and can be customized as needed.
 
 ### Documentation
+
 Refer to the `README.md` and other documentation files in the `docs` directory for more detailed information about the project.
 
 By following these instructions, you can successfully build, test, and install the web-app project.

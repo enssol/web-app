@@ -1,222 +1,244 @@
 {
-  "folders": [
-    {
-      "path": "."
-    }
-  ],
-  "settings": {
-    "editor.codeActionsOnSave": {
-      "source.fixAll.shellcheck": "always"
-    },
-    "editor.detectIndentation": true,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "[javascript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "editor.formatOnPaste": true,
-    "editor.formatOnType": true,
-    "editor.insertSpaces": false,
-    "editor.rulers": [80],
-    "editor.trimAutoWhitespace": true,
-    "editor.wordWrap": "on",
-    "editor.wordWrapColumn": 80,
-    "editor.minimap.enabled": true,
-    "editor.tabSize": 4,
-    "editor.lineNumbers": "on",
-    "editor.bracketPairColorization.enabled": true,
-    "editor.cursorBlinking": "smooth",
-    "editor.cursorWidth": 2,
-    "editor.renderWhitespace": "all",
-    "editor.renderControlCharacters": true,
-    "editor.snippetSuggestions": "top",
-    "editor.suggestSelection": "first",
-    "editor.tabCompletion": "on",
-    "editor.quickSuggestions": {
-      "other": true,
-      "comments": true,
-      "strings": true
-    },
-    "editor.parameterHints.enabled": true,
-    "explorer.confirmDelete": false,
-    "explorer.confirmDragAndDrop": false,
-    "explorer.sortOrder": "filesFirst",
-    "explorer.compactFolders": true,
-    "explorer.autoReveal": true,
-    "files.associations": {
-      ".env*": "dotenv",
-      ".vscode": "json",
-      ".dockerignore": "dockerfile",
-      ".editorconfig": "editorconfig",
-      "webp": "image",
-      ".rec": "plaintext",
-      ".csv": "csv",
-      ".html": "html",
-      ".js": "javascript",
-      ".css": "css",
-      ".wasm": "wasm",
-      ".asm": "assembly",
-      ".a": "binary",
-      ".o": "binary",
-      ".s": "assembly",
-      ".so": "binary",
-      ".d": "c",
-      ".c": "c",
-      ".h": "c",
-      ".md": "markdown",
-      ".json": "json",
-      ".yml": "yaml",
-      ".ico": "image",
-      ".conf": "plaintext",
-      ".ini": "ini",
-      "containerfile": "dockerfile",
-      ".txt": "plaintext"
-    },
-    "files.autoSave": "afterDelay", // Add this line
-    "files.autoSaveDelay": 1000, // Optional: Set the delay in milliseconds
-    "git.alwaysSignOff": true,
-    "git.autofetch": true,
-    "git.autofetchPeriod": 180,
-    "git.autorefresh": true,
-    "git.closeDiffOnOperation": true,
-    "git.confirmSync": false,
-    "git.enableCommitSigning": true,
-    "git.enableSmartCommit": true,
-    "git.enabled": true,
-    "git.fetchOnPull": true,
-    "git.inputValidation": true,
-    "git.mergeEditor": true,
-    "git.openRepositoryInParentFolders": "always",
-    "git.postCommitCommand": "sync",
-    "git.pruneOnFetch": true,
-    "git.pullBeforeCheckout": true,
-    "git.rebaseWhenSync": true,
-    "git.replaceTagsWhenPull": true,
-    "git.showProgress": true,
-    "git.verboseCommit": true,
-    "git.pullTags": true,
-    "git.confirmForcePush": true,
-    "github.copilot.enable": {
-      "plaintext": true,
-      "markdown": true,
-      "css": true,
-      "diff": true,
-      "dockerfile": true,
-      "git": true,
-      "html": true,
-      "ini": true,
-      "javascript": true,
-      "json": true,
-      "yaml": true,
-      "dotenv": true,
-      "assembly": true,
-      "c": true
-    },
-    "github.copilot.editor.enableAutoCompletions": true,
-    "github.copilot.chat.edits.enabled": true,
-    "github.copilot.chat.fixTestFailure.enabled": true,
-    "github.copilot.chat.followUps": "always",
-    "github.copilot.chat.inlineChatCompletionTrigger.enabled": true,
-    "github.copilot.chat.inlineChatHint.enabled": true,
-    "github.copilot.chat.reviewSelection.enabled": true,
-    "github.copilot.editor.enableCodeActions": true,
-    "github.copilot.renameSuggestions.triggerAutomatically": true,
-    "github.copilot.chat.codeGeneration.useInstructionFiles": true,
-    "github.copilot.chat.temporalContext.enabled": true,
-    "github.gitProtocol": "ssh",
-    "licenser.author": "Enveng Group - Simon French-Bluhm and Adrian Gallo",
-    "licenser.customTermsAndConditions": "Copyright @YEAR@ @AUTHOR@\n\nThese are the terms and conditions...",
-    "licenser.excludeFileExtensions": [
-      "txt",
-      "sqlite3",
-      "sql",
-      "jpg",
-      "jpeg",
-      "svg",
-      "png",
-      "ico",
-      "crt",
-      "pem",
-      "der",
-      ".gitignore",
-      ".gitattributes",
-      ".gitmodules",
-      ".gitkeep",
-      ".DS_Store",
-      ".vscode",
-      ".env",
-      ".dockerignore",
-      "webp",
-      "html",
-      "ini",
-      "conf",
-      "cfg",
-      "containerfile"
+    "folders": [
+        {
+            "path": "."
+        }
     ],
-    "licenser.license": "AGPLv3",
-    "licenser.projectName": "Enveng Group - Obligation Register",
-    "licenser.useSingleLineStyle": true,
-    "terminal.integrated.shellIntegration.enabled": true,
-    "terminal.integrated.shellIntegration.showCommandGuide": true,
-    "terminal.integrated.fontFamily": "monospace",
-    "terminal.integrated.fontSize": 14,
-    "terminal.integrated.cursorStyle": "block",
-    "terminal.integrated.scrollback": 10000,
-    "terminal.integrated.copyOnSelection": true,
-    "terminal.integrated.rightClickBehavior": "paste",
-    "workbench.editorAssociations": {
-      "*.copilotmd": "vscode.markdown.preview.editor"
-    },
-    "workbench.preferredHighContrastColorTheme": "Default Dark Modern",
-    "workbench.colorTheme": "Default Dark+",
-    "window.confirmSaveUntitledWorkspace": false,
-    "diffEditor.ignoreTrimWhitespace": false,
-    "search.exclude": {
-      "**/node_modules": true,
-      "**/dist": true,
-      "**/coverage": true
-    },
-    "search.useIgnoreFiles": true,
-    "search.useGlobalIgnoreFiles": true,
-    "editor.tokenColorCustomizations": {
-      "[*Light*]": {
-        "textMateRules": [
-          {
-            "scope": "ref.matchtext",
-            "settings": {
-              "foreground": "#000"
+    "settings": {
+        "editor.codeActionsOnSave": {
+            "source.fixAll.shellcheck": "always"
+        },
+        "editor.detectIndentation": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[javascript]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "editor.formatOnPaste": true,
+        "editor.formatOnType": true,
+        "editor.insertSpaces": false,
+        "editor.rulers": [80],
+        "editor.trimAutoWhitespace": true,
+        "editor.wordWrap": "on",
+        "editor.wordWrapColumn": 80,
+        "editor.minimap.enabled": true,
+        "editor.tabSize": 4,
+        "editor.lineNumbers": "on",
+        "editor.bracketPairColorization.enabled": true,
+        "editor.cursorBlinking": "smooth",
+        "editor.cursorWidth": 2,
+        "editor.renderWhitespace": "all",
+        "editor.renderControlCharacters": true,
+        "editor.snippetSuggestions": "top",
+        "editor.suggestSelection": "first",
+        "editor.tabCompletion": "on",
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": true,
+            "strings": true
+        },
+        "editor.parameterHints.enabled": true,
+        "explorer.confirmDelete": false,
+        "explorer.confirmDragAndDrop": false,
+        "explorer.sortOrder": "filesFirst",
+        "explorer.compactFolders": true,
+        "explorer.autoReveal": true,
+        "files.associations": {
+            ".env*": "dotenv",
+            ".vscode": "json",
+            ".dockerignore": "dockerfile",
+            ".editorconfig": "editorconfig",
+            "webp": "image",
+            ".rec": "plaintext",
+            ".csv": "csv",
+            ".html": "html",
+            ".js": "javascript",
+            ".css": "css",
+            ".wasm": "wasm",
+            ".asm": "assembly",
+            ".a": "binary",
+            ".o": "binary",
+            ".s": "assembly",
+            ".so": "binary",
+            ".d": "c",
+            ".c": "c",
+            ".h": "c",
+            ".md": "markdown",
+            ".json": "json",
+            ".yml": "yaml",
+            ".ico": "image",
+            ".conf": "plaintext",
+            ".ini": "ini",
+            "containerfile": "dockerfile",
+            ".txt": "plaintext"
+        },
+        "files.autoSave": "afterDelay", // Add this line
+        "files.autoSaveDelay": 1000, // Optional: Set the delay in milliseconds
+        "git.alwaysSignOff": true,
+        "git.autofetch": true,
+        "git.autofetchPeriod": 180,
+        "git.autorefresh": true,
+        "git.closeDiffOnOperation": true,
+        "git.confirmSync": false,
+        "git.enableCommitSigning": true,
+        "git.enableSmartCommit": true,
+        "git.enabled": true,
+        "git.fetchOnPull": true,
+        "git.inputValidation": true,
+        "git.mergeEditor": true,
+        "git.openRepositoryInParentFolders": "always",
+        "git.postCommitCommand": "sync",
+        "git.pruneOnFetch": true,
+        "git.pullBeforeCheckout": true,
+        "git.rebaseWhenSync": true,
+        "git.replaceTagsWhenPull": true,
+        "git.showProgress": true,
+        "git.verboseCommit": true,
+        "git.pullTags": true,
+        "git.confirmForcePush": true,
+        "github.copilot.enable": {
+            "plaintext": true,
+            "markdown": true,
+            "css": true,
+            "diff": true,
+            "dockerfile": true,
+            "git": true,
+            "html": true,
+            "ini": true,
+            "javascript": true,
+            "json": true,
+            "yaml": true,
+            "dotenv": true,
+            "assembly": true,
+            "c": true
+        },
+        "github.copilot.editor.enableAutoCompletions": true,
+        "github.copilot.chat.edits.enabled": true,
+        "github.copilot.chat.fixTestFailure.enabled": true,
+        "github.copilot.chat.followUps": "always",
+        "github.copilot.chat.inlineChatCompletionTrigger.enabled": true,
+        "github.copilot.chat.inlineChatHint.enabled": true,
+        "github.copilot.chat.reviewSelection.enabled": true,
+        "github.copilot.editor.enableCodeActions": true,
+        "github.copilot.renameSuggestions.triggerAutomatically": true,
+        "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+        "github.copilot.chat.temporalContext.enabled": true,
+        "github.gitProtocol": "ssh",
+        "licenser.author": "Enveng Group - Simon French-Bluhm and Adrian Gallo",
+        "licenser.customTermsAndConditions": "Copyright @YEAR@ @AUTHOR@\n\nThese are the terms and conditions...",
+        "licenser.excludeFileExtensions": [
+            "txt",
+            "sqlite3",
+            "sql",
+            "jpg",
+            "jpeg",
+            "svg",
+            "png",
+            "ico",
+            "crt",
+            "pem",
+            "der",
+            ".gitignore",
+            ".gitattributes",
+            ".gitmodules",
+            ".gitkeep",
+            ".DS_Store",
+            ".vscode",
+            ".env",
+            ".dockerignore",
+            "webp",
+            "html",
+            "ini",
+            "conf",
+            "cfg",
+            "containerfile"
+        ],
+        "licenser.license": "AGPLv3",
+        "licenser.projectName": "Enveng Group - Obligation Register",
+        "licenser.useSingleLineStyle": true,
+        "terminal.integrated.shellIntegration.enabled": true,
+        "terminal.integrated.shellIntegration.showCommandGuide": true,
+        "terminal.integrated.fontFamily": "monospace",
+        "terminal.integrated.fontSize": 14,
+        "terminal.integrated.cursorStyle": "block",
+        "terminal.integrated.scrollback": 10000,
+        "terminal.integrated.copyOnSelection": true,
+        "terminal.integrated.rightClickBehavior": "paste",
+        "workbench.editorAssociations": {
+            "*.copilotmd": "vscode.markdown.preview.editor"
+        },
+        "workbench.preferredHighContrastColorTheme": "Default Dark Modern",
+        "workbench.colorTheme": "Default Dark+",
+        "window.confirmSaveUntitledWorkspace": false,
+        "diffEditor.ignoreTrimWhitespace": false,
+        "search.exclude": {
+            "**/node_modules": true,
+            "**/dist": true,
+            "**/coverage": true
+        },
+        "search.useIgnoreFiles": true,
+        "search.useGlobalIgnoreFiles": true,
+        "editor.tokenColorCustomizations": {
+            "[*Light*]": {
+                "textMateRules": [
+                    {
+                        "scope": "ref.matchtext",
+                        "settings": {
+                            "foreground": "#000"
+                        }
+                    }
+                ]
+            },
+            "[*Dark*]": {
+                "textMateRules": [
+                    {
+                        "scope": "ref.matchtext",
+                        "settings": {
+                            "foreground": "#fff"
+                        }
+                    }
+                ]
+            },
+            "textMateRules": []
+        },
+        "licenser.useSPDXLicenseFormat": true,
+        "prettier.useTabs": true,
+        "snyk.scanningMode": "manual",
+        "terminal.integrated.profiles.osx": {
+            "bash": {
+                "path": "bash",
+                "args": ["-l"],
+                "icon": "terminal-bash"
+            },
+            "zsh": {
+                "path": "zsh",
+                "args": ["-l"]
+            },
+            "fish": {
+                "path": "fish",
+                "args": ["-l"]
+            },
+            "tmux": {
+                "path": "tmux",
+                "icon": "terminal-tmux"
+            },
+            "pwsh": {
+                "path": "pwsh",
+                "icon": "terminal-powershell"
             }
-          }
-        ]
-      },
-      "[*Dark*]": {
-        "textMateRules": [
-          {
-            "scope": "ref.matchtext",
-            "settings": {
-              "foreground": "#fff"
-            }
-          }
-        ]
-      },
-      "textMateRules": []
+        }
     },
-    "licenser.useSPDXLicenseFormat": true,
-    "prettier.useTabs": true,
-    "snyk.scanningMode": "manual"
-  },
-  "extensions": {
-    "recommendations": [
-      "ymotongpoo.licenser",
-      "github.copilot-chat",
-      "maziac.asm-code-lens",
-      "your-publisher-name.recfile-syntax",
-      "mechatroner.rainbow-csv",
-      "esbenp.prettier-vscode",
-      "ms-vscode-remote.remote-containers",
-      "1dot75cm.rpmspec",
-      "dotenv.dotenv-vscode"
-    ]
-  },
-  "browser-preview.browserPath": "/usr/bin/microsoft-edge"
+    "extensions": {
+        "recommendations": [
+            "ymotongpoo.licenser",
+            "github.copilot-chat",
+            "maziac.asm-code-lens",
+            "your-publisher-name.recfile-syntax",
+            "mechatroner.rainbow-csv",
+            "esbenp.prettier-vscode",
+            "1dot75cm.rpmspec",
+            "dotenv.dotenv-vscode"
+        ]
+    },
+    "browser-preview.browserPath": "/usr/bin/microsoft-edge"
 }

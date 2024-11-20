@@ -498,3 +498,137 @@ Here is a set of **coding standards** derived from the provided information, ali
 ---
 
 By adhering to these standards, the team will maintain clarity, ensure high performance, and achieve compliance with industry and project-specific requirements.
+
+# EnvEng WebApp Development
+ 
+Welcome to the **EnvEng WebApp Development** project! This repository contains the code and documentation for building a web application using **5S methodology** for project management and **Data-Oriented Programming (DOP)** for development.  
+ 
+## Table of Contents
+1. [Project Overview](#project-overview)
+2. [Features](#features)
+3. [Methodologies](#methodologies)
+   - [5S Implementation](#5s-implementation)
+   - [Data-Oriented Programming (DOP)](#data-oriented-programming-dop)
+4. [Setup Instructions](#setup-instructions)
+5. [Git Workflow](#git-workflow)
+   - [Branching Strategy](#branching-strategy)
+   - [Commit Guidelines](#commit-guidelines)
+6. [CI/CD Workflow](#cicd-workflow)
+7. [Contributing](#contributing)
+8. [License](#license)
+ 
+---
+ 
+## Project Overview
+ 
+The **EnvEng WebApp** aims to deliver a robust web application tailored for environmental engineering needs. Our goals include:
+- Building a scalable, maintainable codebase.
+- Ensuring clarity through **Data-Oriented Programming (DOP)** principles.
+- Maintaining a clean and organized development process using **5S methodology**.
+ 
+Key objectives:
+- Implement user authentication and core features.
+- Optimize data handling and performance.
+- Adhere to best practices for project management and development.
+ 
+---
+ 
+## Features
+ 
+- User authentication and authorization.
+- Dashboard for managing environmental data.
+- Integration with third-party APIs for real-time updates.
+- Performance-optimized, clean, and maintainable codebase.
+ 
+---
+ 
+## Methodologies
+ 
+### 5S Implementation
+- **Sort**: Identify and eliminate unnecessary code and resources.
+- **Set in Order**: Organize files and directories for easy access and maintainability.
+- **Shine**: Maintain code quality with regular reviews and automated checks.
+- **Standardize**: Follow coding standards and create reusable templates.
+- **Sustain**: Regular training and audits to ensure long-term adherence.
+ 
+### Data-Oriented Programming (DOP)
+- **Data Separation**: Logical separation of data and application logic.
+- **Efficient Data Handling**: Use optimized data structures for high performance.
+- **Immutability**: Implement immutable data practices to enhance consistency.
+ 
+---
+ 
+## Setup Instructions
+ 
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-org/enveng-webapp.git
+   cd enveng-webapp
+   ```
+ 
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+ 
+3. Run the development server:
+   ```bash
+   npm start
+   ```
+ 
+4. Build the project for production:
+   ```bash
+   npm run build
+   ```
+ 
+---
+ 
+## Git Workflow
+ 
+### Branching Strategy
+- **Main**: Stable, production-ready code.
+- **Develop**: Integration branch for new features and fixes.
+- **Feature Branches**: `feature/feature-name`
+- **Bugfix Branches**: `bugfix/bug-description`
+ 
+### Commit Guidelines
+- Write atomic commits focusing on one change.
+- Use descriptive commit messages.
+- Example:
+  ```bash
+  git commit -m "Add user authentication endpoint"
+  ```
+ 
+---
+ 
+## CI/CD Workflow
+ 
+### Continuous Integration (CI)
+- Automated builds and tests for every push to `develop`.
+- Static code analysis to ensure quality.
+ 
+### Continuous Delivery (CD)
+- Deploy to staging for integration tests.
+- Require manual approval for production deployment.
+ 
+### Pipeline Example
+Refer to the `.github/workflows/ci-cd.yml` file for our complete CI/CD pipeline.
+ 
+---
+ 
+## Contributing
+ 
+We welcome contributions to improve the EnvEng WebApp. Please follow these steps:
+1. Fork the repository and clone it locally.
+2. Create a new feature or bugfix branch.
+3. Make your changes and commit them with a descriptive message.
+4. Submit a pull request to the `develop` branch.
+ 
+Refer to the [CONTRIBUTING.md](CONTRIBUTING.md) file for more details.
+ 
+---
+ 
+## License
+ 
+This project is licensed under the [AGPLv3](LICENSE). See the `LICENSE` file for details.
+ 

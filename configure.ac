@@ -1,63 +1,74 @@
+// Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+#                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.71])
-AC_INIT([your_project], [1.0], [your_email@example.com])
-AM_INIT_AUTOMAKE([gnu])
-AC_CONFIG_SRCDIR([src/main.c])
+# Autoconf configuration file for the web-app project.
+# Information about the project is stored in the `configure.ac` file.
+AC_PREREQ([2.72])
+AC_INIT(web-app, 1.0, https://github.com/enssol/web-app/issues/new)
+AC_CONFIG_SRCDIR([include/config.h])
 AC_CONFIG_HEADERS([config.h])
+
+# Specify the auxiliary build directory
+AC_CONFIG_AUX_DIR([build])
+
+# Initialize Automake.
+AM_INIT_AUTOMAKE([gnu subdir-objects dist-xz])
+
+# Initialize Libtool.
+AC_CONFIG_MACRO_DIRS([m4])
+AM_PROG_AR
+LT_INIT
 
 # Check for programs
 AC_PROG_CC
-AC_PROG_RANLIB
 AC_PROG_YACC
-
-# Check for glibc
-AC_CHECK_HEADERS([gnu/libc-version.h])
-
-# Check for C11 support
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 201112L
-#error "C11 support required"
-#endif
-]])], [
-  AC_DEFINE([HAVE_C11], [1], [Define to 1 if the compiler supports C11])
-], [
-  # Check for C99 support
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199901L
-#error "C99 support required"
-#endif
-]])], [
-    AC_DEFINE([HAVE_C99], [1], [Define to 1 if the compiler supports C99])
-  ], [
-    # Check for C89 support
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 199409L
-#error "C89 support required"
-#endif
-]])], [
-      AC_DEFINE([HAVE_C89], [1], [Define to 1 if the compiler supports C89])
-    ], [
-      AC_MSG_ERROR([No acceptable C compiler found!])
-    ])
-  ])
-])
+AC_PROG_MAKE_SET
+AC_CHECK_TOOL([AR], [ar])
+AC_CHECK_TOOL([LD], [ld])
+AC_CHECK_TOOL([RANLIB], [ranlib])
+AC_CHECK_PROG([GDB], [gdb], [gdb])
+AC_CHECK_PROG([M4], [m4], [m4])
 
 # Checks for libraries.
-AC_CHECK_LIB([m], [main])
+AC_CHECK_LIB([c], [malloc], [], [AC_MSG_ERROR([glibc is required])])
+AC_CHECK_LIB([pthread], [pthread_create], [], [AC_MSG_ERROR([POSIX threads library is required])])
 
 # Checks for header files.
-AC_CHECK_HEADERS([stdio.h stdlib.h string.h stdarg.h ctype.h])
+AC_CHECK_HEADERS([stdio.h stdlib.h string.h stdarg.h ctype.h sys/stat.h])
 
-# Checks for typedefs, structures, and compiler characteristics.
+# Checks for typedefs
 AC_TYPE_SIZE_T
 
-# Checks for library functions.
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
+# Checks for structures
+AC_CHECK_HEADERS([sys/stat.h])
 
-# Define the output files
-AC_CONFIG_FILES([Makefile
-                 src/Makefile
-                 tests/Makefile])
+# Checks for compiler characteristics
+AC_PROG_CC
+
+# Checks for library functions.
+AC_CHECK_FUNCS([memset strchr strdup strrchr strtol])
+
+# Checks for system services
+AC_CHECK_FUNCS([fork pipe])
+
+# Specify directories for configuration files, source files, and header files
+AC_CONFIG_FILES([
+    Makefile
+    src/Makefile
+    lib/Makefile
+    include/Makefile
+    etc/Makefile
+    bin/Makefile
+    obj/Makefile
+    deps/Makefile
+    docs/Makefile
+    dist/Makefile
+    logs/Makefile
+    m4/Makefile
+    tmp/Makefile
+])
+
 AC_OUTPUT
