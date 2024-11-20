@@ -170,7 +170,7 @@ AWK = awk
 CC = gcc
 CCDEPMODE = depmode=none
 CFLAGS = -g -O2
-CPPFLAGS = -I/opt/homebrew/opt/node@18/include
+CPPFLAGS = 
 CSCOPE = cscope
 CTAGS = ctags
 CYGPATH_W = echo
@@ -195,7 +195,7 @@ INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LD = /usr/bin/ld
-LDFLAGS = -L/opt/homebrew/opt/node@18/lib
+LDFLAGS = 
 LIBOBJS = 
 LIBS = -lpthread -lc 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool

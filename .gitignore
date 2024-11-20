@@ -90,11 +90,20 @@ tests/Makefile.in
 .DS_Store
 .env*
 .flaskenv*
-!.env.project
-!.env.vault
+src/Makefile
+Makefile
+docs/Makefile
+etc/Makefile
+include/Makefile
 
 # Node.js dependencies
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+!.env.project
+!.env.vault
+docs/Makefile
+Makefile
+etc/Makefile

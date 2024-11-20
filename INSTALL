@@ -1,208 +1,365 @@
-<!--
- Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
- SPDX-License-Identifier: AGPL-3.0-or-later
--->
+Installation Instructions
+*************************
 
-# Installation Instructions
+Basic Installation
+==================
 
-To install the web-app project, follow these steps:
+   The following shell commands:
 
-## Build Directory
+     test -f configure || ./bootstrap
+     ./configure
+     make
+     make install
 
-Create a build directory to store the build files:
+should configure, build, and install this package.  The first line,
+which bootstraps, is intended for developers; when building from
+distribution tarballs it does nothing and can be skipped.
 
-```sh
-mkdir -p build
-```
+   The following more-detailed instructions are generic; see the
+‘README’ file for instructions specific to this package.  Some packages
+provide this ‘INSTALL’ file but do not implement all of the features
+documented below.  The lack of an optional feature in a given package is
+not necessarily a bug.  More recommendations for GNU packages can be
+found in the GNU Coding Standards.
 
-## Generate a file list:
+   Many packages have scripts meant for developers instead of ordinary
+builders, as they may use developer tools that are less commonly
+installed, or they may access the network, which has privacy
+implications.  If the ‘bootstrap’ shell script exists, it attempts to
+build the ‘configure’ shell script and related files, possibly using
+developer tools or the network.  Because the output of ‘bootstrap’ is
+system-independent, it is normally run by a package developer so that
+its output can be put into the distribution tarball and ordinary
+builders and users need not run ‘bootstrap’.  Some packages have
+commands like ‘./autopull.sh’ and ‘./autogen.sh’ that you can run
+instead of ‘./bootstrap’, for more fine-grained control over
+bootstrapping.
 
-Ensure you run this command from the root directory of the project and also run:
+   The ‘configure’ shell script attempts to guess correct values for
+various system-dependent variables used during compilation.  It uses
+those values to create a ‘Makefile’ in each directory of the package.
+It may also create one or more ‘.h’ files containing system-dependent
+definitions.  Finally, it creates a shell script ‘config.status’ that
+you can run in the future to recreate the current configuration, and a
+file ‘config.log’ containing output useful for debugging ‘configure’.
 
-```sh
-rm node_modules
-```
+   It can also use an optional file (typically called ‘config.cache’ and
+enabled with ‘--cache-file=config.cache’ or simply ‘-C’) that saves the
+results of its tests to speed up reconfiguring.  Caching is disabled by
+default to prevent problems with accidental use of stale cache files.
 
-After the build, you can reinstall the node_modules with:
+   If you need to do unusual things to compile the package, please try
+to figure out how ‘configure’ could check whether to do them, and mail
+diffs or instructions to the address given in the ‘README’ so they can
+be considered for the next release.  If you are using the cache, and at
+some point ‘config.cache’ contains results you don’t want to keep, you
+may remove or edit it.
 
-```sh
-npm install
-```
+   The ‘autoconf’ program generates ‘configure’ from the file
+‘configure.ac’.  Normally you should edit ‘configure.ac’ instead of
+editing ‘configure’ directly.
 
-```sh
-find . -type d \( -path ./node_modules -o -path ./.github -o -path ./bin -o -path ./build -o -path ./dist -o -path ./logs -o -path ./obj -o -path ./tmp -o -path ./.vscode -o -path ./.git \) -prune -o -type f \( ! -name 'web-app.code-workspace' ! -name '.DS_Store' ! -name '.gitkeep' ! -name '.env' ! -name '.env.me' ! -name '.env.previous' ! -name 'package-lock.json' ! -name 'package.json' ! -name '.editorconfig' \) -print > etc/scan_list.txt
-```
+   The simplest way to compile this package is:
 
-The `scan_list.txt` file will be used to generate the `configure.scan` file.
+  1. ‘cd’ to the directory containing the package’s source code.
 
--   `-type d` specifies directories.
--   `-path` specifies directories to exclude.
--   `-type f` specifies files.
--   `-name` specifies files to exclude.
--   `-print` prints the file list.
+  2. If this is a developer checkout and file ‘configure’ does not yet
+     exist, type ‘./bootstrap’ to create it.  You may need special
+     developer tools and network access to bootstrap, and the network
+     access may have privacy implications.
 
-## Autoscan
+  3. Type ‘./configure’ to configure the package for your system.  This
+     might take a while.  While running, ‘configure’ prints messages
+     telling which features it is checking for.
 
-### Generate a `configure.scan` file:
+  4. Type ‘make’ to compile the package.
 
-```sh
-f
-autoscan -B ./include -I ./lib -I ./etc -I ./src -I ./tests  -v -d -f etc/scan_list.txt
-```
+  5. Optionally, type ‘make check’ to run any self-tests that come with
+     the package, generally using the just-built uninstalled binaries.
 
--   `-B` specifies the base directory for the project.
--   `-I` specifies the include directories for the project.
--   `-v` enables verbose output.
--   `-d` enables debugging output.
+  6. Type ‘make install’ to install the programs and any data files and
+     documentation.  When installing into a prefix owned by root, it is
+     recommended that the package be configured and built as a regular
+     user, and only the ‘make install’ phase executed with root
+     privileges.
 
-The `configure.scan` file will be generated in the base directory of the project.
+  7. Optionally, type ‘make installcheck’ to repeat any self-tests, but
+     this time using the binaries in their final installed location.
+     This target does not install anything.  Running this target as a
+     regular user, particularly if the prior ‘make install’ required
+     root privileges, verifies that the installation completed
+     correctly.
 
-The `configure.scan` file will be used to generate the `configure.ac` file.
+  8. You can remove the program binaries and object files from the
+     source code directory by typing ‘make clean’.  To also remove the
+     files that ‘configure’ created (so you can compile the package for
+     a different kind of computer), type ‘make distclean’.  There is
+     also a ‘make maintainer-clean’ target, but that is intended mainly
+     for the package’s developers.  If you use it, you may have to
+     bootstrap again.
 
-## Autoreconf
+  9. If the package follows the GNU Coding Standards, you can type ‘make
+     uninstall’ to remove the installed files.
 
-### Generate a `configure.ac` file:
+Compilers and Options
+=====================
 
-```sh
-# If autoscan.log is empty, then the scan was successful.
-rm autoscan.log
-mv configure.scan configure.ac
-```
+   Some systems require unusual options for compilation or linking that
+the ‘configure’ script does not know about.  Run ‘./configure --help’
+for details on some of the pertinent environment variables.
 
-### Update the `configure.ac` file:
+   You can give ‘configure’ initial values for configuration parameters
+by setting variables in the command line or in the environment.  Here is
+an example:
 
-```makefile
-# Autoconf configuration file for the web-app project.
-# Information about the project is stored in the `configure.ac` file.
-AC_PREREQ([2.72])
-AC_INIT(web-app, 1.0, https://github.com/enssol/web-app/issues/new)
-AC_CONFIG_SRCDIR([include/config.h])
-AC_CONFIG_HEADERS([config.h])
+     ./configure CC=gcc CFLAGS=-g LIBS=-lposix
 
-# Specify the auxiliary build directory
-AC_CONFIG_AUX_DIR([build])
+   See “Defining Variables” for more details.
 
-# Initialize Automake.
-AM_INIT_AUTOMAKE([gnu subdir-objects dist-xz])
+Compiling For Multiple Architectures
+====================================
 
-# Initialize Libtool.
-AC_CONFIG_MACRO_DIRS([m4])
-AM_PROG_AR
-LT_INIT
+   You can compile the package for more than one kind of computer at the
+same time, by placing the object files for each system in their own
+directory.  To do this, you can use GNU ‘make’.  ‘cd’ to the directory
+where you want the object files and executables to go and run the
+‘configure’ script.  ‘configure’ automatically checks for the source
+code in the directory that ‘configure’ is in and in ‘..’.  This is known
+as a “VPATH” build.
 
-# Check for programs
-AC_PROG_CC
-AC_PROG_YACC
-AC_PROG_MAKE_SET
-AC_CHECK_TOOL([AR], [ar])
-AC_CHECK_TOOL([LD], [ld])
-AC_CHECK_TOOL([RANLIB], [ranlib])
-AC_CHECK_PROG([GDB], [gdb], [gdb])
-AC_CHECK_PROG([M4], [m4], [m4])
+   With a non-GNU ‘make’, it is safer to compile the package for one
+system at a time in the source code directory.  After you have installed
+the package for one system, use ‘make distclean’ before reconfiguring
+for another system.
 
-# Checks for libraries.
-AC_CHECK_LIB([c], [malloc], [], [AC_MSG_ERROR([glibc is required])])
-AC_CHECK_LIB([pthread], [pthread_create], [], [AC_MSG_ERROR([POSIX threads library is required])])
+   Some platforms, notably macOS, support “fat” or “universal” binaries,
+where a single binary can execute on different architectures.  On these
+platforms you can configure and compile just once, with options specific
+to that platform.
 
-# Checks for header files.
-AC_CHECK_HEADERS([stdio.h stdlib.h string.h stdarg.h ctype.h sys/stat.h])
+Installation Names
+==================
 
-# Checks for typedefs
-AC_TYPE_SIZE_T
+   By default, ‘make install’ installs the package’s commands under
+‘/usr/local/bin’, include files under ‘/usr/local/include’, etc.  You
+can specify an installation prefix other than ‘/usr/local’ by giving
+‘configure’ the option ‘--prefix=PREFIX’, where PREFIX must be an
+absolute file name.
 
-# Checks for structures
-AC_CHECK_HEADERS([sys/stat.h])
+   You can specify separate installation prefixes for
+architecture-specific files and architecture-independent files.  If you
+pass the option ‘--exec-prefix=PREFIX’ to ‘configure’, the package uses
+PREFIX as the prefix for installing programs and libraries.
+Documentation and other data files still use the regular prefix.
 
-# Checks for compiler characteristics
-AC_PROG_CC
+   In addition, if you use an unusual directory layout you can give
+options like ‘--bindir=DIR’ to specify different values for particular
+kinds of files.  Run ‘configure --help’ for a list of the directories
+you can set and what kinds of files go in them.  In general, the default
+for these options is expressed in terms of ‘${prefix}’, so that
+specifying just ‘--prefix’ will affect all of the other directory
+specifications that were not explicitly provided.
 
-# Checks for library functions.
-AC_CHECK_FUNCS([memset strchr strdup strrchr strtol])
+   The most portable way to affect installation locations is to pass the
+correct locations to ‘configure’; however, many packages provide one or
+both of the following shortcuts of passing variable assignments to the
+‘make install’ command line to change installation locations without
+having to reconfigure or recompile.
 
-# Checks for system services
-AC_CHECK_FUNCS([fork pipe])
+   The first method involves providing an override variable for each
+affected directory.  For example, ‘make install
+prefix=/alternate/directory’ will choose an alternate location for all
+directory configuration variables that were expressed in terms of
+‘${prefix}’.  Any directories that were specified during ‘configure’,
+but not in terms of ‘${prefix}’, must each be overridden at install time
+for the entire installation to be relocated.  The approach of makefile
+variable overrides for each directory variable is required by the GNU
+Coding Standards, and ideally causes no recompilation.  However, some
+platforms have known limitations with the semantics of shared libraries
+that end up requiring recompilation when using this method, particularly
+noticeable in packages that use GNU Libtool.
 
-# Specify directories for configuration files, source files, and header files
-AC_CONFIG_FILES([Makefile
-                 src/Makefile
-                 lib/Makefile
-                 include/Makefile
-                 build/Makefile
-                 etc/Makefile
-                 bin/Makefile
-                 obj/Makefile
-                 deps/Makefile
-                 docs/Makefile
-                 dist/Makefile
-                 logs/Makefile
-                 m4/Makefile
-                 tmp/Makefile])
+   The second method involves providing the ‘DESTDIR’ variable.  For
+example, ‘make install DESTDIR=/alternate/directory’ will prepend
+‘/alternate/directory’ before all installation names.  The approach of
+‘DESTDIR’ overrides is not required by the GNU Coding Standards, and
+does not work on platforms that have drive letters.  On the other hand,
+it does better at avoiding recompilation issues, and works well even
+when some directory options were not specified in terms of ‘${prefix}’
+at ‘configure’ time.
 
-AC_OUTPUT
-```
+Optional Features
+=================
 
-## Configure the package for your system:
+   If the package supports it, you can cause programs to be installed
+with an extra prefix or suffix on their names by giving ‘configure’ the
+option ‘--program-prefix=PREFIX’ or ‘--program-suffix=SUFFIX’.
 
-```sh
-autoreconf -i
-```
+   Some packages pay attention to ‘--enable-FEATURE’ and
+‘--disable-FEATURE’ options to ‘configure’, where FEATURE indicates an
+optional part of the package.  They may also pay attention to
+‘--with-PACKAGE’ and ‘--without-PACKAGE’ options, where PACKAGE is
+something like ‘gnu-ld’.  ‘./configure --help’ should mention the
+‘--enable-...’ and ‘--with-...’ options that the package recognizes.
 
-or
+   Some packages offer the ability to configure how verbose the
+execution of ‘make’ will be.  For these packages, running ‘./configure
+--enable-silent-rules’ sets the default to minimal output, which can be
+overridden with ‘make V=1’; while running ‘./configure
+--disable-silent-rules’ sets the default to verbose, which can be
+overridden with ‘make V=0’.
 
-```sh
+Specifying a System Type
+========================
 
-./configure --disable-dependency-tracking
-cp config.h to ../include/config.h
-make
-make check
-sudo make install
-```
+   By default ‘configure’ builds for the current system.  To create
+binaries that can run on a different system type, specify a
+‘--host=TYPE’ option along with compiler variables that specify how to
+generate object code for TYPE.  For example, to create binaries intended
+to run on a 64-bit ARM processor:
 
-## Build the software:
+     ./configure --host=aarch64-linux-gnu \
+        CC=aarch64-linux-gnu-gcc \
+        CXX=aarch64-linux-gnu-g++
 
-```sh
-make
-```
+If done on a machine that can execute these binaries (e.g., via
+‘qemu-aarch64’, ‘$QEMU_LD_PREFIX’, and Linux’s ‘binfmt_misc’
+capability), the build behaves like a native build.  Otherwise it is a
+cross-build: ‘configure’ will make cross-compilation guesses instead of
+running test programs, and ‘make check’ will not work.
 
-## Run tests to verify the build:
+   A system type can either be a short name like ‘mingw64’, or a
+canonical name like ‘x86_64-pc-linux-gnu’.  Canonical names have the
+form CPU-COMPANY-SYSTEM where SYSTEM is either OS or KERNEL-OS.  To
+canonicalize and validate a system type, you can run the command
+‘config.sub’, which is often squirreled away in a subdirectory like
+‘build-aux’.  For example:
 
-```sh
-make check
-```
+     $ build-aux/config.sub arm64-linux
+     aarch64-unknown-linux-gnu
+     $ build-aux/config.sub riscv-lnx
+     Invalid configuration 'riscv-lnx': OS 'lnx' not recognized
 
-## Install the software (usually requires superuser privileges):
+You can look at the ‘config.sub’ file to see which types are recognized.
+If the file is absent, this package does not need the system type.
 
-```sh
-sudo make install
-```
+   If ‘configure’ fails with the diagnostic “cannot guess build type”.
+‘config.sub’ did not recognize your system’s type.  In this case, first
+fetch the newest versions of these files from the GNU config package
+(https://savannah.gnu.org/projects/config).  If that fixes things,
+please report it to the maintainers of the package containing
+‘configure’.  Otherwise, you can try the configure option ‘--build=TYPE’
+where TYPE comes close to your system type; also, please report the
+problem to <config-patches@gnu.org>.
 
-## Clean up the build files (optional, but useful for a fresh build):
+   For more details about configuring system types, see the Autoconf
+documentation.
 
-```sh
-make clean
-```
+Sharing Defaults
+================
 
-## Summary of Commands
+   If you want to set default values for ‘configure’ scripts to share,
+you can create a site shell script called ‘config.site’ that gives
+default values for variables like ‘CC’, ‘cache_file’, and ‘prefix’.
+‘configure’ looks for ‘PREFIX/share/config.site’ if it exists, then
+‘PREFIX/etc/config.site’ if it exists.  Or, you can set the
+‘CONFIG_SITE’ environment variable to the location of the site script.
+A warning: not all ‘configure’ scripts look for a site script.
 
-1. `autoreconf -i`
-2. `./configure`
-3. `make`
-4. `make check`
-5. `sudo make install`
-6. `make clean`
+Defining Variables
+==================
 
-## Additional Notes
+   Variables not defined in a site shell script can be set in the
+environment passed to ‘configure’.  However, some packages may run
+configure again during the build, and the customized values of these
+variables may be lost.  In order to avoid this problem, you should set
+them in the ‘configure’ command line, using ‘VAR=value’.  For example:
 
-### Environment Variables
+     ./configure CC=/usr/local2/bin/gcc
 
-Ensure that any necessary environment variables are set. You can source them from a `.env` file if needed.
+causes the specified ‘gcc’ to be used as the C compiler (unless it is
+overridden in the site shell script).
 
-### Configuration Files
+Unfortunately, this technique does not work for ‘CONFIG_SHELL’ due to an
+Autoconf limitation.  Until the limitation is lifted, you can use this
+workaround:
 
-Configuration files such as `config.conf`, `config.ini`, and `gcc.spec` are located in the `config` directory and can be customized as needed.
+     CONFIG_SHELL=/bin/bash ./configure CONFIG_SHELL=/bin/bash
 
-### Documentation
+‘configure’ Invocation
+======================
 
-Refer to the `README.md` and other documentation files in the `docs` directory for more detailed information about the project.
+   ‘configure’ recognizes the following options to control how it
+operates.
 
-By following these instructions, you can successfully build, test, and install the web-app project.
+‘--help’
+‘-h’
+     Print a summary of all of the options to ‘configure’, and exit.
+
+‘--help=short’
+‘--help=recursive’
+     Print a summary of the options unique to this package’s
+     ‘configure’, and exit.  The ‘short’ variant lists options used only
+     in the top level, while the ‘recursive’ variant lists options also
+     present in any nested packages.
+
+‘--version’
+‘-V’
+     Print the version of Autoconf used to generate the ‘configure’
+     script, and exit.
+
+‘--cache-file=FILE’
+     Enable the cache: use and save the results of the tests in FILE,
+     traditionally ‘config.cache’.  FILE defaults to ‘/dev/null’ to
+     disable caching.
+
+‘--config-cache’
+‘-C’
+     Alias for ‘--cache-file=config.cache’.
+
+‘--srcdir=DIR’
+     Look for the package’s source code in directory DIR.  Usually
+     ‘configure’ can determine that directory automatically.
+
+‘--prefix=DIR’
+     Use DIR as the installation prefix.  See “Installation Names” for
+     more details, including other options available for fine-tuning the
+     installation locations.
+
+‘--host=TYPE’
+     Build binaries for system TYPE.  See “Specifying a System Type”.
+
+‘--enable-FEATURE’
+‘--disable-FEATURE’
+     Enable or disable the optional FEATURE.  See “Optional Features”.
+
+‘--with-PACKAGE’
+‘--without-PACKAGE’
+     Use or omit PACKAGE when building.  See “Optional Features”.
+
+‘--quiet’
+‘--silent’
+‘-q’
+     Do not print messages saying which checks are being made.  To
+     suppress all normal output, redirect it to ‘/dev/null’ (any error
+     messages will still be shown).
+
+‘--no-create’
+‘-n’
+     Run the configure checks, but stop before creating any output
+     files.
+
+‘configure’ also recognizes several environment variables, and accepts
+some other, less widely useful, options.  Run ‘configure --help’ for
+more details.
+
+Copyright notice
+================
+
+   Copyright © 1994–1996, 1999–2002, 2004–2017, 2020–2024 Free Software
+Foundation, Inc.
+
+   Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without warranty of any kind.

@@ -124,7 +124,7 @@ web_app_DEPENDENCIES =
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
-am__v_lt_1 =
+am__v_lt_1 = 
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
 am__v_P_0 = false
@@ -132,11 +132,11 @@ am__v_P_1 = :
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN     " $@;
-am__v_GEN_1 =
+am__v_GEN_1 = 
 AM_V_at = $(am__v_at_$(V))
 am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
 am__v_at_0 = @
-am__v_at_1 =
+am__v_at_1 = 
 DEFAULT_INCLUDES = -I.
 depcomp = $(SHELL) $(top_srcdir)/build/depcomp
 am__maybe_remake_depfiles = depfiles
@@ -151,7 +151,7 @@ LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 AM_V_CC = $(am__v_CC_$(V))
 am__v_CC_ = $(am__v_CC_$(AM_DEFAULT_VERBOSITY))
 am__v_CC_0 = @echo "  CC      " $@;
-am__v_CC_1 =
+am__v_CC_1 = 
 CCLD = $(CC)
 LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -159,7 +159,7 @@ LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 AM_V_CCLD = $(am__v_CCLD_$(V))
 am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CCLD_0 = @echo "  CCLD    " $@;
-am__v_CCLD_1 =
+am__v_CCLD_1 = 
 SOURCES = $(web_app_SOURCES)
 DIST_SOURCES = $(web_app_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
@@ -299,7 +299,7 @@ AWK = awk
 CC = gcc
 CCDEPMODE = depmode=none
 CFLAGS = -g -O2
-CPPFLAGS = -I/opt/homebrew/opt/node@18/include
+CPPFLAGS = 
 CSCOPE = cscope
 CTAGS = ctags
 CYGPATH_W = echo
@@ -307,16 +307,16 @@ DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
 DLLTOOL = false
 DSYMUTIL = dsymutil
-DUMPBIN =
+DUMPBIN = 
 ECHO_C = \c
-ECHO_N =
-ECHO_T =
+ECHO_N = 
+ECHO_T = 
 EGREP = /usr/bin/grep -E
 ETAGS = etags
-EXEEXT =
+EXEEXT = 
 FGREP = /usr/bin/grep -F
 FILECMD = file
-GDB =
+GDB = 
 GREP = /usr/bin/grep
 INSTALL = /opt/homebrew/bin/ginstall -c
 INSTALL_DATA = ${INSTALL} -m 644
@@ -324,14 +324,14 @@ INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LD = /usr/bin/ld
-LDFLAGS = -L/opt/homebrew/opt/node@18/lib
-LIBOBJS =
-LIBS = -lpthread -lc
+LDFLAGS = 
+LIBOBJS = 
+LIBS = -lpthread -lc 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = lipo
 LN_S = ln -s
-LTLIBOBJS =
-LT_SYS_LIBRARY_PATH =
+LTLIBOBJS = 
+LT_SYS_LIBRARY_PATH = 
 M4 = m4
 MAKEINFO = ${SHELL} '/Users/adriangallo/web-app/build/missing' makeinfo
 MANIFEST_TOOL = :
@@ -347,34 +347,34 @@ PACKAGE_BUGREPORT = https://github.com/enssol/web-app/issues/new
 PACKAGE_NAME = web-app
 PACKAGE_STRING = web-app 1.0
 PACKAGE_TARNAME = web-app
-PACKAGE_URL =
+PACKAGE_URL = 
 PACKAGE_VERSION = 1.0
 PATH_SEPARATOR = :
 RANLIB = ranlib
 SED = /usr/bin/sed
-SET_MAKE =
+SET_MAKE = 
 SHELL = /bin/sh
 STRIP = strip
 VERSION = 1.0
 YACC = bison -y
-YFLAGS =
+YFLAGS = 
 abs_builddir = /Users/adriangallo/web-app
 abs_srcdir = /Users/adriangallo/web-app
 abs_top_builddir = /Users/adriangallo/web-app
 abs_top_srcdir = /Users/adriangallo/web-app
 ac_ct_AR = ar
 ac_ct_CC = gcc
-ac_ct_DUMPBIN =
+ac_ct_DUMPBIN = 
 am__include = include
 am__leading_dot = .
-am__quote =
-am__rm_f_notfound =
+am__quote = 
+am__rm_f_notfound = 
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
 am__xargs_n = xargs -n
 bindir = ${exec_prefix}/bin
 build = aarch64-apple-darwin24.1.0
-build_alias =
+build_alias = 
 build_cpu = aarch64
 build_os = darwin24.1.0
 build_vendor = apple
@@ -385,7 +385,7 @@ docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
 host = aarch64-apple-darwin24.1.0
-host_alias =
+host_alias = 
 host_cpu = aarch64
 host_os = darwin24.1.0
 host_vendor = apple
@@ -409,8 +409,8 @@ sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 srcdir = .
 sysconfdir = ${prefix}/etc
-target_alias =
-top_build_prefix =
+target_alias = 
+top_build_prefix = 
 top_builddir = .
 top_srcdir = .
 
@@ -503,7 +503,7 @@ config.h: stamp-h1
 stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
 	$(AM_V_at)rm -f stamp-h1
 	$(AM_V_GEN)cd $(top_builddir) && $(SHELL) ./config.status config.h
-$(srcdir)/config.h.in:  $(am__configure_deps)
+$(srcdir)/config.h.in:  $(am__configure_deps) 
 	$(AM_V_GEN)($(am__cd) $(top_srcdir) && $(AUTOHEADER))
 	$(AM_V_at)rm -f stamp-h1
 	$(AM_V_at)touch $@
@@ -563,7 +563,7 @@ $(SRC_DIR)/$(DEPDIR)/$(am__dirstamp):
 $(SRC_DIR)/parser.$(OBJEXT): $(SRC_DIR)/$(am__dirstamp) \
 	$(SRC_DIR)/$(DEPDIR)/$(am__dirstamp)
 
-web-app$(EXEEXT): $(web_app_OBJECTS) $(web_app_DEPENDENCIES) $(EXTRA_web_app_DEPENDENCIES)
+web-app$(EXEEXT): $(web_app_OBJECTS) $(web_app_DEPENDENCIES) $(EXTRA_web_app_DEPENDENCIES) 
 	@rm -f web-app$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(web_app_OBJECTS) $(web_app_LDADD) $(LIBS)
 
@@ -586,24 +586,24 @@ am--depfiles: $(am__depfiles_remade)
 #	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
 #	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
 #	$(am__mv) $$depbase.Tpo $$depbase.Po
-#	$(AM_V_CC)source='$<' object='$@' libtool=no
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp)
+#	$(AM_V_CC)source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
 	$(AM_V_CC)$(COMPILE) -c -o $@ $<
 
 .c.obj:
 #	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
 #	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
 #	$(am__mv) $$depbase.Tpo $$depbase.Po
-#	$(AM_V_CC)source='$<' object='$@' libtool=no
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp)
+#	$(AM_V_CC)source='$<' object='$@' libtool=no 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
 	$(AM_V_CC)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .c.lo:
 #	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
 #	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
 #	$(am__mv) $$depbase.Tpo $$depbase.Plo
-#	$(AM_V_CC)source='$<' object='$@' libtool=yes
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp)
+#	$(AM_V_CC)source='$<' object='$@' libtool=yes 
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
 	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
@@ -1104,6 +1104,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_configDATA \
 .PRECIOUS: Makefile
 
 
+# Include the .env file if it exists
 # Include the .env file if it exists
 -include .env
 export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
