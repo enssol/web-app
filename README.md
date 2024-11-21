@@ -3,45 +3,23 @@
 https://en.wikipedia.org/wiki/GNU_toolchain
 Projects in the GNU toolchain are:
 
-GNU Emacs – Extensible, customizable text editor with a real-time display
-
-GNU Core Utilities – Basic file, shell and text manipulation utilities of the GNU operating system
-
-GNU Autotools (build system) – GNU software packaging tools
-
-Autotools consists of the GNU utilities 
-Autoconf
-Automake
-Libtool.
-
-GNU Binutils – GNU software development tools for executable code
-The tools include:
-as	assembler popularly known as GAS (GNU Assembler)
-ld	linker
-gprof	profiler
-addr2line	convert address to file and line
-ar	create, modify, and extract from archives
-c++filt	demangling filter for C++ symbols
-dlltool	creation of Windows dynamic-link libraries
-gold	alternative linker for ELF files
-nlmconv	object file conversion to a NetWare Loadable Module
-nm	list symbols exported by object files
-objcopy	copy object files, possibly making changes
-objdump	dump information about object files
-ranlib	generate indices for archives (for compatibility; same as ar -s)
-readelf	display contents of ELF files
-size	list section sizes and total size of binary files
-strings	list printable strings
-strip	remove symbols from object files
-windmc	generates Windows message resources
-windres	compiler for Windows resource files
-
-GNU Bison – Yacc-compatible parser generator program
-GNU C Library – GNU implementation of the standard C library
-GNU Compiler Collection – Free and open-source compiler for various programming languages
-GNU Debugger – Source-level debugger
-GNU m4 – General-purpose macro processor
-GNU make – Software build automation tool
+gcc: The GNU Compiler Collection, a compiler system supporting various programming languages, primarily C and C++.
+glibc: The GNU C Library, providing the core libraries for the GNU system and GNU/Linux systems, offering essential APIs for C programming.
+bison: A parser generator that is compatible with Yacc, used to convert a grammar description for an LALR context-free grammar into a C program to parse that grammar.
+coreutils: A package of basic file, shell, and text manipulation utilities of the GNU operating system1.
+autoconf: A tool for producing shell scripts that automatically configure software source code packages to adapt to various types of Unix-like systems.
+automake: A tool for automatically generating Makefile.in files compliant with the GNU Coding Standards.
+autotools: A suite of programming tools designed to assist in making source code packages portable to many Unix-like systems.
+gdb: The GNU Debugger, a tool for debugging applications written in various programming languages.
+emacs: An extensible, customizable, free text editor with built-in support for many programming languages and other features.
+make: A build automation tool that automatically builds executable programs and libraries from source code by reading files called Makefiles.
+binutils: A collection of binary tools, including ld (the GNU linker) and as (the GNU assembler).
+pkgconf: A tool that helps manage compile and link flags for libraries, often used as a replacement for pkg-config.
+libtool: A generic library support script that hides the complexity of using shared libraries behind a consistent, portable interface.
+flex: A fast lexical analyzer generator, often used with Bison to generate scanners (programs that recognize lexical patterns in text).
+gettext: A set of tools for internationalization and localization, allowing programs to be compiled with multi-language support.
+m4: The GNU m4 package is a macro processing language available in the apt package manager. It is an implementation of the traditional UNIX macro processor, compatible with SVR4 but with some extensions. These extensions include handling more than nine positional parameters to macros and built-in functions for including files, running shell commands, and performing arithmetic.
+autopoint is a tool from the GNU gettext package. It is used to set up the gettext infrastructure in a source package. Specifically, autopoint copies standard gettext infrastructure files into a source package, which is essential for internationalization (i18n) supporrt.
 
 CFEngine – Configuration management software
 

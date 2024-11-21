@@ -4,6 +4,7 @@
  */
 
 #include "config.h"
+#include "gettext.h"
 #include "unity.h"
 #include "main.c" // Include the main source file to test its functions
 

@@ -3,6 +3,10 @@
 
 # obj/Makefile.am
 
+# Include the .env file if it exists
+-include .env
+export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+
 # Define the object files for the obj directory
 noinst_LIBRARIES = libwebapp.a
 libwebapp_a_SOURCES = $(srcdir)/src/*.c

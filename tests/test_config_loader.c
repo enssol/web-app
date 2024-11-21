@@ -4,6 +4,7 @@
  */
 
 #include "config.h"
+#include "gettext.h"
 #include "unity.h"
 #include "config_loader.h"
 #include <stdio.h>

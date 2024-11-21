@@ -4,6 +4,7 @@
  */
 
 #include "config.h"
+#include "gettext.h"
 #include "unity.h"
 #include "logger.h"
 #include <stdio.h>

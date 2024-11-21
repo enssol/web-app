@@ -3,6 +3,10 @@
 
 # docs/Makefile.am
 
+# Include the .env file if it exists
+-include .env
+export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+
 # Define the documentation files for the docs directory
 dist_doc_DATA = user_guide.md developer_guide.md api_reference.md
 

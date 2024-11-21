@@ -3,6 +3,7 @@
 
 %{
 #include <stdio.h>
+#include "gettext.h"
 #include <stdlib.h>
 
 // Function prototype for error handling

@@ -4,6 +4,7 @@
  */
 
 #include "config.h"
+#include "gettext.h"
 #include "garbage_collector.h"
 
 void init_garbage_collector() {

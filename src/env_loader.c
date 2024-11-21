@@ -4,6 +4,7 @@
  */
 
 #include "config.h"
+#include "gettext.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

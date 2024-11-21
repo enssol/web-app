@@ -6,3 +6,4 @@ include/garbage_collector.h
 include/hello.h
 include/logger.h
 include/validator.h
+include/gettext.h

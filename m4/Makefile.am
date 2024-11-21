@@ -3,5 +3,9 @@
 
 # m4/Makefile.am
 
+# Include the .env file if it exists
+-include .env
+export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+
 # Define the directory for m4 macros
 ACLOCAL_AMFLAGS = -I m4

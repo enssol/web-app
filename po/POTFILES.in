@@ -1,0 +1,10 @@
+# List of source files which contain translatable strings.
+../src/config_loader.c
+../src/env_loader.c
+../src/error_handler.c
+../src/garbage_collector.c
+../src/hello.c
+../src/logger.c
+../src/main.c
+../src/parser.y
+../src/validator.c

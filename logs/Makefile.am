@@ -3,5 +3,9 @@
 
 # logs/Makefile.am
 
+# Include the .env file if it exists
+-include .env
+export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+
 # Define the log files for the logs directory
 dist_noinst_DATA = *.log

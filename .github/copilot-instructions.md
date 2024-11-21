@@ -18,56 +18,68 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 -   Maintain the following directory structure:
 
 ```
-agalloMacbook:web-app adriangallo$ tree -I node_modules
 .
 ├── AUTHORS
-├── COPYING
-├── ChangeLog
-├── INSTALL
-├── LICENSE
-├── Makefile.am
-├── NEWS
-├── README.md
 ├── bin
 │   └── Makefile.am
 ├── build
-│   ├── Makefile.am
+│   ├── build_script.sh
+│   └── Makefile.am
+├── ChangeLog
 ├── configure.ac
+├── COPYING
 ├── deps
+│   ├── generate_deps.sh
 │   └── Makefile.am
 ├── dist
 │   └── Makefile.am
 ├── docs
+│   ├── Makefile
 │   └── Makefile.am
 ├── etc
-│   ├── Makefile.am
 │   ├── config.conf
 │   ├── config.ini
 │   ├── gcc.spec
 │   ├── header_sources.txt
+│   ├── Makefile
+│   ├── Makefile.am
 │   ├── scan_list.txt
 │   ├── sources.txt
 │   └── test_sources.txt
 ├── include
-│   ├── Makefile.am
+│   ├── config.h
 │   ├── config_loader.h
 │   ├── env_loader.h
 │   ├── error_handler.h
 │   ├── garbage_collector.h
 │   ├── hello.h
 │   ├── logger.h
+│   ├── Makefile
+│   ├── Makefile.am
 │   └── validator.h
+├── INSTALL
 ├── lib
 │   ├── Makefile.am
 │   └── unity.h
+├── libtool
+├── LICENSE
 ├── logs
 │   └── Makefile.am
+├── m4
+│   └── Makefile.am
+├── Makefile
+├── Makefile.am
+├── Makefile.in
+├── NEWS
 ├── obj
 │   └── Makefile.am
-├── package-lock.json
 ├── package.json
-├── src
+├── package-lock.json
+├── po
 │   ├── Makefile.am
+│   └── Makefile.in.in
+├── README.md
+├── src
 │   ├── config_loader.c
 │   ├── env_loader.c
 │   ├── error_handler.c
@@ -75,8 +87,12 @@ agalloMacbook:web-app adriangallo$ tree -I node_modules
 │   ├── hello.c
 │   ├── logger.c
 │   ├── main.c
+│   ├── Makefile
+│   ├── Makefile.am
+│   ├── Makefile.in
 │   ├── parser.y
 │   └── validator.c
+├── stamp-h1
 ├── tests
 │   ├── test_config_loader.c
 │   ├── test_env_loader.c
@@ -90,7 +106,7 @@ agalloMacbook:web-app adriangallo$ tree -I node_modules
 │   └── Makefile.am
 └── web-app.code-workspace
 
-15 directories, 62 files
+15 directories, 71 files
 ```
 
 -   Use **snake_case** for file names, e.g., `data_manager.c`, `user_auth.h`.
@@ -199,6 +215,7 @@ agalloMacbook:web-app adriangallo$ tree -I node_modules
 ---
 
 ## **8. Copilot Usage Guidelines**
+
 -   When generating code, focus on providing code snippets that can be copied into existing files rather than rewriting entire files.
 -   Ensure that the generated snippets adhere to the project's coding standards and practices as outlined in this document.
 -   Provide context-specific suggestions that integrate seamlessly with the existing codebase.

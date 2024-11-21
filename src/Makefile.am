@@ -3,7 +3,15 @@
 
 # src/Makefile.am
 
+# Include the .env file if it exists
+-include .env
+export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+
 # Define the source files for the src directory
 lib_LTLIBRARIES = libwebapp.la
-libwebapp_la_SOURCES = config_loader.c env_loader.c error_handler.c garbage_collector.c hello.c logger.c main.c parser.c validator.c
+libwebapp_la_SOURCES = config_loader.c env_loader.c error_handler.c garbage_collector.c hello.c logger.c main.c validator.c
 libwebapp_la_LDFLAGS = -static
+
+# Flex rules
+parser.c: parser.l
+	$(LEX) -o$@ $<

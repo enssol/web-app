@@ -3,5 +3,9 @@
 
 # tmp/Makefile.am
 
+# Include the .env file if it exists
+-include .env
+export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+
 # Define the temporary files for the tmp directory
 dist_noinst_DATA = *.tmp

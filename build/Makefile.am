@@ -3,6 +3,10 @@
 
 # build/Makefile.am
 
+# Include the .env file if it exists
+-include .env
+export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+
 # Define the auxiliary files for the build directory
 EXTRA_DIST = build_script.sh
 
