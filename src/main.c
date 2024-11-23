@@ -81,48 +81,45 @@ int main() {
 
 /**
  * Initialize the application
- * This function sets up the initial state of the application, including configuration, logging, and database connections.
  */
 void initialize() {
-    // Load environment variables
-    if (load_env_config("config/.env") != 0) {
-        handle_error("Failed to load environment variables");
-    }
-
-    // Load configuration files
-    if (load_ini_config("config/config.ini") != 0) {
-        handle_error("Failed to load config.ini");
-    }
-    if (load_conf_config("config/config.conf") != 0) {
-        handle_error("Failed to load config.conf");
-    }
-
-    // Initialize logging
+    // Initialize logger
     init_logger();
 
-    // Initialize garbage collector
-    init_garbage_collector();
+    // Load configuration
+    if (load_ini_config("config/config.ini") != 0) {
+        handle_error("Failed to load INI configuration");
+    }
+    if (load_conf_config("config/config.conf") != 0) {
+        handle_error("Failed to load CONF configuration");
+    }
+    if (load_env_config("config/.env") != 0) {
+        handle_error("Failed to load ENV configuration");
+    }
 
-    log_info("Initialization complete");
+    // Upgrade configuration if needed
+    if (config.version < CURRENT_CONFIG_VERSION) {
+        upgrade_config(config.version);
+    }
+
+    // Log application start
+    log_info("Application started: %s v%.1f", config.app_name, config.version);
 }
 
 /**
  * Cleanup the application
- * This function releases any resources that were allocated during the application's execution.
  */
 void cleanup() {
-    log_info("Cleaning up...");
+    // Cleanup resources
     cleanup_garbage_collector();
-    log_info("Cleanup complete");
 }
 
 /**
- * Handle errors
- * This function prints an error message to stderr.
- * @param error_message The error message to print.
+ * Handle errors by logging and exiting the application
  */
 void handle_error(const char *error_message) {
-    fprintf(stderr, "Error: %s\n", error_message);
+    log_error("Error: %s", error_message);
+    exit(EXIT_FAILURE);
 }
 
 /**

@@ -1,11 +1,9 @@
-# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: 	AGPL-3.0-or-later
-
 # deps/Makefile.am
 
-# Include the .env file if it exists
--include .env
-export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+.POSIX: # Enforce POSIX mode for portability
+
+# Include common rules
+include ../common-rules.am
 
 # Generate the dependency files list
 gen_deps_list = $(srcdir)/deps/generate_deps.sh
@@ -20,5 +18,8 @@ depsdir = $(srcdir)/deps
 dist_noinst_DATA = $(DEPS_FILES)
 
 # Hook to generate the dependency files list before building
-all: $(gen_deps_list)
-	@$(gen_deps_list)
+all: $(gen_deps_list) clib_install generate_tags cflow
+    @$(gen_deps_list)
+
+# Add clean_tags to the clean process
+clean: clean_tags

@@ -40,3 +40,7 @@ indent_size = 4
 # Settings for JSON and configuration files
 [*.{json,conf}]
 indent_size = 2                # Use 2 spaces for JSON and config files
+
+# Specific settings for POTFILES.in
+[POTFILES.in]
+insert_final_newline = false   # Do not insert a final newline

@@ -1,40 +1,36 @@
 # Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+# Main Root Makefile.am
+
+.POSIX: # Enforce POSIX mode for portability
+
+# Include common rules
+include common-rules.am
+
 # Define the project name and options
 AUTOMAKE_OPTIONS = gnu subdir-objects dist-xz
 ACLOCAL_AMFLAGS = -I m4
-bin_PROGRAMS = web-app
-
-# Include the .env file if it exists
--include .env
-export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
 
 # Source and header files
-include $(SOURCES_FILE)
-include $(HEADER_FILE)
-
-# Define the source files for the src directory
-lib_LTLIBRARIES = libwebapp.la
-libwebapp_la_SOURCES = $(SRC_DIR)/config_loader.c $(SRC_DIR)/env_loader.c $(SRC_DIR)/error_handler.c $(SRC_DIR)/garbage_collector.c $(SRC_DIR)/hello.c $(SRC_DIR)/logger.c $(SRC_DIR)/main.c $(SRC_DIR)/validator.c
-libwebapp_la_LDFLAGS = -static
-
-# Define the directory for the binary
-web_app_SOURCES = $(SRC_FILES) $(BUILT_SOURCES)
+bin_PROGRAMS = web-app
+web_app_SOURCES = $(SRC_DIR)/main.c $(SRC_DIR)/config_loader.c $(SRC_DIR)/env_loader.c
 web_app_HEADERS = $(HEADER_FILES)
+
+# Define the source files
+SRC_DIR = src
+OBJ_DIR = objects
+SRC_FILES = $(SRC_DIR)/config_loader.c $(SRC_DIR)/env_loader.c $(SRC_DIR)/main.c
+OBJ_FILES = $(SRC_FILES:.c=.o)
 
 # Define the directory for headers
 web_appdir = $(INCLUDE_DIR)
 
 # Include directories
-AM_CPPFLAGS = -I$(INCLUDE_DIR)
+AM_CPPFLAGS = -I$(INCLUDE_DIR) $(LIBS_CFLAGS)
 
 # Define subdirectories
 SUBDIRS = src include etc docs m4 po bin build deps dist tmp lib objects logs m4
-
-# Compiler and linker flags from gcc.spec
-AM_CFLAGS = @CC1_FLAGS@
-AM_LDFLAGS = @LINK_FLAGS@ -static
 
 # Additional libraries
 LDADD = -lm
@@ -45,40 +41,49 @@ configdir = $(CONFIG_DIR)
 # Install configuration files
 dist_config_DATA = $(CONFIG_INI_FILE) $(CONFIG_CONF_FILE) $(GCC_SPEC_FILE)
 
-# Bison rules
-BUILT_SOURCES = $(SRC_DIR)/parser.c $(INCLUDE_DIR)/parser.h $(INCLUDE_DIR)/version.h
-CLEANFILES = $(SRC_DIR)/parser.c $(INCLUDE_DIR)/parser.h $(INCLUDE_DIR)/version.h
-
-# Ensure parser.c is built only once
-noinst_LIBRARIES = libparser.a
-libparser_a_SOURCES = $(SRC_DIR)/parser.c
-
-$(SRC_DIR)/parser.c $(INCLUDE_DIR)/parser.h: $(SRC_DIR)/parser.y
-	bison -d $(SRC_DIR)/parser.y
-	mv parser.tab.c $(SRC_DIR)/parser.c
-	mv parser.tab.h $(INCLUDE_DIR)/parser.h
-
 # Custom rule to generate a version file
 version.h: $(SRC_DIR)/version.txt
-	@echo "#define VERSION \"`cat $(SRC_DIR)/version.txt`\"" > $(INCLUDE_DIR)/version.h
+    @echo "#define VERSION \"`cat $(SRC_DIR)/version.txt`\"" > $(INCLUDE_DIR)/version.h
 
-# Optional: Files to include in the distribution tarball.
-# This ensures these files are included when running `make dist`.
-EXTRA_DIST = README.md LICENSE INSTALL AUTHORS ChangeLog NEWS etc/config.conf etc/config.ini etc/gcc.spec docs/
+# Add common rules to the build process
+all: generate_tags compile docs
 
-# Use VPATH to specify the directories where the source files are located
-VPATH = $(srcdir):$(srcdir)/$(SRC_DIR):$(srcdir)/$(INCLUDE_DIR)
-
-# Include gettext files
-GETTEXT_PACKAGE = enveng-webapp
-
-# For flex
-LEX = flex
-LEX_OUTPUT_ROOT = lex.yy
-
-# Flex rules
-parser.c: parser.l
-	$(LEX) -o$@ $<
+clean: clean_tags clean_html_docs
 
 # Clean up files
 DISTCLEANFILES = Makefile.in aclocal.m4 configure config.h.in
+
+# Custom rule to fix Makefile.in.in
+fix-makefile-in-in:
+    ./fix_makefile.sh
+
+# Ensure the fix is applied after Makefile.in.in is generated
+all-local: fix-makefile-in-in
+
+# Add gtk-doc support
+if ENABLE_GTK_DOC
+GTK_DOC_USE_LIBTOOL = 1
+include $(top_srcdir)/gtk-doc.make
+endif
+
+# Add intltool support
+INTLTOOL_FILES = intltool-extract.in intltool-merge.in intltool-update.in
+EXTRA_DIST = $(INTLTOOL_FILES)
+DISTCLEANFILES += intltool-extract intltool-merge intltool-update
+CLEANFILES = *.mo
+
+# Add rules for generating .mo files
+%.mo: %.po
+    msgfmt -o $@ $<
+
+# Add rules for installing .mo files
+install-data-local:
+    $(mkinstalldirs) $(DESTDIR)$(datadir)/locale
+    for lang in $(LINGUAS); do \
+        $(INSTALL_DATA) $$lang.mo $(DESTDIR)$(datadir)/locale/$$lang/LC_MESSAGES/$(PACKAGE).mo; \
+    done
+
+uninstall-local:
+    for lang in $(LINGUAS); do \
+        rm -f $(DESTDIR)$(datadir)/locale/$$lang/LC_MESSAGES/$(PACKAGE).mo; \
+    done

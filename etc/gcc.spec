@@ -1,8 +1,8 @@
 *cc1:
-  std=iso9899:2024: -std=iso9899:2024 \
+  std=gnu23: -std=gnu23 \
   D_POSIX_C_SOURCE: -D_POSIX_C_SOURCE=2024L \
   D_XOPEN_SOURCE: -D_XOPEN_SOURCE=800 \
-  %{!O3: -O3} \
+  %{!O0: -O0} \
   %{!fstack-protector: -fstack-protector} \
   %{!march=native: -march=native} \
   %{!mtune=generic: -mtune=generic} \

@@ -3,10 +3,17 @@
 
 # etc/Makefile.am
 
-# Include the .env file if it exists
--include .env
-export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+.POSIX: # Enforce POSIX mode for portability
+
+# Include common rules
+include ../common-rules.am
+
+# Add generate_tags to the build process
+all: generate_tags
+
+# Add clean_tags to the clean process
+clean: clean_tags
 
 # Define the configuration files for the etc directory
 configdir = $(sysconfdir)
-dist_config_DATA = config.conf config.ini gcc.spec header_sources.txt sources.txt
+dist_config_DATA = config.conf config.ini gcc.spec header_sources.txt sources.txt .autoindent process_files.gawk

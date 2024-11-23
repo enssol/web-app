@@ -4,24 +4,59 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.shellcheck": "always"
   },
-  "editor.detectIndentation": true,
+  "editor.detectIndentation": false,
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.defaultFormatter": "ms-vscode.cpptools",
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[c]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.trimAutoWhitespace": true
+  },
+  "[cpp]": {
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.trimAutoWhitespace": true
+  },
+  "[json]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[jsonc]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.trimAutoWhitespace": false
+  },
+  "[makefile]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": false
+  },
+  "[makefile.am]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": false
+  },
+  "[makefile.in]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": false
+  },
   "editor.formatOnPaste": true,
   "editor.formatOnType": true,
-  "editor.insertSpaces": false,
+  "editor.insertSpaces": true,
   "editor.rulers": [80],
   "editor.trimAutoWhitespace": true,
-  "editor.wordWrap": "on",
+  "editor.wordWrap": "wordWrapColumn",
   "editor.wordWrapColumn": 80,
   "editor.minimap.enabled": true,
   "editor.tabSize": 4,
   "editor.lineNumbers": "on",
   "editor.bracketPairColorization.enabled": true,
-  "editor.cursorBlinking": "smooth",
   "editor.cursorWidth": 2,
   "editor.renderWhitespace": "all",
   "editor.renderControlCharacters": true,
@@ -37,15 +72,11 @@
   "git.alwaysSignOff": true,
   "git.autofetch": true,
   "git.autofetchPeriod": 180,
-  "git.autorefresh": true,
   "git.closeDiffOnOperation": true,
-  "git.confirmSync": false,
   "git.enableCommitSigning": true,
   "git.enableSmartCommit": true,
   "git.enabled": true,
   "git.fetchOnPull": true,
-  "git.inputValidation": true,
-  "git.mergeEditor": true,
   "git.openRepositoryInParentFolders": "always",
   "git.postCommitCommand": "sync",
   "git.pruneOnFetch": true,
@@ -64,8 +95,87 @@
   },
   "search.useIgnoreFiles": true,
   "search.useGlobalIgnoreFiles": true,
-  "workbench.startupEditor": "none",
+  "workbench.startupEditor": "terminal",
   "diffEditor.maxComputationTime": 0,
   "prettier.useTabs": true,
-  "dotenv.enableAutocloaking": false
+  "editor.codeActions.triggerOnFocusChange": true,
+  "editor.foldingImportsByDefault": true,
+  "editor.guides.bracketPairs": true,
+  "editor.guides.highlightActiveIndentation": "always",
+  "editor.lightbulb.enabled": "on",
+  "editor.linkedEditing": true,
+  "editor.smoothScrolling": true,
+  "editor.stickyTabStops": true,
+  "diffEditor.codeLens": true,
+  "diffEditor.hideUnchangedRegions.enabled": true,
+  "editor.inlineSuggest.syntaxHighlightingEnabled": true,
+  "files.autoGuessEncoding": true,
+  "files.encoding": "utf8bom",
+  "files.eol": "\n",
+  "files.insertFinalNewline": false,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "explorer.fileNesting.enabled": true,
+  "scm.alwaysShowActions": true,
+  "scm.alwaysShowRepositories": true,
+  "scm.defaultViewMode": "tree",
+  "scm.diffDecorationsGutterPattern": {
+    "added": true
+  },
+  "ipynb.experimental.serialization": true,
+  "git.autoStash": true,
+  "markdown.preview.typographer": true,
+  "C_Cpp.clang_format_fallbackStyle": "Google",
+  "C_Cpp.clang_format_style": "file",
+  "C_Cpp.clang_format_sortIncludes": true,
+  "C_Cpp.clang_format_path": "/usr/bin/clang-format",
+  "makefile.extensionOutputFolder": "./build",
+  "makefile.configurations": [
+    {
+      "name": "Debug",
+      "makeArgs": ["DEBUG=1"]
+    },
+    {
+      "name": "Release",
+      "makeArgs": ["RELEASE=1"]
+    }
+  ],
+  "makefile.launchConfigurations": [
+    {
+      "name": "Debug",
+      "binaryPath": "./build/debug/myapp"
+    },
+    {
+      "name": "Release",
+      "binaryPath": "./build/release/myapp"
+    }
+  ],
+  "makefile.makePath": "/usr/bin/make",
+  "makefile.makefilePath": "./Makefile",
+  "makefile.buildLog": "./logs/build.log",
+  "shellcheck.enable": true,
+  "shellcheck.executablePath": "/usr/bin/shellcheck",
+  "shellcheck.run": "onSave",
+  "shellcheck.exclude": [
+    "SC1000", // Example: Exclude specific rule
+    "SC2000"  // Example: Exclude another specific rule
+  ],
+  "shellcheck.customArgs": [
+    "--severity=style", // Set severity level
+    "--enable=all"      // Enable all checks
+  ],
+  "shellcheck.ignorePatterns": [
+    "**/node_modules/**", // Ignore node_modules directory
+    "**/build/**"         // Ignore build directory
+  ],
+  "markdown.extension.list.indentationSize": "inherit",
+  "markdown.extension.print.onFileSave": true,
+  "markdownlint.config": {
+    "default": true,
+    "MD013": false, // Disable line length rule for Markdown
+    "MD033": false, // Allow inline HTML
+    "MD041": false, // Allow first line to be non-header
+    "MD007": { "indent": 4 }, // Set list indentation to 4 spaces
+    "MD029": { "style": "ordered" } // Enforce ordered list style
+  }
 }

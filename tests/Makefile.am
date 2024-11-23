@@ -3,6 +3,8 @@
 
 # tests/Makefile.am
 
+.POSIX: # Enforce POSIX mode for portability
+
 # Include the .env file if it exists
 if [ -f ../config/.env ]; then \
   include ../config/.env; \
@@ -49,4 +51,3 @@ config_DATA = $(dist_config_DATA)
 # Install configuration files
 dist_config_DATA = ../config/config.conf ../config/config.ini ../config/gcc.spec \
 				   ../config/sources.txt ../config/test_sources.txt ../config/header_sources.txt
-

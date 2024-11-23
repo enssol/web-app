@@ -3,9 +3,10 @@
 
 # po/Makefile.am
 
-# Include the .env file if it exists
--include .env
-export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+.POSIX: # Enforce POSIX mode for portability
+
+# Include common rules
+include ../common-rules.am
 
 # Define the gettext package
 GETTEXT_PACKAGE = enveng-webapp
@@ -31,55 +32,50 @@ SUFFIXES = .po .gmo .sed .sin .nop .po-create .po-update
 # Override the SUFFIXES target
 .SUFFIXES:
 
-# Use local targets to avoid overriding Automake targets
+# Include the LINGUAS file
+LINGUAS = en
+
 install-data-local: all
     @catalogs='$(CATALOGS)'; \
     for cat in $$catalogs; do \
-      cat=`basename $$cat`; \
-      lang=`echo $$cat | sed -e 's/\.gmo$$//'`; \
-      dir=$(localedir)/$$lang/LC_MESSAGES; \
-      $(mkdir_p) $(DESTDIR)$$dir; \
-      if test -r $$cat; then realcat=$$cat; else realcat=$(srcdir)/$$cat; fi; \
-      $(INSTALL_DATA) $$realcat $(DESTDIR)$$dir/$(DOMAIN).mo; \
-      echo "installing $$realcat as $(DESTDIR)$$dir/$(DOMAIN).mo"; \
-      for lc in '' $(EXTRA_LOCALE_CATEGORIES); do \
-        if test -n "$$lc"; then \
-          if (cd $(DESTDIR)$(localedir)/$$lang && LC_ALL=C ls -l -d $$lc 2>/dev/null) | grep ' -> ' >/dev/null; then \
-            link=`cd $(DESTDIR)$(localedir)/$$lang && LC_ALL=C ls -l -d $$lc | sed -e 's/^.* -> //'`; \
-            mv $(DESTDIR)$(localedir)/$$lang/$$lc $(DESTDIR)$(localedir)/$$lang/$$lc.old; \
-            mkdir $(DESTDIR)$(localedir)/$$lang/$$lc; \
-            (cd $(DESTDIR)$(localedir)/$$lang/$$lc.old && \
-             for file in *; do \
-               if test -f $$file; then \
-                 ln -s ../$$link/$$file $(DESTDIR)$(localedir)/$$lang/$$lc/$$file; \
-               fi; \
-             done); \
-            rm -f $(DESTDIR)$(localedir)/$$lang/$$lc.old; \
-          else \
-            if test -d $(DESTDIR)$(localedir)/$$lang/$$lc; then \
-              :; \
-            else \
-              rm -f $(DESTDIR)$(localedir)/$$lang/$$lc; \
-              mkdir $(DESTDIR)$(localedir)/$$lang/$$lc; \
+        cat=`basename "$$cat"`; \
+        lang=`echo "$$cat" | sed -e 's/\.gmo$$//'`; \
+        dir="$(localedir)/$$lang/LC_MESSAGES"; \
+        $(mkdir_p) "$(DESTDIR)$$dir"; \
+        if [ -r "$$cat" ]; then realcat="$$cat"; else realcat="$(srcdir)/$$cat"; fi; \
+        $(INSTALL_DATA) "$$realcat" "$(DESTDIR)$$dir/$(DOMAIN).mo"; \
+        echo "installing $$realcat as $(DESTDIR)$$dir/$(DOMAIN).mo"; \
+        for lc in '' $(EXTRA_LOCALE_CATEGORIES); do \
+            if [ -n "$$lc" ]; then \
+                if (cd "$(DESTDIR)$(localedir)/$$lang" && LC_ALL=C ls -l -d "$$lc" 2>/dev/null) | grep ' -> ' >/dev/null; then \
+                    link=`cd "$(DESTDIR)$(localedir)/$$lang" && LC_ALL=C ls -l -d "$$lc" | sed -e 's/^.* -> //'`; \
+                    mv "$(DESTDIR)$(localedir)/$$lang/$$lc" "$(DESTDIR)$(localedir)/$$lang/$$lc.old"; \
+                    (cd "$(DESTDIR)$(localedir)/$$lang" && ln -s "../$$link/$$lc" "$(DESTDIR)$(localedir)/$$lang/$$lc"); \
+                    rm -f "$(DESTDIR)$(localedir)/$$lang/$$lc.old"; \
+                else \
+                    if [ -d "$(DESTDIR)$(localedir)/$$lang/$$lc" ]; then \
+                        :; \
+                    else \
+                        rm -f "$(DESTDIR)$(localedir)/$$lang/$$lc"; \
+                        mkdir "$(DESTDIR)$(localedir)/$$lang/$$lc"; \
+                    fi; \
+                fi; \
             fi; \
-          fi; \
-          rm -f $(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo; \
-          ln -s ../LC_MESSAGES/$(DOMAIN).mo $(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo 2>/dev/null || \
-          ln $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(DOMAIN).mo $(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo 2>/dev/null || \
-          cp -p $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(DOMAIN).mo $(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo; \
-          echo "installing $$realcat link as $(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo"; \
-        fi; \
-      done; \
+            rm -f "$(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo"; \
+            ln -s "../LC_MESSAGES/$(DOMAIN).mo" "$(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo" 2>/dev/null || \
+            cp -p "$(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(DOMAIN).mo" "$(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo"; \
+            echo "installing $$realcat link as $(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo"; \
+        done; \
     done
 
 uninstall-local:
     catalogs='$(CATALOGS)'; \
     for cat in $$catalogs; do \
-      cat=`basename $$cat`; \
-      lang=`echo $$cat | sed -e 's/\.gmo$$//'`; \
-      for lc in LC_MESSAGES $(EXTRA_LOCALE_CATEGORIES); do \
-        rm -f $(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo; \
-      done; \
+        cat=`basename $$cat`; \
+        lang=`echo $$cat | sed -e 's/\.gmo$$//'`; \
+        for lc in LC_MESSAGES $(EXTRA_LOCALE_CATEGORIES); do \
+            rm -f $(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo; \
+        done; \
     done
 
 clean-local:
@@ -101,3 +97,20 @@ mostlyclean-local:
     rm -f $(srcdir)/stamp-poT
     rm -f core core.* $(DOMAIN).po $(DOMAIN).1po $(DOMAIN).2po *.new.po
     rm -fr *.o
+
+# Custom rule to fix Makefile.in.in
+fix-makefile-in-in:
+    @echo "Applying fixes to po/Makefile.in.in"
+    ./fix_makefile.sh || (echo "Fix failed!" && exit 1)
+
+# Ensure the fix is applied after Makefile.in.in is generated
+all-local: fix-makefile-in-in
+
+SUBDIRS = .
+
+# Define the gettext domain
+DOMAIN = $(PACKAGE)
+
+# Define the rules for generating .mo files
+%.mo: %.po
+    msgfmt -o $@ $<

@@ -19,13 +19,47 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 
 ```
 .
+├── ABOUT-NLS
+├── aclocal.m4
 ├── AUTHORS
+├── autom4te.cache
+│   ├── output.0
+│   ├── output.1
+│   ├── output.2
+│   ├── output.3
+│   ├── output.4
+│   ├── requests
+│   ├── traces.0
+│   ├── traces.1
+│   ├── traces.2
+│   ├── traces.3
+│   └── traces.4
 ├── bin
 │   └── Makefile.am
 ├── build
+│   ├── ar-lib
 │   ├── build_script.sh
-│   └── Makefile.am
+│   ├── compile
+│   ├── config.guess
+│   ├── config.rpath
+│   ├── config.sub
+│   ├── depcomp
+│   ├── in
+│   ├── install-sh
+│   ├── ltmain.sh
+│   ├── Makefile.am
+│   ├── missing
+│   └── ylwrap
 ├── ChangeLog
+├── config.guess
+├── config.h
+├── config.h.in
+├── config.h.in~
+├── config.log
+├── config.status
+├── config.sub
+├── configure
+├── configure~
 ├── configure.ac
 ├── COPYING
 ├── deps
@@ -43,6 +77,7 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 │   ├── header_sources.txt
 │   ├── Makefile
 │   ├── Makefile.am
+│   ├── process_files.gawk
 │   ├── scan_list.txt
 │   ├── sources.txt
 │   └── test_sources.txt
@@ -52,6 +87,7 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 │   ├── env_loader.h
 │   ├── error_handler.h
 │   ├── garbage_collector.h
+│   ├── gettext.h
 │   ├── hello.h
 │   ├── logger.h
 │   ├── Makefile
@@ -59,6 +95,7 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 │   └── validator.h
 ├── INSTALL
 ├── lib
+│   ├── clib.json
 │   ├── Makefile.am
 │   └── unity.h
 ├── libtool
@@ -66,18 +103,43 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 ├── logs
 │   └── Makefile.am
 ├── m4
-│   └── Makefile.am
+│   ├── gettext.m4
+│   ├── host-cpu-c-abi.m4
+│   ├── iconv.m4
+│   ├── intlmacosx.m4
+│   ├── lib-ld.m4
+│   ├── lib-link.m4
+│   ├── lib-prefix.m4
+│   ├── libtool.m4
+│   ├── lt~obsolete.m4
+│   ├── ltoptions.m4
+│   ├── ltsugar.m4
+│   ├── ltversion.m4
+│   ├── Makefile.am
+│   ├── nls.m4
+│   ├── po.m4
+│   └── progtest.m4
 ├── Makefile
 ├── Makefile.am
 ├── Makefile.in
 ├── NEWS
-├── obj
+├── objects
 │   └── Makefile.am
 ├── package.json
 ├── package-lock.json
 ├── po
+│   ├── boldquot.sed
+│   ├── ChangeLog
+│   ├── en@boldquot.header
+│   ├── en@quot.header
+│   ├── insert-header.sin
 │   ├── Makefile.am
-│   └── Makefile.in.in
+│   ├── Makefile.in.in
+│   ├── Makevars.template
+│   ├── POTFILES.in
+│   ├── quot.sed
+│   ├── remove-potcdate.sin
+│   └── Rules-quot
 ├── README.md
 ├── src
 │   ├── config_loader.c
@@ -85,6 +147,7 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 │   ├── error_handler.c
 │   ├── garbage_collector.c
 │   ├── hello.c
+│   ├── lexer.l
 │   ├── logger.c
 │   ├── main.c
 │   ├── Makefile
@@ -94,6 +157,9 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 │   └── validator.c
 ├── stamp-h1
 ├── tests
+│   ├── Makefile
+│   ├── Makefile.am
+│   ├── Makefile.in
 │   ├── test_config_loader.c
 │   ├── test_env_loader.c
 │   ├── test_error_handler.c
@@ -105,8 +171,6 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 ├── tmp
 │   └── Makefile.am
 └── web-app.code-workspace
-
-15 directories, 71 files
 ```
 
 -   Use **snake_case** for file names, e.g., `data_manager.c`, `user_auth.h`.
@@ -157,16 +221,30 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 ### Indentation
 
 -   Use spaces (not tabs) for indentation, with an indent size of 4.
+-   For Makefiles and Makefile.am files, use tabs for indentation with an indent size of 4.
 
 ### Brace Style
 
--   Use the following brace style:
+-   Use the Allman brace style:
     ```c
     if (condition)
     {
         // Code block
     }
     ```
+
+### Quotes
+
+-   Prefer double quotes for strings in C and header files.
+
+### Additional Formatting Rules
+
+-   Align consecutive assignments and declarations.
+-   Allow short functions on a single line (inline only).
+-   Break before braces for functions, control statements, namespaces, classes, else, catch, while, structs, enums, and unions.
+-   Space before parentheses in control statements.
+-   No spaces in container literals.
+-   Sort includes and preserve include blocks.
 
 ### Line Length
 

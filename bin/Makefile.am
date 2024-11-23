@@ -3,6 +3,11 @@
 
 # bin/Makefile.am
 
+.POSIX: # Enforce POSIX mode for portability
+
+# Include common rules
+include ../common-rules.am
+
 # Include the .env file if it exists
 -include .env
 export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
@@ -11,3 +16,9 @@ export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
 bin_PROGRAMS = webapp
 webapp_SOURCES = main.c
 webapp_LDADD = ../lib/libwebapp.la
+
+# Add clib_install, perf, generate_tags, cflow, and stow to the build process
+all: clib_install perf generate_tags cflow stow
+
+# Add clean_tags to the clean process
+clean: clean_tags

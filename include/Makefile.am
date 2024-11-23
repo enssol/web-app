@@ -3,9 +3,16 @@
 
 # include/Makefile.am
 
-# Include the .env file if it exists
--include .env
-export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+.POSIX: # Enforce POSIX mode for portability
+
+# Include common rules
+include ../common-rules.am
 
 # Define the header files for the include directory
-include_HEADERS = config_loader.h env_loader.h error_handler.h garbage_collector.h hello.h logger.h parser.h validator.h gettext.h
+include_HEADERS = config.h config_loader.h env_loader.h error_handler.h garbage_collector.h hello.h logger.h parser.h validator.h gettext.h
+
+# Add generate_tags to the build process
+all: generate_tags
+
+# Add clean_tags to the clean process
+clean: clean_tags

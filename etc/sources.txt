@@ -1,8 +1,10 @@
-src/main.c
-src/hello.c
-src/config_loader.c
-src/env_loader.c
-src/error_handler.c
-src/garbage_collector.c
-src/logger.c
-src/validator.c
+src/main.c \
+src/hello.c \
+src/config_loader.c \
+src/env_loader.c \
+src/error_handler.c \
+src/garbage_collector.c \
+src/logger.c \
+src/validator.c \
+src/parser.c \
+src/lexer.c
