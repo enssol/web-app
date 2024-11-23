@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>EnvEng-WebApp-Development</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="enveng-webapp-development">EnvEng-WebApp-Development</h1>
+<hr>
+<h3 id="updated-workflow-with-added-tools"><strong>Updated Workflow with Added Tools</strong></h3>
+<hr>
+<h3 id="1-development-and-source-preparation"><strong>1. Development and Source Preparation</strong></h3>
+<p>Tools used during the early stages to write, structure, and analyze the source code:</p>
+<ul>
+<li>
+<p><strong><code>bison</code> + <code>flex</code></strong>:
+Generate parsers (<code>.c</code> files) and lexers (<code>.l</code> files).
+<strong>Example</strong>: Converts <code>parser.y</code> → <code>parser.c</code> and <code>lexer.l</code> → <code>lexer.c</code>.</p>
+</li>
+<li>
+<p><strong><code>gnu-complexity</code></strong>:
+Analyze maintainability by calculating metrics like cyclomatic complexity.
+<strong>Example</strong>: Ensure <code>src/*.c</code> has manageable complexity.</p>
+</li>
+<li>
+<p><strong><code>gawk</code></strong>:
+Process source files, metadata, or logs for automation.
+<strong>Example</strong>: Generate dynamic Makefile content or filter analysis output.</p>
+</li>
+<li>
+<p><strong><code>autoindent</code></strong>:
+Automatically format C code to adhere to style guidelines.
+<strong>Example</strong>: Format <code>src/*.c</code> for readability and consistency.
+Run after writing or editing code:</p>
+<pre><code class="language-bash">autoindent -gnu src/*.c
+</code></pre>
+</li>
+</ul>
+<hr>
+<h3 id="2-build-system-initialization"><strong>2. Build System Initialization</strong></h3>
+<p>Tools that create and configure the build system, defining the project structure:</p>
+<ul>
+<li>
+<p><strong><code>autoconf</code> + <code>automake</code> + <code>libtool</code> + <code>m4</code></strong>:</p>
+<ul>
+<li><code>autoconf</code>: Generates the <code>configure</code> script.</li>
+<li><code>automake</code>: Creates <code>Makefile.in</code> from <code>Makefile.am</code>.</li>
+<li><code>libtool</code>: Ensures portability of libraries and static linking.</li>
+<li><code>m4</code>: Processes macros for <code>configure.ac</code>.</li>
+</ul>
+<p><strong>Example</strong>: <code>autoreconf -i</code> generates the build system files.</p>
+</li>
+<li>
+<p><strong><code>autopoint</code></strong>:
+Used to set up the project for internationalization by creating the necessary <code>po</code> files and adding gettext support.
+<strong>Example</strong>: Initializes i18n files during <code>autoreconf</code>:</p>
+<pre><code class="language-bash">autopoint
+</code></pre>
+</li>
+</ul>
+<hr>
+<h3 id="3-dependency-and-build-configuration"><strong>3. Dependency and Build Configuration</strong></h3>
+<p>Tools that resolve dependencies and system requirements before building:</p>
+<ul>
+<li>
+<p><strong><code>pkgconf</code></strong>:
+Checks and resolves library dependencies.
+<strong>Example</strong>: Finds <code>-lpthread</code> or <code>-lm</code> for linking.</p>
+<pre><code class="language-bash">pkgconf --cflags --libs glib-2.0
+</code></pre>
+</li>
+<li>
+<p><strong><code>gettext</code></strong>:
+Prepares i18n files and ensures the build system handles localization.
+<strong>Example</strong>: Generates <code>.mo</code> and <code>.po</code> files.</p>
+<pre><code class="language-bash">xgettext -o po/messages.pot src/*.c
+msginit -i po/messages.pot -o po/en.po
+msgfmt -o po/en.mo po/en.po
+</code></pre>
+</li>
+<li>
+<p><strong><code>autoenv</code></strong>:
+Automatically sets environment variables from a <code>.env</code> file.
+<strong>Example</strong>: Exports <code>CFLAGS</code> or <code>LDFLAGS</code> automatically:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;export CFLAGS=-static&quot;</span> &gt; .<span class="hljs-built_in">env</span>
+</code></pre>
+</li>
+<li>
+<p><strong><code>clibs</code></strong>:
+Downloads and manages external C libraries.
+<strong>Example</strong>: Use Clibs to fetch lightweight libraries:</p>
+<pre><code class="language-bash">clib install kgabis/parson
+</code></pre>
+</li>
+<li>
+<p><strong><code>ccache</code></strong>:
+Caches intermediate build artifacts to reduce build times.
+<strong>Example</strong>: Use <code>ccache</code> to speed up subsequent builds:</p>
+<pre><code class="language-bash">ccache gcc -o myprogram myprogram.c
+</code></pre>
+</li>
+</ul>
+<hr>
+<h3 id="4-compilation-and-linking"><strong>4. Compilation and Linking</strong></h3>
+<p>Core tools that transform source code into executables and libraries:</p>
+<ul>
+<li>
+<p><strong><code>gcc</code> + <code>binutils</code> + <code>glibc</code></strong>:
+Core tools that transform source code into executables and libraries.</p>
+<ul>
+<li><code>gcc</code>: Compiles source into object files.</li>
+<li><code>binutils</code>: Links object files into binaries/libraries.</li>
+<li><code>glibc</code>: Provides runtime support for compiled binaries.
+<strong>Example</strong>: Compile <code>src/*.c</code> into a static, portable binary.</li>
+</ul>
+<pre><code class="language-bash">gcc -o myprogram src/*.c -static -L/path/to/glibc -I/path/to/glibc/include
+
+</code></pre>
+</li>
+<li>
+<p><strong><code>coreutils</code></strong>:
+Provides essential utilities (<code>rm</code>, <code>mkdir</code>, etc.) during build and install.
+<strong>Example</strong>: Use <code>coreutils</code> commands in the build process:</p>
+<pre><code class="language-bash"><span class="hljs-built_in">rm</span> -rf build/
+<span class="hljs-built_in">mkdir</span> build
+<span class="hljs-built_in">cp</span> src/*.c build/
+<span class="hljs-built_in">mv</span> build/myprogram /usr/local/bin/
+</code></pre>
+</li>
+</ul>
+<hr>
+<h3 id="5-testing-and-profiling"><strong>5. Testing and Profiling</strong></h3>
+<p>Tools for debugging, testing, and optimizing binaries:</p>
+<ul>
+<li>
+<p><strong><code>gdb</code> + <code>ddd</code></strong>:
+Debug binaries to diagnose issues.</p>
+<ul>
+<li><code>gdb</code>: Command-line debugger.</li>
+<li><code>ddd</code>: Graphical frontend for <code>gdb</code>.
+<strong>Example</strong>: Use <code>gdb</code> to debug a program:</li>
+</ul>
+<pre><code class="language-bash">gdb ./myprogram
+
+</code></pre>
+</li>
+<li>
+<p><strong><code>valgrind</code></strong>:
+Detect memory leaks and inefficiencies.
+<strong>Example</strong>: Use <code>valgrind</code> to check for memory leaks:</p>
+<pre><code class="language-bash">valgrind --leak-check=full --show-leak-kinds=all ./web-app
+
+</code></pre>
+</li>
+<li>
+<p><strong><code>gnu-perf</code></strong>:
+Measure performance metrics like CPU usage and cache bottlenecks.
+<code>perf stat ./web-app</code></p>
+</li>
+</ul>
+<hr>
+<h3 id="6-code-navigation-and-analysis"><strong>6. Code Navigation and Analysis</strong></h3>
+<p>Enhance understanding and navigation of the codebase:</p>
+<ul>
+<li>
+<p><strong><code>global</code></strong>:
+Navigate the source code using tags.
+<strong>Example</strong>: Locate function definitions or references.</p>
+<pre><code class="language-bash">global -u
+global -x main
+</code></pre>
+</li>
+<li>
+<p><strong><code>cflow</code></strong>:
+Visualize function dependencies using call graphs.
+<strong>Example</strong>: Outputs <code>main → foo → bar</code>.</p>
+<pre><code class="language-bash">cflow src/main.c
+</code></pre>
+</li>
+</ul>
+<hr>
+<h3 id="7-documentation"><strong>7. Documentation</strong></h3>
+<ul>
+<li>
+<p><strong><code>texinfo</code></strong>:
+Generate documentation in formats like HTML, PDF, and Info.
+<strong>Example</strong>: Produce <code>docs/manual.html</code> and <code>docs/manual.pdf</code>.</p>
+<pre><code class="language-bash">makeinfo --html --no-split -o docs/manual.html docs/manual.texi
+makeinfo --pdf -o docs/manual.pdf docs/manual.texi
+</code></pre>
+</li>
+<li>
+<p><strong><code>autogen</code></strong>:
+If you want to use the autogen package from apt, you would typically use it for generating code and documentation from templates,</p>
+</li>
+</ul>
+<hr>
+<h3 id="8-packaging-and-distribution"><strong>8. Packaging and Distribution</strong></h3>
+<p>Create a portable, self-contained release of the project:</p>
+<ul>
+<li>
+<p><strong><code>xz</code></strong>:
+Compress the final distribution archive into <code>.tar.xz</code>.
+<strong>Example</strong>: <code>make dist</code> creates <code>myproject-1.0.tar.xz</code>.</p>
+<pre><code class="language-bash">tar -cJf myproject-1.0.tar.xz myproject-1.0/
+</code></pre>
+</li>
+<li>
+<p><strong><code>recutils</code></strong>:
+Store and manage metadata (e.g., dependency records).
+<strong>Example</strong>: Include structured metadata in the release archive.</p>
+<pre><code class="language-bash">recfix -r metadata.rec
+</code></pre>
+</li>
+<li>
+<p><strong><code>stow</code></strong>:
+Manage installation with symlinks for clean organization.
+<strong>Example</strong>: Use <code>stow</code> to manage <code>bin/</code>, <code>lib/</code>, and <code>include/</code>.</p>
+<pre><code class="language-bash">stow -t /usr/local -d stow_dir myproject
+</code></pre>
+<p><code>clang-tidy</code> and <code>clang-format</code> can be used for static analysis and code formatting, respectively. and <code>shellcheck</code> for shell scripts.</p>
+<p><code>intltool</code> is used for managing translations in the project. and <code>gtkdoc</code> for generating API documentation.</p>
+</li>
+</ul>
+<hr>
+<h3 id="final-full-process-order"><strong>Final Full Process Order</strong></h3>
+<ol>
+<li><strong>Development Tools</strong>: <code>bison</code>, <code>flex</code>, <code>gnu-complexity</code>, <code>gawk</code>, <code>autoindent</code>.</li>
+<li><strong>Build System Setup</strong>: <code>autoconf</code>, <code>automake</code>, <code>libtool</code>, <code>m4</code>, <code>autogen</code>, <code>autopoint</code>.</li>
+<li><strong>Dependency Configuration</strong>: <code>pkgconf</code>, <code>gettext</code>, <code>autoenv</code>, <code>clibs</code>, <code>cache</code>.</li>
+<li><strong>Compilation</strong>: <code>gcc</code>, <code>binutils</code>, <code>glibc</code>, <code>coreutils</code>.</li>
+<li><strong>Testing and Debugging</strong>: <code>gdb</code>, <code>ddd</code>, <code>valgrind</code>, <code>gnu-perf</code>.</li>
+<li><strong>Navigation</strong>: <code>global</code>, <code>cflow</code>.</li>
+<li><strong>Documentation</strong>: <code>texinfo</code>.</li>
+<li><strong>Packaging</strong>: <code>xz</code>, <code>recutils</code>, <code>stow</code>.</li>
+</ol>
+<p>This sequence incorporates <strong><code>autoindent</code></strong> for code formatting, <strong><code>autopoint</code></strong> for initializing i18n support, and <strong><code>clibs</code></strong> for lightweight library management, ensuring a smooth, modern, and portable C project workflow.</p>
+<h1 id="project-build-process">Project Build Process</h1>
+<h2 id="1-preprocessing">1. Preprocessing</h2>
+<ul>
+<li>File Inclusion: Replace #include directives with the contents of the specified header files.
+<ul>
+<li><strong>Tool</strong>: <code>gcc -E</code></li>
+<li><strong>Input File Extension</strong>: <code>.c</code>, <code>.h</code></li>
+<li><strong>Output File Extension</strong>: <code>.i</code></li>
+<li><strong>Input Directory</strong>: <code>src/</code></li>
+<li><strong>Output Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Macro Expansion: Replace macros defined with #define with their corresponding values.
+<ul>
+<li><strong>Tool</strong>: <code>gcc -E</code></li>
+<li><strong>Input File Extension</strong>: <code>.c</code>, <code>.h</code></li>
+<li><strong>Output File Extension</strong>: <code>.i</code></li>
+<li><strong>Input Directory</strong>: <code>src/</code></li>
+<li><strong>Output Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Conditional Compilation: Evaluate #if, #ifdef, #ifndef, #else, and #endif directives to include or exclude parts of the code.
+<ul>
+<li><strong>Tool</strong>: <code>gcc -E</code></li>
+<li><strong>Input File Extension</strong>: <code>.c</code>, <code>.h</code></li>
+<li><strong>Output File Extension</strong>: <code>.i</code></li>
+<li><strong>Input Directory</strong>: <code>src/</code></li>
+<li><strong>Output Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Line Control: Process #line directives to control line numbers and filenames in error messages and debugging information.
+<ul>
+<li><strong>Tool</strong>: <code>gcc -E</code></li>
+<li><strong>Input File Extension</strong>: <code>.c</code>, <code>.h</code></li>
+<li><strong>Output File Extension</strong>: <code>.i</code></li>
+<li><strong>Input Directory</strong>: <code>src/</code></li>
+<li><strong>Output Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Removing Comments: Strip out all comments from the source code.
+<ul>
+<li><strong>Tool</strong>: <code>gcc -E</code></li>
+<li><strong>Input File Extension</strong>: <code>.c</code>, <code>.h</code></li>
+<li><strong>Output File Extension</strong>: <code>.i</code></li>
+<li><strong>Input Directory</strong>: <code>src/</code></li>
+<li><strong>Output Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="2-compilation">2. Compilation</h2>
+<ul>
+<li>Lexical Analysis: Convert the sequence of characters in the source code into a sequence of tokens.
+<ul>
+<li><strong>Tool</strong>: <code>gcc -S</code></li>
+<li><strong>Input File Extension</strong>: <code>.i</code></li>
+<li><strong>Output File Extension</strong>: <code>.s</code></li>
+<li><strong>Input Directory</strong>: <code>build/</code></li>
+<li><strong>Output Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Syntax Analysis: Parse the tokens to generate an Abstract Syntax Tree (AST) based on the grammar of the language.
+<ul>
+<li><strong>Tool</strong>: <code>gcc -S</code></li>
+<li><strong>Input File Extension</strong>: <code>.i</code></li>
+<li><strong>Output File Extension</strong>: <code>.s</code></li>
+<li><strong>Input Directory</strong>: <code>build/</code></li>
+<li><strong>Output Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Semantic Analysis: Check the AST for semantic errors (e.g., type checking, variable declaration).
+<ul>
+<li><strong>Tool</strong>: <code>gcc -S</code></li>
+<li><strong>Input File Extension</strong>: <code>.i</code></li>
+<li><strong>Output File Extension</strong>: <code>.s</code></li>
+<li><strong>Input Directory</strong>: <code>build/</code></li>
+<li><strong>Output Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Intermediate Code Generation: Translate the AST into an intermediate representation (IR), which is a lower-level code that is easier to optimize.
+<ul>
+<li><strong>Tool</strong>: <code>gcc -S</code></li>
+<li><strong>Input File Extension</strong>: <code>.i</code></li>
+<li><strong>Output File Extension</strong>: <code>.s</code></li>
+<li><strong>Input Directory</strong>: <code>build/</code></li>
+<li><strong>Output Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Optimization: Perform optimizations on the IR to improve performance (e.g., constant folding, dead code elimination).
+<ul>
+<li><strong>Tool</strong>: <code>gcc -S</code></li>
+<li><strong>Input File Extension</strong>: <code>.i</code></li>
+<li><strong>Output File Extension</strong>: <code>.s</code></li>
+<li><strong>Input Directory</strong>: <code>build/</code></li>
+<li><strong>Output Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Code Generation: Convert the optimized IR into assembly code.
+<ul>
+<li><strong>Tool</strong>: <code>gcc -S</code></li>
+<li><strong>Input File Extension</strong>: <code>.i</code></li>
+<li><strong>Output File Extension</strong>: <code>.s</code>, <code>.asm</code></li>
+<li><strong>Input Directory</strong>: <code>build/</code></li>
+<li><strong>Output Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="3-assembly">3. Assembly</h2>
+<ul>
+<li>Assembly Translation: Translate the assembly code into machine code (binary instructions).
+<ul>
+<li><strong>Tool</strong>: <code>as</code></li>
+<li><strong>Input File Extension</strong>: <code>.s</code>, <code>.asm</code></li>
+<li><strong>Output File Extension</strong>: <code>.o</code></li>
+<li><strong>Input Directory</strong>: <code>build/</code></li>
+<li><strong>Output Directory</strong>: <code>obj/</code></li>
+</ul>
+</li>
+<li>Object File Creation: Package the machine code into an object file (.o), including metadata such as symbol tables and relocation information.
+<ul>
+<li><strong>Tool</strong>: <code>as</code></li>
+<li><strong>Input File Extension</strong>: <code>.s</code>, <code>.asm</code></li>
+<li><strong>Output File Extension</strong>: <code>.o</code></li>
+<li><strong>Input Directory</strong>: <code>build/</code></li>
+<li><strong>Output Directory</strong>: <code>obj/</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="4-linking">4. Linking</h2>
+<ul>
+<li>Combining Object Files: Merge multiple object files into a single executable.
+<ul>
+<li><strong>Tool</strong>: <code>ld</code></li>
+<li><strong>Input File Extension</strong>: <code>.o</code></li>
+<li><strong>Output File Extension</strong>: <code>.out</code>, <code>.exe</code></li>
+<li><strong>Input Directory</strong>: <code>obj/</code></li>
+<li><strong>Output Directory</strong>: <code>bin/</code></li>
+</ul>
+</li>
+<li>Symbol Resolution: Resolve references to symbols (functions, variables) across object files.
+<ul>
+<li><strong>Tool</strong>: <code>ld</code></li>
+<li><strong>Input File Extension</strong>: <code>.o</code></li>
+<li><strong>Output File Extension</strong>: <code>.out</code>, <code>.exe</code></li>
+<li><strong>Input Directory</strong>: <code>obj/</code></li>
+<li><strong>Output Directory</strong>: <code>bin/</code></li>
+</ul>
+</li>
+<li>Library Linking: Link against static or dynamic libraries, resolving references to library functions.
+<ul>
+<li><strong>Tool</strong>: <code>ld</code></li>
+<li><strong>Input File Extension</strong>: <code>.o</code>, <code>.a</code>, <code>.so</code></li>
+<li><strong>Output File Extension</strong>: <code>.out</code>, <code>.exe</code></li>
+<li><strong>Input Directory</strong>: <code>obj/</code>, <code>lib/</code></li>
+<li><strong>Output Directory</strong>: <code>bin/</code></li>
+</ul>
+</li>
+<li>Relocation: Adjust addresses in the code and data sections to reflect their final positions in memory.
+<ul>
+<li><strong>Tool</strong>: <code>ld</code></li>
+<li><strong>Input File Extension</strong>: <code>.o</code></li>
+<li><strong>Output File Extension</strong>: <code>.out</code>, <code>.exe</code></li>
+<li><strong>Input Directory</strong>: <code>obj/</code></li>
+<li><strong>Output Directory</strong>: <code>bin/</code></li>
+</ul>
+</li>
+<li>Executable Creation: Generate the final executable file, including headers and metadata required for execution.
+<ul>
+<li><strong>Tool</strong>: <code>ld</code></li>
+<li><strong>Input File Extension</strong>: <code>.o</code></li>
+<li><strong>Output File Extension</strong>: <code>.out</code>, <code>.exe</code></li>
+<li><strong>Input Directory</strong>: <code>obj/</code></li>
+<li><strong>Output Directory</strong>: <code>bin/</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="5-dependency-generation">5. Dependency Generation</h2>
+<ul>
+<li>Dependency Generation: Generate dependency files to track which files need to be recompiled when a source file changes.
+<ul>
+<li><strong>Tool</strong>: <code>gcc -M</code></li>
+<li><strong>Input File Extension</strong>: <code>.c</code>, <code>.h</code></li>
+<li><strong>Output File Extension</strong>: <code>.d</code></li>
+<li><strong>Input Directory</strong>: <code>src/</code></li>
+<li><strong>Output Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="6-optimization-tools-and-techniques">6. Optimization Tools and Techniques</h2>
+<ul>
+<li>Compiler Optimization Flags: Improve performance and efficiency of the generated code.
+<ul>
+<li><strong>Tool</strong>: <code>gcc</code></li>
+<li><strong>Flags</strong>: <code>-O0</code>, <code>-O1</code>, <code>-O2</code>, <code>-O3</code>, <code>-Os</code>, <code>-Ofast</code>, <code>-flto</code></li>
+</ul>
+</li>
+<li>Profile-Guided Optimization (PGO): Use profiling data to optimize the program.
+<ul>
+<li><strong>Tool</strong>: <code>gcc</code></li>
+<li><strong>Steps</strong>: <code>-fprofile-generate</code>, <code>-fprofile-use</code></li>
+</ul>
+</li>
+<li>Interprocedural Optimization (IPO): Perform optimizations across function and file boundaries.
+<ul>
+<li><strong>Tool</strong>: <code>gcc</code></li>
+<li><strong>Flag</strong>: <code>-flto</code></li>
+</ul>
+</li>
+<li>Vectorization: Enable automatic vectorization of loops.
+<ul>
+<li><strong>Tool</strong>: <code>gcc</code></li>
+<li><strong>Flags</strong>: <code>-ftree-vectorize</code>, <code>-march=native</code></li>
+</ul>
+</li>
+<li>Inlining: Enable function inlining.
+<ul>
+<li><strong>Tool</strong>: <code>gcc</code></li>
+<li><strong>Flags</strong>: <code>-finline-functions</code>, <code>-finline-limit=N</code></li>
+</ul>
+</li>
+<li>Loop Optimization: Improve performance of loops.
+<ul>
+<li><strong>Tool</strong>: <code>gcc</code></li>
+<li><strong>Flags</strong>: <code>-funroll-loops</code>, <code>-floop-interchange</code>, <code>-floop-block</code>, <code>-floop-parallelize-all</code></li>
+</ul>
+</li>
+<li>Dead Code Elimination: Remove code that does not affect the program's output.
+<ul>
+<li><strong>Tool</strong>: <code>gcc</code></li>
+<li><strong>Flag</strong>: <code>-fdce</code></li>
+</ul>
+</li>
+<li>Constant Folding: Evaluate constant expressions at compile time.
+<ul>
+<li><strong>Tool</strong>: <code>gcc</code></li>
+<li><strong>Flag</strong>: <code>-ftree-ccp</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="7-other-common-tools">7. Other Common Tools</h2>
+<ul>
+<li><strong>Tool</strong>: <code>make</code>
+<ul>
+<li><strong>Command</strong>: <code>make</code></li>
+<li><strong>Description</strong>: Automates the build process by reading <code>Makefile</code> instructions.</li>
+</ul>
+</li>
+<li><strong>Tool</strong>: <code>gdb</code>
+<ul>
+<li><strong>Command</strong>: <code>gdb</code></li>
+<li><strong>Description</strong>: Debugs the executable, providing source-level debugging information.</li>
+</ul>
+</li>
+<li><strong>Tool</strong>: <code>strip</code>
+<ul>
+<li><strong>Command</strong>: <code>strip</code></li>
+<li><strong>Description</strong>: Removes symbols from the executable to reduce its size.</li>
+</ul>
+</li>
+<li><strong>Tool</strong>: <code>objdump</code>
+<ul>
+<li><strong>Command</strong>: <code>objdump</code></li>
+<li><strong>Description</strong>: Displays information about object files.</li>
+</ul>
+</li>
+<li><strong>Tool</strong>: <code>nm</code>
+<ul>
+<li><strong>Command</strong>: <code>nm</code></li>
+<li><strong>Description</strong>: Lists symbols from object files.</li>
+</ul>
+</li>
+<li><strong>Tool</strong>: <code>ranlib</code>
+<ul>
+<li><strong>Command</strong>: <code>ranlib</code></li>
+<li><strong>Description</strong>: Generates an index to the contents of an archive.</li>
+</ul>
+</li>
+</ul>
+<ol start="8">
+<li>Other Common File Types
+<ul>
+<li>Precompiled Headers: Speed up compilation by precompiling frequently included headers.
+<ul>
+<li><strong>File Extension</strong>: <code>.gch</code></li>
+<li><strong>Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Assembly Listings: Human-readable versions of the assembly code, often used for debugging and analysis.
+<ul>
+<li><strong>File Extension</strong>: <code>.lst</code></li>
+<li><strong>Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Map Files: Provide detailed information about the memory layout of the program.
+<ul>
+<li><strong>File Extension</strong>: <code>.map</code></li>
+<li><strong>Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Debug Information: Contain additional information used by debuggers to provide source-level debugging.
+<ul>
+<li><strong>File Extension</strong>: <code>.dbg</code></li>
+<li><strong>Directory</strong>: <code>build/</code></li>
+</ul>
+</li>
+<li>Intermediate Object Files: Similar to <code>.o</code> files but may be used in different contexts or by different tools.
+<ul>
+<li><strong>File Extension</strong>: <code>.obj</code></li>
+<li><strong>Directory</strong>: <code>obj/</code></li>
+</ul>
+</li>
+<li>Configuration Files: Store settings and parameters for the build process or the application.
+<ul>
+<li><strong>File Extension</strong>: <code>.cfg</code>, <code>.conf</code></li>
+<li><strong>Directory</strong>: <code>config/</code></li>
+</ul>
+</li>
+<li>Log Files: Record the output of the build process or the execution of the application.
+<ul>
+<li><strong>File Extension</strong>: <code>.log</code></li>
+<li><strong>Directory</strong>: <code>logs/</code></li>
+</ul>
+</li>
+<li>Temporary Files: Created during the build process, often used for intermediate steps.
+<ul>
+<li><strong>File Extension</strong>: <code>.tmp</code></li>
+<li><strong>Directory</strong>: <code>tmp/</code></li>
+</ul>
+</li>
+<li>Documentation Files: Provide information about the project, such as README files, manuals, and guides.
+<ul>
+<li><strong>File Extension</strong>: <code>.md</code>, <code>.txt</code>, <code>.pdf</code></li>
+<li><strong>Directory</strong>: <code>docs/</code></li>
+</ul>
+</li>
+<li>Script Files: Used to automate the build process or other tasks.
+<ul>
+<li><strong>File Extension</strong>: <code>.sh</code>, <code>.bat</code>, <code>.ps1</code></li>
+<li><strong>Directory</strong>: <code>scripts/</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="summary">Summary</h2>
+<ul>
+<li>Preprocessing:
+<ul>
+<li>File Inclusion</li>
+<li>Macro Expansion</li>
+<li>Conditional Compilation</li>
+<li>Line Control</li>
+<li>Removing Comments</li>
+</ul>
+</li>
+<li>Compilation:
+<ul>
+<li>Lexical Analysis</li>
+<li>Syntax Analysis</li>
+<li>Semantic Analysis</li>
+<li>Intermediate Code Generation</li>
+<li>Optimization</li>
+<li>Code Generation</li>
+</ul>
+</li>
+<li>Assembly:
+<ul>
+<li>Assembly Translation</li>
+<li>Object File Creation</li>
+</ul>
+</li>
+<li>Linking:
+<ul>
+<li>Combining Object Files</li>
+<li>Symbol Resolution</li>
+<li>Library Linking</li>
+<li>Relocation</li>
+<li>Executable Creation</li>
+</ul>
+</li>
+<li>Dependency Generation:
+<ul>
+<li>Dependency Generation</li>
+</ul>
+</li>
+<li>Optimization Tools and Techniques:
+<ul>
+<li>Compiler Optimization Flags</li>
+<li>Profile-Guided Optimization (PGO)</li>
+<li>Interprocedural Optimization (IPO)</li>
+<li>Vectorization</li>
+<li>Inlining</li>
+<li>Loop Optimization</li>
+<li>Dead Code Elimination</li>
+<li>Constant Folding</li>
+</ul>
+</li>
+<li>Other Common Tools:
+<ul>
+<li>make</li>
+<li>gdb</li>
+<li>strip</li>
+<li>objdump</li>
+<li>nm</li>
+<li>ranlib</li>
+</ul>
+</li>
+</ul>
+<p>Each of these micro stages contributes to transforming the high-level C source code into a runnable executable program.</p>
+<p>Here is a set of <strong>coding standards</strong> derived from the provided information, aligned with the requirements for ISO/IEC 9899:2024, POSIX.1-2024, and X/Open 800 compliance, and incorporating the principles of 5S methodology and Data-Oriented Programming (DOP):</p>
+<hr>
+<h3 id="coding-standards-for-enveng-web-application-development"><strong>Coding Standards for EnvEng Web Application Development</strong></h3>
+<h4 id="1-general-standards"><strong>1. General Standards</strong></h4>
+<p>1.1 <strong>Compliance</strong></p>
+<ul>
+<li>
+<p>All code must adhere to the ISO/IEC 9899:2024 (C Standard).</p>
+</li>
+<li>
+<p>Code must be compliant with POSIX.1-2024 and X/Open 800 for portability and interoperability.</p>
+<p>1.2 <strong>Portability</strong></p>
+</li>
+<li>
+<p>Ensure the codebase is compatible across multiple platforms, architectures, and operating systems.</p>
+</li>
+<li>
+<p>Avoid platform-specific features unless necessary, and encapsulate such dependencies to enable easy replacement.</p>
+<p>1.3 <strong>Self-Containment</strong></p>
+</li>
+<li>
+<p>All modules should be self-contained, with no reliance on external configurations or environment-specific details unless explicitly defined.</p>
+</li>
+</ul>
+<hr>
+<h4 id="2-file-and-repository-structure-aligned-with-5s-set-in-order"><strong>2. File and Repository Structure (Aligned with 5S: Set in Order)</strong></h4>
+<p>2.1 <strong>Directory Structure</strong></p>
+<ul>
+<li>
+<p>Use a logical and consistent directory structure, e.g.,:</p>
+<pre><code>src/         # Source code files
+include/     # Header files
+tests/       # Unit and integration tests
+docs/        # Documentation
+build/       # Build outputs
+scripts/     # Utility scripts
+</code></pre>
+<p>2.2 <strong>File Naming</strong></p>
+</li>
+<li>
+<p>Use descriptive, snake_case naming for files (e.g., <code>data_manager.c</code>, <code>user_auth.h</code>).</p>
+<p>2.3 <strong>Version Control</strong></p>
+</li>
+<li>
+<p>All source code must be tracked using a version control system (e.g., Git).</p>
+</li>
+<li>
+<p>Commit messages should follow a standardized format:</p>
+<pre><code>[Type] Short Description (e.g., [Fix] Resolved memory leak in data processing)
+</code></pre>
+</li>
+</ul>
+<hr>
+<h4 id="3-coding-practices-aligned-with-dop-and-5s-principles"><strong>3. Coding Practices (Aligned with DOP and 5S Principles)</strong></h4>
+<p>3.1 <strong>Clarity and Maintainability</strong></p>
+<ul>
+<li>
+<p>Separate data and logic by defining clear data structures in header files and encapsulating logic in C files.</p>
+</li>
+<li>
+<p>Write modular and reusable functions.</p>
+<p>3.2 <strong>Coding Style</strong></p>
+</li>
+<li>
+<p>Follow a consistent style for readability:</p>
+<ul>
+<li>Indentation: 4 spaces (no tabs).</li>
+<li>Brace style: Place braces on a new line.<pre><code class="language-c"><span class="hljs-keyword">if</span> (condition)
+{
+    <span class="hljs-comment">// Code block</span>
+}
+</code></pre>
+</li>
+<li>Naming:
+<ul>
+<li>Variables: <code>snake_case</code> (e.g., <code>user_id</code>).</li>
+<li>Functions: <code>camelCase</code> (e.g., <code>processData</code>).</li>
+<li>Constants: <code>UPPER_CASE</code> (e.g., <code>MAX_BUFFER_SIZE</code>).</li>
+</ul>
+</li>
+</ul>
+<p>3.3 <strong>Data Handling</strong></p>
+</li>
+<li>
+<p>Use immutable data structures whenever possible.</p>
+</li>
+<li>
+<p>Avoid global variables; instead, use well-defined interfaces.</p>
+</li>
+<li>
+<p>Centralize configuration and constants for reuse (e.g., <code>config.h</code>).</p>
+<p>3.4 <strong>Error Handling</strong></p>
+</li>
+<li>
+<p>Use POSIX-compliant error codes for standardization.</p>
+</li>
+<li>
+<p>Always check the return value of system calls and library functions. Example:</p>
+<pre><code class="language-c"><span class="hljs-keyword">if</span> ((fd = open(filename, O_RDONLY)) &lt; <span class="hljs-number">0</span>)
+{
+    perror(<span class="hljs-string">&quot;Error opening file&quot;</span>);
+    <span class="hljs-built_in">exit</span>(EXIT_FAILURE);
+}
+</code></pre>
+<p>3.5 <strong>Memory Management</strong></p>
+</li>
+<li>
+<p>Allocate and free memory explicitly; avoid memory leaks.</p>
+</li>
+<li>
+<p>Use tools like <code>valgrind</code> to identify leaks during development.</p>
+<p>3.6 <strong>Thread Safety</strong></p>
+</li>
+<li>
+<p>Design code to be thread-safe using POSIX threading primitives (e.g., <code>pthread_mutex_t</code>).</p>
+</li>
+</ul>
+<hr>
+<h4 id="4-documentation-aligned-with-5s-standardize"><strong>4. Documentation (Aligned with 5S: Standardize)</strong></h4>
+<p>4.1 <strong>Code Comments</strong></p>
+<ul>
+<li>
+<p>Use block comments for file headers and function documentation:</p>
+<pre><code class="language-c"><span class="hljs-comment">/**
+ * Function: calculateSum
+ * ----------------------
+ * Computes the sum of two integers.
+ *
+ * x: First integer
+ * y: Second integer
+ *
+ * returns: The sum of x and y
+ */</span>
+</code></pre>
+<p>4.2 <strong>Standardized Templates</strong></p>
+</li>
+<li>
+<p>Create templates for:</p>
+<ul>
+<li>Function definitions</li>
+<li>File headers</li>
+<li>Commit messages</li>
+</ul>
+<p>4.3 <strong>External Documentation</strong></p>
+</li>
+<li>
+<p>Maintain documentation for APIs, data structures, and workflows using Markdown in the <code>docs/</code> directory.</p>
+</li>
+</ul>
+<hr>
+<h4 id="5-testing-standards"><strong>5. Testing Standards</strong></h4>
+<p>5.1 <strong>Test-Driven Development (TDD)</strong></p>
+<ul>
+<li>
+<p>Write tests for every feature and bug fix.</p>
+<p>5.2 <strong>Unit Testing</strong></p>
+</li>
+<li>
+<p>Use a framework like <code>Unity</code> or <code>CMock</code> for unit tests.</p>
+</li>
+<li>
+<p>All tests must reside in the <code>tests/</code> directory and follow the naming convention <code>test_&lt;module_name&gt;.c</code>.</p>
+<p>5.3 <strong>Automated Testing</strong></p>
+</li>
+<li>
+<p>Implement CI/CD pipelines to automate testing and code quality checks.</p>
+</li>
+</ul>
+<hr>
+<h4 id="6-performance-optimization-aligned-with-dop"><strong>6. Performance Optimization (Aligned with DOP)</strong></h4>
+<p>6.1 <strong>Efficient Data Structures</strong></p>
+<ul>
+<li>
+<p>Use data structures optimized for cache efficiency (e.g., arrays over linked lists when sequential access is frequent).</p>
+<p>6.2 <strong>Profiling</strong></p>
+</li>
+<li>
+<p>Profile code regularly using tools like <code>gprof</code> or <code>perf</code>.</p>
+</li>
+</ul>
+<hr>
+<h4 id="7-5s-maintenance-and-sustainability"><strong>7. 5S Maintenance and Sustainability</strong></h4>
+<p>7.1 <strong>Regular Reviews</strong></p>
+<ul>
+<li>
+<p>Conduct code reviews bi-weekly to ensure adherence to standards.</p>
+<p>7.2 <strong>Continuous Training</strong></p>
+</li>
+<li>
+<p>Train team members on 5S, DOP, and coding standards.</p>
+<p>7.3 <strong>Audits</strong></p>
+</li>
+<li>
+<p>Schedule periodic audits to ensure the workspace and codebase remain clean and organized.</p>
+</li>
+</ul>
+<hr>
+<p>By adhering to these standards, the team will maintain clarity, ensure high performance, and achieve compliance with industry and project-specific requirements.</p>
+<h1 id="enveng-webapp-development-1">EnvEng WebApp Development</h1>
+<p>Welcome to the <strong>EnvEng WebApp Development</strong> project! This repository contains the code and documentation for building a web application using <strong>5S methodology</strong> for project management and <strong>Data-Oriented Programming (DOP)</strong> for development.</p>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#project-overview">Project Overview</a></li>
+<li><a href="#features">Features</a></li>
+<li><a href="#methodologies">Methodologies</a>
+<ul>
+<li><a href="#5s-implementation">5S Implementation</a></li>
+<li><a href="#data-oriented-programming-dop">Data-Oriented Programming (DOP)</a></li>
+</ul>
+</li>
+<li><a href="#setup-instructions">Setup Instructions</a></li>
+<li><a href="#git-workflow">Git Workflow</a>
+<ul>
+<li><a href="#branching-strategy">Branching Strategy</a></li>
+<li><a href="#commit-guidelines">Commit Guidelines</a></li>
+</ul>
+</li>
+<li><a href="#cicd-workflow">CI/CD Workflow</a></li>
+<li><a href="#contributing">Contributing</a></li>
+<li><a href="#license">License</a></li>
+</ol>
+<hr>
+<h2 id="project-overview">Project Overview</h2>
+<p>The <strong>EnvEng WebApp</strong> aims to deliver a robust web application tailored for environmental engineering needs. Our goals include:</p>
+<ul>
+<li>Building a scalable, maintainable codebase.</li>
+<li>Ensuring clarity through <strong>Data-Oriented Programming (DOP)</strong> principles.</li>
+<li>Maintaining a clean and organized development process using <strong>5S methodology</strong>.</li>
+</ul>
+<p>Key objectives:</p>
+<ul>
+<li>Implement user authentication and core features.</li>
+<li>Optimize data handling and performance.</li>
+<li>Adhere to best practices for project management and development.</li>
+</ul>
+<hr>
+<h2 id="features">Features</h2>
+<ul>
+<li>User authentication and authorization.</li>
+<li>Dashboard for managing environmental data.</li>
+<li>Integration with third-party APIs for real-time updates.</li>
+<li>Performance-optimized, clean, and maintainable codebase.</li>
+</ul>
+<hr>
+<h2 id="methodologies">Methodologies</h2>
+<h3 id="5s-implementation">5S Implementation</h3>
+<ul>
+<li><strong>Sort</strong>: Identify and eliminate unnecessary code and resources.</li>
+<li><strong>Set in Order</strong>: Organize files and directories for easy access and maintainability.</li>
+<li><strong>Shine</strong>: Maintain code quality with regular reviews and automated checks.</li>
+<li><strong>Standardize</strong>: Follow coding standards and create reusable templates.</li>
+<li><strong>Sustain</strong>: Regular training and audits to ensure long-term adherence.</li>
+</ul>
+<h3 id="data-oriented-programming-dop">Data-Oriented Programming (DOP)</h3>
+<ul>
+<li><strong>Data Separation</strong>: Logical separation of data and application logic.</li>
+<li><strong>Efficient Data Handling</strong>: Use optimized data structures for high performance.</li>
+<li><strong>Immutability</strong>: Implement immutable data practices to enhance consistency.</li>
+</ul>
+<hr>
+<h2 id="setup-instructions">Setup Instructions</h2>
+<ol>
+<li>
+<p>Clone the repository:</p>
+<pre><code class="language-bash">git <span class="hljs-built_in">clone</span> https://github.com/your-org/enveng-webapp.git
+<span class="hljs-built_in">cd</span> enveng-webapp
+</code></pre>
+</li>
+<li>
+<p>Install dependencies:</p>
+<pre><code class="language-bash">npm install
+</code></pre>
+</li>
+<li>
+<p>Run the development server:</p>
+<pre><code class="language-bash">npm start
+</code></pre>
+</li>
+<li>
+<p>Build the project for production:</p>
+<pre><code class="language-bash">npm run build
+</code></pre>
+</li>
+</ol>
+<hr>
+<h2 id="git-workflow">Git Workflow</h2>
+<h3 id="branching-strategy">Branching Strategy</h3>
+<ul>
+<li><strong>Main</strong>: Stable, production-ready code.</li>
+<li><strong>Develop</strong>: Integration branch for new features and fixes.</li>
+<li><strong>Feature Branches</strong>: <code>feature/feature-name</code></li>
+<li><strong>Bugfix Branches</strong>: <code>bugfix/bug-description</code></li>
+</ul>
+<h3 id="commit-guidelines">Commit Guidelines</h3>
+<ul>
+<li>Write atomic commits focusing on one change.</li>
+<li>Use descriptive commit messages.</li>
+<li>Example:<pre><code class="language-bash">git commit -m <span class="hljs-string">&quot;Add user authentication endpoint&quot;</span>
+</code></pre>
+</li>
+</ul>
+<hr>
+<h2 id="cicd-workflow">CI/CD Workflow</h2>
+<h3 id="continuous-integration-ci">Continuous Integration (CI)</h3>
+<ul>
+<li>Automated builds and tests for every push to <code>develop</code>.</li>
+<li>Static code analysis to ensure quality.</li>
+</ul>
+<h3 id="continuous-delivery-cd">Continuous Delivery (CD)</h3>
+<ul>
+<li>Deploy to staging for integration tests.</li>
+<li>Require manual approval for production deployment.</li>
+</ul>
+<h3 id="pipeline-example">Pipeline Example</h3>
+<p>Refer to the <code>.github/workflows/ci-cd.yml</code> file for our complete CI/CD pipeline.</p>
+<hr>
+<h2 id="contributing">Contributing</h2>
+<p>We welcome contributions to improve the EnvEng WebApp. Please follow these steps:</p>
+<ol>
+<li>Fork the repository and clone it locally.</li>
+<li>Create a new feature or bugfix branch.</li>
+<li>Make your changes and commit them with a descriptive message.</li>
+<li>Submit a pull request to the <code>develop</code> branch.</li>
+</ol>
+<p>Refer to the <a href="CONTRIBUTING.html">CONTRIBUTING.md</a> file for more details.</p>
+<hr>
+<h2 id="license">License</h2>
+<p>This project is licensed under the <a href="LICENSE">AGPLv3</a>. See the <code>LICENSE</code> file for details.</p>
+
+            
+            
+        </body>
+        </html>

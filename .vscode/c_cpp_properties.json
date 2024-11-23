@@ -1,0 +1,69 @@
+{
+  "env": {
+    "myIncludePath": [
+      "${workspaceFolder}/include",
+      "${workspaceFolder}/src",
+      "${workspaceFolder}/lib",
+      "${workspaceFolder}/deps",
+      "${workspaceFolder}/po",
+      "${workspaceFolder}/etc",
+      "${workspaceFolder}/docs",
+      "${workspaceFolder}/dist",
+      "${workspaceFolder}/logs",
+      "${workspaceFolder}/tmp",
+      "${workspaceFolder}/build",
+      "${workspaceFolder}/objects",
+      "/usr/include",
+      "/usr/local/include"
+    ],
+    "myDefines": [
+      "DEBUG",
+      "MY_FEATURE=1",
+      "_POSIX_C_SOURCE=2024L",
+      "_XOPEN_SOURCE=800",
+      "PLATFORM_LINUX"
+    ]
+  },
+  "configurations": [
+    {
+      "name": "Linux",
+      "compilerPath": "/usr/bin/gcc",
+      "compilerArgs": [
+        "-std=gnu23",
+        "-O0",
+        "-fstack-protector",
+        "-march=native",
+        "-mtune=generic",
+        "-fPIC",
+        "-fno-common",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-flto",
+        "-funroll-all-loops",
+        "-Wl,--gc-sections",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "-Wconversion",
+        "-Wfloat-equal",
+        "-fvisibility=hidden",
+        "-fno-strict-aliasing",
+        "-fdiagnostics-color=always"
+      ],
+      "intelliSenseMode": "linux-gcc-x64",
+      "includePath": ["${myIncludePath}"],
+      "defines": ["${myDefines}"],
+      "cStandard": "gnu23",
+      "cppStandard": "gnu++23",
+      "forcedInclude": ["${workspaceFolder}/include/config.h"],
+      "browse": {
+        "path": ["${myIncludePath}", "${workspaceFolder}"],
+        "limitSymbolsToIncludedHeaders": true,
+        "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db",
+        "configurationProvider": "ms-vscode.makefile-tools"
+      }
+    }
+  ],
+  "version": 4,
+  "enableConfigurationSquiggles": true
+}

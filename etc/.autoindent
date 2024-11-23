@@ -1,0 +1,11 @@
+﻿# .autoindentrc
+# Use spaces for indentation
+-indent_with_tabs
+# Use Google style for braces
+-brace_style google
+# Limit lines to 80 characters
+-max_line_length 80
+# Ensure a newline at the end of files
+-newline_at_end
+# Remove trailing whitespace
+-remove_trailing_whitespace
