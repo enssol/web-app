@@ -14,13 +14,13 @@ ACLOCAL_AMFLAGS = -I m4
 
 # Source and header files
 bin_PROGRAMS = web-app
-web_app_SOURCES = $(SRC_DIR)/main.c $(SRC_DIR)/config_loader.c $(SRC_DIR)/env_loader.c
+web_app_SOURCES = $(SRC_DIR)/main.c $(SRC_DIR)/config_loader.c $(SRC_DIR)/env_loader.c $(SRC_DIR)/error_handler.c $(SRC_DIR)/garbage_collector.c $(SRC_DIR)/hello.c $(SRC_DIR)/lexer.l $(SRC_DIR)/logger.c $(SRC_DIR)/parser.y $(SRC_DIR)/validator.c
 web_app_HEADERS = $(HEADER_FILES)
 
 # Define the source files
 SRC_DIR = src
 OBJ_DIR = objects
-SRC_FILES = $(SRC_DIR)/config_loader.c $(SRC_DIR)/env_loader.c $(SRC_DIR)/main.c
+SRC_FILES = $(SRC_DIR)/config_loader.c $(SRC_DIR)/env_loader.c $(SRC_DIR)/main.c $(SRC_DIR)/error_handler.c $(SRC_DIR)/garbage_collector.c $(SRC_DIR)/hello.c $(SRC_DIR)/lexer.l $(SRC_DIR)/logger.c $(SRC_DIR)/parser.y $(SRC_DIR)/validator.c
 OBJ_FILES = $(SRC_FILES:.c=.o)
 
 # Define the directory for headers
@@ -53,27 +53,16 @@ clean: clean_tags clean_html_docs
 # Clean up files
 DISTCLEANFILES = Makefile.in aclocal.m4 configure config.h.in
 
-# Custom rule to fix Makefile.in.in
-fix-makefile-in-in:
-    ./fix_makefile.sh
-
-# Ensure the fix is applied after Makefile.in.in is generated
-all-local: fix-makefile-in-in
-
 # Add gtk-doc support
-if ENABLE_GTK_DOC
 GTK_DOC_USE_LIBTOOL = 1
 include $(top_srcdir)/gtk-doc.make
-endif
 
 # Add intltool support
 INTLTOOL_FILES = intltool-extract.in intltool-merge.in intltool-update.in
-EXTRA_DIST = $(INTLTOOL_FILES)
 DISTCLEANFILES += intltool-extract intltool-merge intltool-update
-CLEANFILES = *.mo
 
 # Add rules for generating .mo files
-%.mo: %.po
+$(LINGUAS:%=%.mo): %.mo: %.po
     msgfmt -o $@ $<
 
 # Add rules for installing .mo files

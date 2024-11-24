@@ -16,7 +16,8 @@ Checks: >
   linuxkernel-*,
   mpi-*,
   hicpp-*,
-  llvm-header-guard
+  llvm-header-guard,
+  -modernize-deprecated-headers
 
 WarningsAsErrors: >
   bugprone-*,

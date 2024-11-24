@@ -1,0 +1,8 @@
+﻿{
+  "name": "enveng-webapp",
+  "version": "1.0.0",
+  "repository": "https://github.com/your-org/enveng-webapp",
+  "dependencies": {},
+  "install": "make install",
+  "uninstall": "make uninstall"
+}

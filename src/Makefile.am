@@ -28,12 +28,5 @@ all: autoindent generate_tags generate_metadata process_metadata include_metadat
 all-local: generate_mo_files
 install-data-local: install_mo_files
 
-# Add ccache to the build process
-CCACHE := $(shell which ccache)
-ifneq ($(CCACHE),)
-    CC := $(CCACHE) gcc
-    CXX := $(CCACHE) g++
-endif
-
 # Add clean_tags to the clean process
 clean: clean_tags

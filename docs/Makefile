@@ -95,15 +95,10 @@ build_triplet = x86_64-pc-linux-gnu
 host_triplet = x86_64-pc-linux-gnu
 subdir = docs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/gettext.m4 \
-	$(top_srcdir)/m4/host-cpu-c-abi.m4 $(top_srcdir)/m4/iconv.m4 \
-	$(top_srcdir)/m4/intlmacosx.m4 $(top_srcdir)/m4/lib-ld.m4 \
-	$(top_srcdir)/m4/lib-link.m4 $(top_srcdir)/m4/lib-prefix.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/gtk-doc.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
 	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/nls.m4 \
-	$(top_srcdir)/m4/po.m4 $(top_srcdir)/m4/progtest.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(dist_doc_DATA) \
@@ -161,27 +156,47 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(docdir)"
 DATA = $(dist_doc_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
-am__DIST_COMMON = $(srcdir)/Makefile.in
+am__DIST_COMMON = $(srcdir)/../common-rules.am $(srcdir)/Makefile.in
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = ${SHELL} '/home/ubuntu/web-app/build/missing' aclocal-1.16
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
+APP_MODE = development
+APP_NAME = web-app
 AR = ar
 AUTOCONF = ${SHELL} '/home/ubuntu/web-app/build/missing' autoconf
+AUTOGEN = autogen
 AUTOHEADER = ${SHELL} '/home/ubuntu/web-app/build/missing' autoheader
 AUTOMAKE = ${SHELL} '/home/ubuntu/web-app/build/missing' automake-1.16
-AWK = mawk
-CC = gcc
+AWK = gawk
+BIN_DIR = bin
+BISON = bison
+BUILD_DIR = build
+CC = $(CCACHE) gcc
+
+# Compiler and linker definitions
+CCACHE = /usr/bin/ccache
 CCDEPMODE = depmode=none
 CFLAGS = -g -O2
-CPP = gcc -E
+CFLOW = cflow
+CLANG_FORMAT = clang-format
+CLANG_TIDY = clang-tidy
+CLIB = clib
+COMPLEXITY = /usr/bin/complexity
+CONFIG_DIR = etc
+CP = cp -f
+CPPCHECK = cppcheck
 CPPFLAGS = 
 CSCOPE = cscope
 CTAGS = ctags
 CYGPATH_W = echo
+DDD = ddd
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
+DEPS_DIR = deps
+DIST_DIR = dist
 DLLTOOL = false
+DOCS_DIR = docs
 DSYMUTIL = 
 DUMPBIN = 
 ECHO_C = 
@@ -191,46 +206,56 @@ EGREP = /usr/bin/grep -E
 ETAGS = etags
 EXEEXT = 
 FGREP = /usr/bin/grep -F
+FILECMD = file
+FLEX = flex
+GAWK = gawk
 GDB = gdb
-GETTEXT_MACRO_VERSION = 0.20
-GMSGFMT = /usr/bin/msgfmt
-GMSGFMT_015 = /usr/bin/msgfmt
+GLOBAL = global
 GREP = /usr/bin/grep
+GTKDOC_CHECK = gtkdoc-check.test
+GTKDOC_CHECK_PATH = /usr/bin/gtkdoc-check
+GTKDOC_DEPS_CFLAGS = -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include 
+GTKDOC_DEPS_LIBS = -lgobject-2.0 -lglib-2.0 
+GTKDOC_MKPDF = /usr/bin/gtkdoc-mkpdf
+GTKDOC_REBASE = /usr/bin/gtkdoc-rebase
+HTML_DIR = ${datadir}/gtk-doc/html
+INCLUDE_DIR = include
+INDENT = indent
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-INTLLIBS = 
-INTL_MACOSX_LIBS = 
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS = 
 LEX = flex
 LEXLIB = 
 LEX_OUTPUT_ROOT = lex.yy
-LIBICONV = -liconv
-LIBINTL = 
 LIBOBJS = 
-LIBS = -lpthread -lc 
+LIBS = -lc 
+LIBS_CFLAGS = -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include 
+LIBS_LIBS = -lglib-2.0 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
+LIB_DIR = lib
 LIPO = 
 LN_S = ln -s
-LTLIBICONV = -liconv
-LTLIBINTL = 
+LOCALES_DIR = po
+LOGS_DIR = logs
 LTLIBOBJS = 
 LT_SYS_LIBRARY_PATH = 
 M4 = m4
+MACROS_DIR = m4
 MAKE = make
 MAKEINFO = ${SHELL} '/home/ubuntu/web-app/build/missing' makeinfo
 MANIFEST_TOOL = :
+MKDIR = mkdir
 MKDIR_P = /usr/bin/mkdir -p
-MSGFMT = /usr/bin/msgfmt
-MSGMERGE = /usr/bin/msgmerge
-MSGMERGE_FOR_MSGFMT_OPTION = --for-msgfmt
+MV = mv -f
 NM = /usr/bin/nm -B
 NMEDIT = 
 OBJDUMP = objdump
 OBJEXT = o
+OBJ_DIR = objects
 OTOOL = 
 OTOOL64 = 
 PACKAGE = web-app
@@ -241,19 +266,27 @@ PACKAGE_TARNAME = web-app
 PACKAGE_URL = 
 PACKAGE_VERSION = 1.0
 PATH_SEPARATOR = :
+PERF = perf
 PKGCONF = pkgconf
-POSUB = po
+PKG_CONFIG = /usr/bin/pkg-config
+PKG_CONFIG_LIBDIR = 
+PKG_CONFIG_PATH = 
 RANLIB = ranlib
+RECSEL = recsel
+RM = rm -f
 SED = /usr/bin/sed
 SET_MAKE = 
 SHELL = /bin/bash
+SHELLCHECK = shellcheck
+SRC_DIR = src
+STOW = stow
 STRIP = strip
 TAR = tar
-USE_NLS = yes
+TESTS_DIR = tests
+TMP_DIR = tmp
+VALGRIND = valgrind
 VERSION = 1.0
-XGETTEXT = /usr/bin/xgettext
-XGETTEXT_015 = /usr/bin/xgettext
-XGETTEXT_EXTRA_OPTIONS = 
+XZ = xz
 YACC = bison -y
 YFLAGS = 
 abs_builddir = /home/ubuntu/web-app/docs
@@ -311,13 +344,28 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
+CXX = $(CCACHE) g++
+AM_CFLAGS = @CC1_FLAGS@
+AM_LDFLAGS = @LINK_FLAGS@ -static $(LIBS_LIBS)
 
 # Define the documentation files for the docs directory
 dist_doc_DATA = user_guide.md developer_guide.md api_reference.md
+
+# Texinfo source files
+TEXINFO_FILES = manual.texi
+
+# Generated documentation files
+HTML_FILES = manual.html
+
+# Add the generated documentation files to the distribution
+EXTRA_DIST = $(HTML_FILES)
+
+# Clean up generated files
+CLEANFILES = $(HTML_FILES)
 all: all-am
 
 .SUFFIXES:
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(srcdir)/../common-rules.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -337,6 +385,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__maybe_remake_depfiles)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__maybe_remake_depfiles);; \
 	esac;
+$(srcdir)/../common-rules.am $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
@@ -441,6 +490,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -449,8 +499,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-am
-
 clean-am: clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
@@ -533,9 +581,151 @@ uninstall-am: uninstall-dist_docDATA
 .PRECIOUS: Makefile
 
 
-# Include the .env file if it exists
--include .env
-export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+.POSIX: # Enforce POSIX mode for portability
+﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+.POSIX: # Enforce POSIX mode for portability
+
+# Load environment variables if .env exists
+env_load:
+	@if [ -f .env ]; then \
+	    echo "Loading .env variables..."; \
+	    . .env; \
+	fi
+
+# Output compiler choices during build
+all:
+    @echo "Using CC: $(CC)"
+    @echo "Using CXX: $(CXX)"
+
+# Clean build artifacts
+clean:
+    @echo "Cleaning build artifacts..."
+    rm -f cppcheck.xml cppcheck_errors.log
+
+# Installation rules
+stow:
+	@echo "Managing installation with stow..."
+	stow -t /usr/local -d $(STOW_DIR) $(PACKAGE)
+
+# Formatting and static analysis
+autoindent:
+	@echo "Running autoindent on source files..."
+	autoindent -config .autoindentrc $(srcdir)/*.c
+
+autoindent_headers:
+	@echo "Running autoindent on header files..."
+	autoindent -config .autoindentrc $(srcdir)/*.h
+
+clang_format:
+	@echo "Running clang-format on source files..."
+	find $(srcdir) -name '*.c' -o -name '*.h' | xargs clang-format -i
+
+clang_tidy:
+	@echo "Running clang-tidy on source files..."
+	find $(srcdir) -name '*.c' -o -name '*.h' | xargs clang-tidy --fix --format-style=google -- -std=gnu23 -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800
+
+cppcheck:
+	@echo "Running cppcheck on source files..."
+	cppcheck --enable=all --std=gnu23 --platform=unix64 --suppress=missingIncludeSystem --xml --xml-version=2 $(srcdir) 2> cppcheck.xml
+
+shellcheck:
+	@echo "Running shellcheck on shell scripts..."
+	find $(srcdir) -name '*.sh' | xargs shellcheck
+
+log_issues:
+	@echo "Logging issues that cannot be fixed automatically..."
+	grep -i "error" cppcheck.xml > cppcheck_errors.log || true
+
+# Metadata management with recutils
+generate_metadata:
+	@echo "Generating metadata with recutils..."
+	recfix -r $(RECS_FILES)
+
+process_metadata:
+	@echo "Processing metadata with recutils..."
+	recfix -r $(RECS_FILES)
+
+include_metadata:
+	@echo "Including metadata in the release archive..."
+	tar --append --file=$(PACKAGE)-$(VERSION).tar.xz $(RECS_FILES)
+
+# Debugging tools
+gdb:
+	@echo "Running gdb on the binary..."
+	gdb ./web-app
+
+ddd:
+	@echo "Running ddd on the binary..."
+	ddd ./web-app
+
+valgrind:
+	@echo "Running valgrind on the binary..."
+	valgrind --leak-check=full --show-leak-kinds=all ./web-app
+
+perf:
+	@echo "Running gnu-perf on the binary..."
+	perf stat ./web-app
+
+# Documentation generation
+docs:
+	@echo "Generating documentation with texinfo..."
+	makeinfo --html --no-split -o docs/manual.html docs/manual.texi
+	makeinfo --pdf -o docs/manual.pdf docs/manual.texi
+
+generate_html_docs:
+	@echo "Generating HTML documentation with texinfo..."
+	makeinfo --html --no-split -o $(DOCS_DIR)/manual.html $(DOCS_DIR)/manual.texi
+
+clean_html_docs:
+	@echo "Cleaning generated HTML documentation..."
+	rm -f $(DOCS_DIR)/manual.html
+
+# Distribution packaging
+dist-xz:
+	@echo "Creating distribution archive with xz..."
+	tar -cJf $(PACKAGE)-$(VERSION).tar.xz $(DISTFILES)
+
+# Tags management
+generate_tags:
+	@echo "Generating tags with global..."
+	global -u
+
+clean_tags:
+	@echo "Cleaning tags..."
+	rm -f GPATH GRTAGS GSYMS GTAGS
+
+# Generated code and templates
+generate_code:
+	@echo "Generating code from templates with autogen..."
+	autogen -T $(CONFIG_DIR)/code_template.def -o $(SRC_DIR)/generated_code.c
+
+generate_docs:
+	@echo "Generating documentation from templates with autogen..."
+	autogen -T $(DOCS_DIR)/doc_template.def -o $(DOCS_DIR)/generated_docs.md
+
+# gettext and internationalization
+generate_mo_files:
+	@echo "Generating .mo files from .po files..."
+	for lang in en_AU; do \
+		mkdir -p $(localedir)/$$lang/LC_MESSAGES; \
+		msgfmt -o $(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo $(srcdir)/po/$$lang.po; \
+	done
+
+install_mo_files:
+	@echo "Installing .mo files..."
+	for lang in en_AU; do \
+		$(INSTALL_DATA) $(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo; \
+	done
+
+# Include common rules
+
+# Add generate_docs to the build process
+all: generate_docs generate_html_docs
+
+# Add clean_html_docs to the clean process
+clean: clean_html_docs
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

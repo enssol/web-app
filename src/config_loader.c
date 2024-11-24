@@ -60,4 +60,3 @@ int load_conf_config(const char *filename) {
     fclose(file);
     return 0; // Success
 }
-

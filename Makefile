@@ -17,6 +17,33 @@
 # Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+# Main Root Makefile.am
+
+# -*- mode: makefile -*-
+#
+# gtk-doc.make - make rules for gtk-doc
+# Copyright (C) 2003 James Henstridge
+#               2004-2007 Damon Chaplin
+#               2007-2017 Stefan Sauer
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+####################################
+# Everything below here is generic #
+####################################
+
+
 
 
 am__is_gnu_make = { \
@@ -95,15 +122,10 @@ host_triplet = x86_64-pc-linux-gnu
 bin_PROGRAMS = web-app$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/gettext.m4 \
-	$(top_srcdir)/m4/host-cpu-c-abi.m4 $(top_srcdir)/m4/iconv.m4 \
-	$(top_srcdir)/m4/intlmacosx.m4 $(top_srcdir)/m4/lib-ld.m4 \
-	$(top_srcdir)/m4/lib-link.m4 $(top_srcdir)/m4/lib-prefix.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/gtk-doc.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
 	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/m4/nls.m4 \
-	$(top_srcdir)/m4/po.m4 $(top_srcdir)/m4/progtest.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -119,8 +141,14 @@ am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(configdir)" \
 	"$(DESTDIR)$(web_appdir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am__objects_1 = $(SRC_DIR)/parser.$(OBJEXT)
-am_web_app_OBJECTS = $(am__objects_1)
+am_web_app_OBJECTS = $(SRC_DIR)/main.$(OBJEXT) \
+	$(SRC_DIR)/config_loader.$(OBJEXT) \
+	$(SRC_DIR)/env_loader.$(OBJEXT) \
+	$(SRC_DIR)/error_handler.$(OBJEXT) \
+	$(SRC_DIR)/garbage_collector.$(OBJEXT) \
+	$(SRC_DIR)/hello.$(OBJEXT) $(SRC_DIR)/lexer.$(OBJEXT) \
+	$(SRC_DIR)/logger.$(OBJEXT) $(SRC_DIR)/parser.$(OBJEXT) \
+	$(SRC_DIR)/validator.$(OBJEXT)
 web_app_OBJECTS = $(am_web_app_OBJECTS)
 web_app_LDADD = $(LDADD)
 web_app_DEPENDENCIES =
@@ -143,7 +171,14 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.
 depcomp = $(SHELL) $(top_srcdir)/build/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = $(SRC_DIR)/$(DEPDIR)/parser.Po
+am__depfiles_remade = $(SRC_DIR)/$(DEPDIR)/config_loader.Po \
+	$(SRC_DIR)/$(DEPDIR)/env_loader.Po \
+	$(SRC_DIR)/$(DEPDIR)/error_handler.Po \
+	$(SRC_DIR)/$(DEPDIR)/garbage_collector.Po \
+	$(SRC_DIR)/$(DEPDIR)/hello.Po $(SRC_DIR)/$(DEPDIR)/lexer.Po \
+	$(SRC_DIR)/$(DEPDIR)/logger.Po $(SRC_DIR)/$(DEPDIR)/main.Po \
+	$(SRC_DIR)/$(DEPDIR)/parser.Po \
+	$(SRC_DIR)/$(DEPDIR)/validator.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -163,6 +198,23 @@ AM_V_CCLD = $(am__v_CCLD_$(V))
 am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
+LEXCOMPILE = $(LEX) $(AM_LFLAGS) $(LFLAGS)
+LTLEXCOMPILE = $(LIBTOOL) $(AM_V_lt) $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(LEX) $(AM_LFLAGS) $(LFLAGS)
+AM_V_LEX = $(am__v_LEX_$(V))
+am__v_LEX_ = $(am__v_LEX_$(AM_DEFAULT_VERBOSITY))
+am__v_LEX_0 = @echo "  LEX     " $@;
+am__v_LEX_1 = 
+YLWRAP = $(top_srcdir)/build/ylwrap
+am__yacc_c2h = sed -e s/cc$$/hh/ -e s/cpp$$/hpp/ -e s/cxx$$/hxx/ \
+		   -e s/c++$$/h++/ -e s/c$$/h/
+YACCCOMPILE = $(YACC) $(AM_YFLAGS) $(YFLAGS)
+LTYACCCOMPILE = $(LIBTOOL) $(AM_V_lt) $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(YACC) $(AM_YFLAGS) $(YFLAGS)
+AM_V_YACC = $(am__v_YACC_$(V))
+am__v_YACC_ = $(am__v_YACC_$(AM_DEFAULT_VERBOSITY))
+am__v_YACC_0 = @echo "  YACC    " $@;
+am__v_YACC_1 = 
 SOURCES = $(web_app_SOURCES)
 DIST_SOURCES = $(web_app_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
@@ -234,16 +286,18 @@ am__define_uniq_tagged_files = \
     if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
   done | $(am__uniquify_input)`
 DIST_SUBDIRS = $(SUBDIRS)
-am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(top_srcdir)/build/ar-lib $(top_srcdir)/build/compile \
-	$(top_srcdir)/build/config.guess \
-	$(top_srcdir)/build/config.rpath \
+am__DIST_COMMON = $(SRC_DIR)/lexer.c $(SRC_DIR)/parser.c \
+	$(srcdir)/Makefile.in $(srcdir)/common-rules.am \
+	$(srcdir)/config.h.in $(top_srcdir)/build/ar-lib \
+	$(top_srcdir)/build/compile $(top_srcdir)/build/config.guess \
 	$(top_srcdir)/build/config.sub $(top_srcdir)/build/depcomp \
 	$(top_srcdir)/build/install-sh $(top_srcdir)/build/ltmain.sh \
-	$(top_srcdir)/build/missing ABOUT-NLS AUTHORS COPYING \
-	ChangeLog INSTALL NEWS README.md build/ar-lib build/compile \
+	$(top_srcdir)/build/missing $(top_srcdir)/build/ylwrap \
+	$(top_srcdir)/gtk-doc.make ABOUT-NLS AUTHORS COPYING ChangeLog \
+	INSTALL NEWS README.md build/ar-lib build/compile \
 	build/config.guess build/config.rpath build/config.sub \
-	build/depcomp build/install-sh build/ltmain.sh build/missing
+	build/depcomp build/install-sh build/ltmain.sh build/missing \
+	build/ylwrap config.guess config.sub
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -288,28 +342,45 @@ distuninstallcheck_listfiles = find . -type f -print
 am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
   | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
 distcleancheck_listfiles = find . -type f -print
-
-# Use VPATH to specify the directories where the source files are located
-VPATH = $(srcdir)/$(SRC_DIR):$(srcdir)/$(INCLUDE_DIR)
 ACLOCAL = ${SHELL} '/home/ubuntu/web-app/build/missing' aclocal-1.16
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
+APP_MODE = development
+APP_NAME = web-app
 AR = ar
 AUTOCONF = ${SHELL} '/home/ubuntu/web-app/build/missing' autoconf
+AUTOGEN = autogen
 AUTOHEADER = ${SHELL} '/home/ubuntu/web-app/build/missing' autoheader
 AUTOMAKE = ${SHELL} '/home/ubuntu/web-app/build/missing' automake-1.16
-AWK = mawk
-CC = gcc
+AWK = gawk
+BIN_DIR = bin
+BISON = bison
+BUILD_DIR = build
+CC = $(CCACHE) gcc
+
+# Compiler and linker definitions
+CCACHE = /usr/bin/ccache
 CCDEPMODE = depmode=none
 CFLAGS = -g -O2
-CPP = gcc -E
+CFLOW = cflow
+CLANG_FORMAT = clang-format
+CLANG_TIDY = clang-tidy
+CLIB = clib
+COMPLEXITY = /usr/bin/complexity
+CONFIG_DIR = etc
+CP = cp -f
+CPPCHECK = cppcheck
 CPPFLAGS = 
 CSCOPE = cscope
 CTAGS = ctags
 CYGPATH_W = echo
+DDD = ddd
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
+DEPS_DIR = deps
+DIST_DIR = dist
 DLLTOOL = false
+DOCS_DIR = docs
 DSYMUTIL = 
 DUMPBIN = 
 ECHO_C = 
@@ -319,48 +390,56 @@ EGREP = /usr/bin/grep -E
 ETAGS = etags
 EXEEXT = 
 FGREP = /usr/bin/grep -F
+FILECMD = file
+FLEX = flex
+GAWK = gawk
 GDB = gdb
-GETTEXT_MACRO_VERSION = 0.20
-GMSGFMT = /usr/bin/msgfmt
-GMSGFMT_015 = /usr/bin/msgfmt
+GLOBAL = global
 GREP = /usr/bin/grep
+GTKDOC_CHECK = gtkdoc-check.test
+GTKDOC_CHECK_PATH = /usr/bin/gtkdoc-check
+GTKDOC_DEPS_CFLAGS = -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include 
+GTKDOC_DEPS_LIBS = -lgobject-2.0 -lglib-2.0 
+GTKDOC_MKPDF = /usr/bin/gtkdoc-mkpdf
+GTKDOC_REBASE = /usr/bin/gtkdoc-rebase
+HTML_DIR = ${datadir}/gtk-doc/html
+INCLUDE_DIR = include
+INDENT = indent
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-INTLLIBS = 
-INTL_MACOSX_LIBS = 
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS = 
-
-# For flex
 LEX = flex
 LEXLIB = 
 LEX_OUTPUT_ROOT = lex.yy
-LIBICONV = -liconv
-LIBINTL = 
 LIBOBJS = 
-LIBS = -lpthread -lc 
+LIBS = -lc 
+LIBS_CFLAGS = -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include 
+LIBS_LIBS = -lglib-2.0 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
+LIB_DIR = lib
 LIPO = 
 LN_S = ln -s
-LTLIBICONV = -liconv
-LTLIBINTL = 
+LOCALES_DIR = po
+LOGS_DIR = logs
 LTLIBOBJS = 
 LT_SYS_LIBRARY_PATH = 
 M4 = m4
+MACROS_DIR = m4
 MAKE = make
 MAKEINFO = ${SHELL} '/home/ubuntu/web-app/build/missing' makeinfo
 MANIFEST_TOOL = :
+MKDIR = mkdir
 MKDIR_P = /usr/bin/mkdir -p
-MSGFMT = /usr/bin/msgfmt
-MSGMERGE = /usr/bin/msgmerge
-MSGMERGE_FOR_MSGFMT_OPTION = --for-msgfmt
+MV = mv -f
 NM = /usr/bin/nm -B
 NMEDIT = 
 OBJDUMP = objdump
 OBJEXT = o
+OBJ_DIR = objects
 OTOOL = 
 OTOOL64 = 
 PACKAGE = web-app
@@ -371,19 +450,29 @@ PACKAGE_TARNAME = web-app
 PACKAGE_URL = 
 PACKAGE_VERSION = 1.0
 PATH_SEPARATOR = :
+PERF = perf
 PKGCONF = pkgconf
-POSUB = po
+PKG_CONFIG = /usr/bin/pkg-config
+PKG_CONFIG_LIBDIR = 
+PKG_CONFIG_PATH = 
 RANLIB = ranlib
+RECSEL = recsel
+RM = rm -f
 SED = /usr/bin/sed
 SET_MAKE = 
 SHELL = /bin/bash
+SHELLCHECK = shellcheck
+
+# Define the source files
+SRC_DIR = src
+STOW = stow
 STRIP = strip
 TAR = tar
-USE_NLS = yes
+TESTS_DIR = tests
+TMP_DIR = tmp
+VALGRIND = valgrind
 VERSION = 1.0
-XGETTEXT = /usr/bin/xgettext
-XGETTEXT_015 = /usr/bin/xgettext
-XGETTEXT_EXTRA_OPTIONS = 
+XZ = xz
 YACC = bison -y
 YFLAGS = 
 abs_builddir = /home/ubuntu/web-app
@@ -439,24 +528,28 @@ target_alias =
 top_build_prefix = 
 top_builddir = .
 top_srcdir = .
+CXX = $(CCACHE) g++
+AM_CFLAGS = @CC1_FLAGS@
+AM_LDFLAGS = @LINK_FLAGS@ -static $(LIBS_LIBS)
+
+# Include common rules
 
 # Define the project name and options
 AUTOMAKE_OPTIONS = gnu subdir-objects dist-xz
 ACLOCAL_AMFLAGS = -I m4
-
-# Define the directory for the binary
-web_app_SOURCES = $(SRC_FILES) $(BUILT_SOURCES)
+web_app_SOURCES = $(SRC_DIR)/main.c $(SRC_DIR)/config_loader.c $(SRC_DIR)/env_loader.c $(SRC_DIR)/error_handler.c $(SRC_DIR)/garbage_collector.c $(SRC_DIR)/hello.c $(SRC_DIR)/lexer.l $(SRC_DIR)/logger.c $(SRC_DIR)/parser.y $(SRC_DIR)/validator.c
 web_app_HEADERS = $(HEADER_FILES)
+SRC_FILES = $(SRC_DIR)/config_loader.c $(SRC_DIR)/env_loader.c $(SRC_DIR)/main.c $(SRC_DIR)/error_handler.c $(SRC_DIR)/garbage_collector.c $(SRC_DIR)/hello.c $(SRC_DIR)/lexer.l $(SRC_DIR)/logger.c $(SRC_DIR)/parser.y $(SRC_DIR)/validator.c
+OBJ_FILES = $(SRC_FILES:.c=.o)
 
 # Define the directory for headers
 web_appdir = $(INCLUDE_DIR)
 
 # Include directories
-AM_CPPFLAGS = -I$(INCLUDE_DIR)
+AM_CPPFLAGS = -I$(INCLUDE_DIR) $(LIBS_CFLAGS)
 
-# Compiler and linker flags from gcc.spec
-AM_CFLAGS = @CC1_FLAGS@
-AM_LDFLAGS = @LINK_FLAGS@ -static
+# Define subdirectories
+SUBDIRS = src include etc docs m4 po bin build deps dist tmp lib objects logs m4
 
 # Additional libraries
 LDADD = -lm
@@ -467,36 +560,101 @@ configdir = $(CONFIG_DIR)
 # Install configuration files
 dist_config_DATA = $(CONFIG_INI_FILE) $(CONFIG_CONF_FILE) $(GCC_SPEC_FILE)
 
-# Bison rules
-
-# Add version.h to the list of built sources
-BUILT_SOURCES = $(SRC_DIR)/parser.c $(INCLUDE_DIR)/parser.h \
-	$(INCLUDE_DIR)/version.h
-
-# Ensure version.h is cleaned up
-CLEANFILES = $(SRC_DIR)/parser.c $(INCLUDE_DIR)/parser.h \
-	$(INCLUDE_DIR)/version.h
-
-# Include gettext files
-SUBDIRS = po
-
-# Optional: Files to include in the distribution tarball.
-# This ensures these files are included when running `make dist`.
-EXTRA_DIST = README.md LICENSE INSTALL AUTHORS ChangeLog NEWS etc/config.conf etc/config.ini etc/gcc.spec docs/
-
-# For gettext
-GETTEXT_PACKAGE = enveng-webapp
-
 # Clean up files
-DISTCLEANFILES = Makefile.in aclocal.m4 configure config.h.in
-all: $(BUILT_SOURCES) config.h
+DISTCLEANFILES = Makefile.in aclocal.m4 configure config.h.in \
+	intltool-extract intltool-merge intltool-update
+
+# Add gtk-doc support
+GTK_DOC_USE_LIBTOOL = 1
+#GTKDOC_CC = $(CC) $(INCLUDES) $(GTKDOC_DEPS_CFLAGS) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+GTKDOC_CC = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(INCLUDES) $(GTKDOC_DEPS_CFLAGS) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+#GTKDOC_LD = $(CC) $(GTKDOC_DEPS_LIBS) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS)
+GTKDOC_LD = $(LIBTOOL) --tag=CC --mode=link $(CC) $(GTKDOC_DEPS_LIBS) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS)
+#GTKDOC_RUN = 
+GTKDOC_RUN = $(LIBTOOL) --mode=execute
+
+# We set GPATH here; this gives us semantics for GNU make
+# which are more like other make's VPATH, when it comes to
+# whether a source that is a target of one rule is then
+# searched for in VPATH/GPATH.
+#
+GPATH = $(srcdir)
+TARGET_DIR = $(HTML_DIR)/$(DOC_MODULE)
+SETUP_FILES = \
+	$(content_files)		\
+	$(expand_content_files)		\
+	$(DOC_MAIN_SGML_FILE)		\
+	$(DOC_MODULE)-sections.txt	\
+	$(DOC_MODULE)-overrides.txt
+
+EXTRA_DIST = \
+	$(HTML_IMAGES)			\
+	$(SETUP_FILES)
+
+DOC_STAMPS = setup-build.stamp scan-build.stamp sgml-build.stamp \
+	html-build.stamp pdf-build.stamp \
+	sgml.stamp html.stamp pdf.stamp
+
+SCANOBJ_FILES = \
+	$(DOC_MODULE).actions	 \
+	$(DOC_MODULE).args 	 \
+	$(DOC_MODULE).hierarchy  \
+	$(DOC_MODULE).interfaces \
+	$(DOC_MODULE).prerequisites \
+	$(DOC_MODULE).signals
+
+REPORT_FILES = \
+	$(DOC_MODULE)-undocumented.txt \
+	$(DOC_MODULE)-undeclared.txt \
+	$(DOC_MODULE)-unused.txt
+
+CLEANFILES = $(SCANOBJ_FILES) $(REPORT_FILES) $(DOC_STAMPS) gtkdoc-check.test
+#HTML_BUILD_STAMP = 
+HTML_BUILD_STAMP = html-build.stamp
+PDF_BUILD_STAMP = 
+#PDF_BUILD_STAMP = pdf-build.stamp
+
+#### setup ####
+GTK_DOC_V_SETUP = $(GTK_DOC_V_SETUP_$(V))
+GTK_DOC_V_SETUP_ = $(GTK_DOC_V_SETUP_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_SETUP_0 = @echo "  DOC   Preparing build";
+
+#### scan ####
+GTK_DOC_V_SCAN = $(GTK_DOC_V_SCAN_$(V))
+GTK_DOC_V_SCAN_ = $(GTK_DOC_V_SCAN_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_SCAN_0 = @echo "  DOC   Scanning header files";
+GTK_DOC_V_INTROSPECT = $(GTK_DOC_V_INTROSPECT_$(V))
+GTK_DOC_V_INTROSPECT_ = $(GTK_DOC_V_INTROSPECT_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_INTROSPECT_0 = @echo "  DOC   Introspecting gobjects";
+
+#### xml ####
+GTK_DOC_V_XML = $(GTK_DOC_V_XML_$(V))
+GTK_DOC_V_XML_ = $(GTK_DOC_V_XML_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_XML_0 = @echo "  DOC   Building XML";
+
+#### html ####
+GTK_DOC_V_HTML = $(GTK_DOC_V_HTML_$(V))
+GTK_DOC_V_HTML_ = $(GTK_DOC_V_HTML_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_HTML_0 = @echo "  DOC   Building HTML";
+GTK_DOC_V_XREF = $(GTK_DOC_V_XREF_$(V))
+GTK_DOC_V_XREF_ = $(GTK_DOC_V_XREF_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_XREF_0 = @echo "  DOC   Fixing cross-references";
+
+#### pdf ####
+GTK_DOC_V_PDF = $(GTK_DOC_V_PDF_$(V))
+GTK_DOC_V_PDF_ = $(GTK_DOC_V_PDF_$(AM_DEFAULT_VERBOSITY))
+GTK_DOC_V_PDF_0 = @echo "  DOC   Building PDF";
+
+# Add intltool support
+INTLTOOL_FILES = intltool-extract.in intltool-merge.in intltool-update.in
+all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .l .lo .o .obj .y
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(srcdir)/common-rules.am $(top_srcdir)/gtk-doc.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -518,6 +676,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles);; \
 	esac;
+$(srcdir)/common-rules.am $(top_srcdir)/gtk-doc.make $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -597,7 +756,25 @@ $(SRC_DIR)/$(am__dirstamp):
 $(SRC_DIR)/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) $(SRC_DIR)/$(DEPDIR)
 	@: > $(SRC_DIR)/$(DEPDIR)/$(am__dirstamp)
+$(SRC_DIR)/main.$(OBJEXT): $(SRC_DIR)/$(am__dirstamp) \
+	$(SRC_DIR)/$(DEPDIR)/$(am__dirstamp)
+$(SRC_DIR)/config_loader.$(OBJEXT): $(SRC_DIR)/$(am__dirstamp) \
+	$(SRC_DIR)/$(DEPDIR)/$(am__dirstamp)
+$(SRC_DIR)/env_loader.$(OBJEXT): $(SRC_DIR)/$(am__dirstamp) \
+	$(SRC_DIR)/$(DEPDIR)/$(am__dirstamp)
+$(SRC_DIR)/error_handler.$(OBJEXT): $(SRC_DIR)/$(am__dirstamp) \
+	$(SRC_DIR)/$(DEPDIR)/$(am__dirstamp)
+$(SRC_DIR)/garbage_collector.$(OBJEXT): $(SRC_DIR)/$(am__dirstamp) \
+	$(SRC_DIR)/$(DEPDIR)/$(am__dirstamp)
+$(SRC_DIR)/hello.$(OBJEXT): $(SRC_DIR)/$(am__dirstamp) \
+	$(SRC_DIR)/$(DEPDIR)/$(am__dirstamp)
+$(SRC_DIR)/lexer.$(OBJEXT): $(SRC_DIR)/$(am__dirstamp) \
+	$(SRC_DIR)/$(DEPDIR)/$(am__dirstamp)
+$(SRC_DIR)/logger.$(OBJEXT): $(SRC_DIR)/$(am__dirstamp) \
+	$(SRC_DIR)/$(DEPDIR)/$(am__dirstamp)
 $(SRC_DIR)/parser.$(OBJEXT): $(SRC_DIR)/$(am__dirstamp) \
+	$(SRC_DIR)/$(DEPDIR)/$(am__dirstamp)
+$(SRC_DIR)/validator.$(OBJEXT): $(SRC_DIR)/$(am__dirstamp) \
 	$(SRC_DIR)/$(DEPDIR)/$(am__dirstamp)
 
 web-app$(EXEEXT): $(web_app_OBJECTS) $(web_app_DEPENDENCIES) $(EXTRA_web_app_DEPENDENCIES) 
@@ -611,7 +788,16 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+#include $(SRC_DIR)/$(DEPDIR)/config_loader.Po # am--include-marker
+#include $(SRC_DIR)/$(DEPDIR)/env_loader.Po # am--include-marker
+#include $(SRC_DIR)/$(DEPDIR)/error_handler.Po # am--include-marker
+#include $(SRC_DIR)/$(DEPDIR)/garbage_collector.Po # am--include-marker
+#include $(SRC_DIR)/$(DEPDIR)/hello.Po # am--include-marker
+#include $(SRC_DIR)/$(DEPDIR)/lexer.Po # am--include-marker
+#include $(SRC_DIR)/$(DEPDIR)/logger.Po # am--include-marker
+#include $(SRC_DIR)/$(DEPDIR)/main.Po # am--include-marker
 #include $(SRC_DIR)/$(DEPDIR)/parser.Po # am--include-marker
+#include $(SRC_DIR)/$(DEPDIR)/validator.Po # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -642,6 +828,12 @@ am--depfiles: $(am__depfiles_remade)
 #	$(AM_V_CC)source='$<' object='$@' libtool=yes 
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
 	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $<
+
+.l.c:
+	$(AM_V_LEX)$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- $(LEXCOMPILE)
+
+.y.c:
+	$(AM_V_YACC)$(am__skipyacc) $(SHELL) $(YLWRAP) $< y.tab.c $@ y.tab.h `echo $@ | $(am__yacc_c2h)` y.output $*.output -- $(YACCCOMPILE)
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -859,6 +1051,9 @@ distdir-am: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
+	$(MAKE) $(AM_MAKEFLAGS) \
+	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
+	  dist-hook
 	-test -n "$(am__skip_mode_fix)" \
 	|| find "$(distdir)" -type d ! -perm -755 \
 		-exec chmod u+rwx,go+rx {} \; -o \
@@ -876,9 +1071,6 @@ dist-bzip2: distdir
 
 dist-lzip: distdir
 	tardir=$(distdir) && $(am__tar) | lzip -c $${LZIP_OPT--9} >$(distdir).tar.lz
-	$(am__post_remove_distdir)
-dist-xz: distdir
-	tardir=$(distdir) && $(am__tar) | XZ_OPT=$${XZ_OPT--e} xz -c >$(distdir).tar.xz
 	$(am__post_remove_distdir)
 
 dist-zstd: distdir
@@ -996,18 +1188,16 @@ distcleancheck: distclean
 	       $(distcleancheck_listfiles) ; \
 	       exit 1; } >&2
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-recursive
-all-am: Makefile $(PROGRAMS) $(DATA) $(HEADERS) config.h
+check: check-recursive
+all-local:
+all-am: Makefile $(PROGRAMS) $(DATA) $(HEADERS) config.h all-local
 installdirs: installdirs-recursive
 installdirs-am:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(configdir)" "$(DESTDIR)$(web_appdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-recursive
-install-exec: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-exec-recursive
+install: install-recursive
+install-exec: install-exec-recursive
 install-data: install-data-recursive
 uninstall: uninstall-recursive
 
@@ -1040,17 +1230,26 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
-clean: clean-recursive
-
-clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
+	-rm -f $(SRC_DIR)/lexer.c
+	-rm -f $(SRC_DIR)/parser.c
+clean-am: clean-binPROGRAMS clean-generic clean-libtool clean-local \
+	mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-		-rm -f $(SRC_DIR)/$(DEPDIR)/parser.Po
+		-rm -f $(SRC_DIR)/$(DEPDIR)/config_loader.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/env_loader.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/error_handler.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/garbage_collector.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/hello.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/lexer.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/logger.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/main.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/parser.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/validator.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-hdr distclean-libtool distclean-tags
+	distclean-hdr distclean-libtool distclean-local distclean-tags
 
 dvi: dvi-recursive
 
@@ -1064,7 +1263,8 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-dist_configDATA install-web_appHEADERS
+install-data-am: install-data-local install-dist_configDATA \
+	install-web_appHEADERS
 
 install-dvi: install-dvi-recursive
 
@@ -1095,9 +1295,19 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-		-rm -f $(SRC_DIR)/$(DEPDIR)/parser.Po
+		-rm -f $(SRC_DIR)/$(DEPDIR)/config_loader.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/env_loader.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/error_handler.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/garbage_collector.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/hello.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/lexer.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/logger.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/main.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/parser.Po
+	-rm -f $(SRC_DIR)/$(DEPDIR)/validator.Po
 	-rm -f Makefile
-maintainer-clean-am: distclean-am maintainer-clean-generic
+maintainer-clean-am: distclean-am maintainer-clean-generic \
+	maintainer-clean-local
 
 mostlyclean: mostlyclean-recursive
 
@@ -1113,51 +1323,394 @@ ps: ps-recursive
 ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-dist_configDATA \
-	uninstall-web_appHEADERS
+	uninstall-local uninstall-web_appHEADERS
 
-.MAKE: $(am__recursive_targets) all check install install-am \
-	install-exec install-strip
+.MAKE: $(am__recursive_targets) all install-am install-strip
 
-.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
+.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am all-local \
 	am--depfiles am--refresh check check-am clean \
 	clean-binPROGRAMS clean-cscope clean-generic clean-libtool \
-	cscope cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
-	dist-gzip dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
-	dist-zstd distcheck distclean distclean-compile \
-	distclean-generic distclean-hdr distclean-libtool \
-	distclean-tags distcleancheck distdir distuninstallcheck dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am \
+	clean-local cscope cscopelist-am ctags ctags-am dist dist-all \
+	dist-bzip2 dist-gzip dist-hook dist-lzip dist-shar dist-tarZ \
+	dist-xz dist-zip dist-zstd distcheck distclean \
+	distclean-compile distclean-generic distclean-hdr \
+	distclean-libtool distclean-local distclean-tags \
+	distcleancheck distdir distuninstallcheck dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-data-local \
 	install-dist_configDATA install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
 	install-info install-info-am install-man install-pdf \
 	install-pdf-am install-ps install-ps-am install-strip \
 	install-web_appHEADERS installcheck installcheck-am \
 	installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-dist_configDATA uninstall-web_appHEADERS
+	maintainer-clean-generic maintainer-clean-local mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-dist_configDATA \
+	uninstall-local uninstall-web_appHEADERS
 
 .PRECIOUS: Makefile
 
 
-# Include the .env file if it exists
--include .env
-export $(shell cat .env | grep -v '#' | awk '/=/ {print $$1}')
+.POSIX: # Enforce POSIX mode for portability
+﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
+# SPDX-License-Identifier: AGPL-3.0-or-later
 
-# Source and header files
-include $(SOURCES_FILE)
-include $(HEADER_FILE)
+.POSIX: # Enforce POSIX mode for portability
 
-$(SRC_DIR)/parser.c $(INCLUDE_DIR)/parser.h: $(SRC_DIR)/parser.y
-	bison -d $(SRC_DIR)/parser.y
-	mv parser.tab.c $(SRC_DIR)/parser.c
-	mv parser.tab.h $(INCLUDE_DIR)/parser.h
+# Load environment variables if .env exists
+env_load:
+	@if [ -f .env ]; then \
+	    echo "Loading .env variables..."; \
+	    . .env; \
+	fi
+
+# Output compiler choices during build
+all:
+    @echo "Using CC: $(CC)"
+    @echo "Using CXX: $(CXX)"
+
+# Clean build artifacts
+clean:
+    @echo "Cleaning build artifacts..."
+    rm -f cppcheck.xml cppcheck_errors.log
+
+# Installation rules
+stow:
+	@echo "Managing installation with stow..."
+	stow -t /usr/local -d $(STOW_DIR) $(PACKAGE)
+
+# Formatting and static analysis
+autoindent:
+	@echo "Running autoindent on source files..."
+	autoindent -config .autoindentrc $(srcdir)/*.c
+
+autoindent_headers:
+	@echo "Running autoindent on header files..."
+	autoindent -config .autoindentrc $(srcdir)/*.h
+
+clang_format:
+	@echo "Running clang-format on source files..."
+	find $(srcdir) -name '*.c' -o -name '*.h' | xargs clang-format -i
+
+clang_tidy:
+	@echo "Running clang-tidy on source files..."
+	find $(srcdir) -name '*.c' -o -name '*.h' | xargs clang-tidy --fix --format-style=google -- -std=gnu23 -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800
+
+cppcheck:
+	@echo "Running cppcheck on source files..."
+	cppcheck --enable=all --std=gnu23 --platform=unix64 --suppress=missingIncludeSystem --xml --xml-version=2 $(srcdir) 2> cppcheck.xml
+
+shellcheck:
+	@echo "Running shellcheck on shell scripts..."
+	find $(srcdir) -name '*.sh' | xargs shellcheck
+
+log_issues:
+	@echo "Logging issues that cannot be fixed automatically..."
+	grep -i "error" cppcheck.xml > cppcheck_errors.log || true
+
+# Metadata management with recutils
+generate_metadata:
+	@echo "Generating metadata with recutils..."
+	recfix -r $(RECS_FILES)
+
+process_metadata:
+	@echo "Processing metadata with recutils..."
+	recfix -r $(RECS_FILES)
+
+include_metadata:
+	@echo "Including metadata in the release archive..."
+	tar --append --file=$(PACKAGE)-$(VERSION).tar.xz $(RECS_FILES)
+
+# Debugging tools
+gdb:
+	@echo "Running gdb on the binary..."
+	gdb ./web-app
+
+ddd:
+	@echo "Running ddd on the binary..."
+	ddd ./web-app
+
+valgrind:
+	@echo "Running valgrind on the binary..."
+	valgrind --leak-check=full --show-leak-kinds=all ./web-app
+
+perf:
+	@echo "Running gnu-perf on the binary..."
+	perf stat ./web-app
+
+# Documentation generation
+docs:
+	@echo "Generating documentation with texinfo..."
+	makeinfo --html --no-split -o docs/manual.html docs/manual.texi
+	makeinfo --pdf -o docs/manual.pdf docs/manual.texi
+
+generate_html_docs:
+	@echo "Generating HTML documentation with texinfo..."
+	makeinfo --html --no-split -o $(DOCS_DIR)/manual.html $(DOCS_DIR)/manual.texi
+
+clean_html_docs:
+	@echo "Cleaning generated HTML documentation..."
+	rm -f $(DOCS_DIR)/manual.html
+
+# Distribution packaging
+dist-xz:
+	@echo "Creating distribution archive with xz..."
+	tar -cJf $(PACKAGE)-$(VERSION).tar.xz $(DISTFILES)
+
+# Tags management
+generate_tags:
+	@echo "Generating tags with global..."
+	global -u
+
+clean_tags:
+	@echo "Cleaning tags..."
+	rm -f GPATH GRTAGS GSYMS GTAGS
+
+# Generated code and templates
+generate_code:
+	@echo "Generating code from templates with autogen..."
+	autogen -T $(CONFIG_DIR)/code_template.def -o $(SRC_DIR)/generated_code.c
+
+generate_docs:
+	@echo "Generating documentation from templates with autogen..."
+	autogen -T $(DOCS_DIR)/doc_template.def -o $(DOCS_DIR)/generated_docs.md
+
+# gettext and internationalization
+generate_mo_files:
+	@echo "Generating .mo files from .po files..."
+	for lang in en_AU; do \
+		mkdir -p $(localedir)/$$lang/LC_MESSAGES; \
+		msgfmt -o $(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo $(srcdir)/po/$$lang.po; \
+	done
+
+install_mo_files:
+	@echo "Installing .mo files..."
+	for lang in en_AU; do \
+		$(INSTALL_DATA) $(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo; \
+	done
 
 # Custom rule to generate a version file
 version.h: $(SRC_DIR)/version.txt
-	@echo "#define VERSION \"`cat $(SRC_DIR)/version.txt`\"" > $(INCLUDE_DIR)/version.h
+    @echo "#define VERSION \"`cat $(SRC_DIR)/version.txt`\"" > $(INCLUDE_DIR)/version.h
+
+# Add common rules to the build process
+all: generate_tags compile docs
+
+clean: clean_tags clean_html_docs
+
+gtkdoc-check.test: Makefile
+	$(AM_V_GEN)echo "#!/bin/sh -e" > $@; \
+		echo "$(GTKDOC_CHECK_PATH) || exit 1" >> $@; \
+		chmod +x $@
+
+all-gtk-doc: $(HTML_BUILD_STAMP) $(PDF_BUILD_STAMP)
+.PHONY: all-gtk-doc
+
+#all-local: all-gtk-doc
+
+docs: $(HTML_BUILD_STAMP) $(PDF_BUILD_STAMP)
+
+$(REPORT_FILES): sgml-build.stamp
+
+setup-build.stamp:
+	-$(GTK_DOC_V_SETUP)if test "$(abs_srcdir)" != "$(abs_builddir)" ; then \
+	  files=`echo $(SETUP_FILES) $(DOC_MODULE).types`; \
+	  if test "x$$files" != "x" ; then \
+	    for file in $$files ; do \
+	      destdir=`dirname $(abs_builddir)/$$file`; \
+	      test -d "$$destdir" || mkdir -p "$$destdir"; \
+	      test -f $(abs_srcdir)/$$file && \
+	        cp -pf $(abs_srcdir)/$$file $(abs_builddir)/$$file || true; \
+	    done; \
+	  fi; \
+	fi
+	$(AM_V_at)touch setup-build.stamp
+
+scan-build.stamp: setup-build.stamp $(HFILE_GLOB) $(CFILE_GLOB)
+	$(GTK_DOC_V_SCAN)_source_dir='' ; \
+	for i in $(DOC_SOURCE_DIR) ; do \
+	  _source_dir="$${_source_dir} --source-dir=$$i" ; \
+	done ; \
+	gtkdoc-scan --module=$(DOC_MODULE) --ignore-headers="$(IGNORE_HFILES)" $${_source_dir} $(SCAN_OPTIONS) $(EXTRA_HFILES)
+	$(GTK_DOC_V_INTROSPECT)if grep -l '^..*$$' $(DOC_MODULE).types > /dev/null 2>&1 ; then \
+	  scanobj_options=""; \
+	  gtkdoc-scangobj 2>&1 --help | grep  >/dev/null "\-\-verbose"; \
+	  if test "$$?" = "0"; then \
+	    if test "x$(V)" = "x1"; then \
+	      scanobj_options="--verbose"; \
+	    fi; \
+	  fi; \
+	  CC="$(GTKDOC_CC)" LD="$(GTKDOC_LD)" RUN="$(GTKDOC_RUN)" CFLAGS="$(GTKDOC_CFLAGS) $(CFLAGS)" LDFLAGS="$(GTKDOC_LIBS) $(LDFLAGS)" \
+	  gtkdoc-scangobj $(SCANGOBJ_OPTIONS) $$scanobj_options --module=$(DOC_MODULE); \
+	else \
+	  for i in $(SCANOBJ_FILES) ; do \
+	    test -f $$i || touch $$i ; \
+	  done \
+	fi
+	$(AM_V_at)touch scan-build.stamp
+
+$(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt: scan-build.stamp
+	@true
+
+sgml-build.stamp: setup-build.stamp $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(HFILE_GLOB) $(CFILE_GLOB) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt $(expand_content_files) xml/gtkdocentities.ent
+	$(GTK_DOC_V_XML)_source_dir='' ; \
+	for i in $(DOC_SOURCE_DIR) ; do \
+	  _source_dir="$${_source_dir} --source-dir=$$i" ; \
+	done ; \
+	gtkdoc-mkdb --module=$(DOC_MODULE) --output-format=xml --expand-content-files="$(expand_content_files)" --main-sgml-file=$(DOC_MAIN_SGML_FILE) $${_source_dir} $(MKDB_OPTIONS)
+	$(AM_V_at)touch sgml-build.stamp
+
+sgml.stamp: sgml-build.stamp
+	@true
+
+$(DOC_MAIN_SGML_FILE): sgml-build.stamp
+	@true
+
+xml/gtkdocentities.ent: Makefile
+	$(GTK_DOC_V_XML)$(MKDIR_P) $(@D) && ( \
+		echo "<!ENTITY package \"$(PACKAGE)\">"; \
+		echo "<!ENTITY package_bugreport \"$(PACKAGE_BUGREPORT)\">"; \
+		echo "<!ENTITY package_name \"$(PACKAGE_NAME)\">"; \
+		echo "<!ENTITY package_string \"$(PACKAGE_STRING)\">"; \
+		echo "<!ENTITY package_tarname \"$(PACKAGE_TARNAME)\">"; \
+		echo "<!ENTITY package_url \"$(PACKAGE_URL)\">"; \
+		echo "<!ENTITY package_version \"$(PACKAGE_VERSION)\">"; \
+	) > $@
+
+html-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files) $(expand_content_files)
+	$(GTK_DOC_V_HTML)rm -rf html && mkdir html && \
+	mkhtml_options=""; \
+	gtkdoc-mkhtml 2>&1 --help | grep  >/dev/null "\-\-verbose"; \
+	if test "$$?" = "0"; then \
+	  if test "x$(V)" = "x1"; then \
+	    mkhtml_options="$$mkhtml_options --verbose"; \
+	  fi; \
+	fi; \
+	gtkdoc-mkhtml 2>&1 --help | grep  >/dev/null "\-\-path"; \
+	if test "$$?" = "0"; then \
+	  mkhtml_options="$$mkhtml_options --path=\"$(abs_srcdir)\""; \
+	fi; \
+	cd html && gtkdoc-mkhtml $$mkhtml_options $(MKHTML_OPTIONS) $(DOC_MODULE) ../$(DOC_MAIN_SGML_FILE)
+	-@test "x$(HTML_IMAGES)" = "x" || \
+	for file in $(HTML_IMAGES) ; do \
+	  test -f $(abs_srcdir)/$$file && cp $(abs_srcdir)/$$file $(abs_builddir)/html; \
+	  test -f $(abs_builddir)/$$file && cp $(abs_builddir)/$$file $(abs_builddir)/html; \
+	  test -f $$file && cp $$file $(abs_builddir)/html; \
+	done;
+	$(GTK_DOC_V_XREF)gtkdoc-fixxref --module=$(DOC_MODULE) --module-dir=html --html-dir=$(HTML_DIR) $(FIXXREF_OPTIONS)
+	$(AM_V_at)touch html-build.stamp
+
+pdf-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files) $(expand_content_files)
+	$(GTK_DOC_V_PDF)rm -f $(DOC_MODULE).pdf && \
+	mkpdf_options=""; \
+	gtkdoc-mkpdf 2>&1 --help | grep  >/dev/null "\-\-verbose"; \
+	if test "$$?" = "0"; then \
+	  if test "x$(V)" = "x1"; then \
+	    mkpdf_options="$$mkpdf_options --verbose"; \
+	  fi; \
+	fi; \
+	if test "x$(HTML_IMAGES)" != "x"; then \
+	  for img in $(HTML_IMAGES); do \
+	    part=`dirname $$img`; \
+	    echo $$mkpdf_options | grep >/dev/null "\-\-imgdir=$$part "; \
+	    if test $$? != 0; then \
+	      mkpdf_options="$$mkpdf_options --imgdir=$$part"; \
+	    fi; \
+	  done; \
+	fi; \
+	gtkdoc-mkpdf --path="$(abs_srcdir)" $$mkpdf_options $(DOC_MODULE) $(DOC_MAIN_SGML_FILE) $(MKPDF_OPTIONS)
+	$(AM_V_at)touch pdf-build.stamp
+
+##############
+
+clean-local:
+	@rm -f *~ *.bak
+	@rm -rf .libs
+	@if echo $(SCAN_OPTIONS) | grep -q "\-\-rebuild-types" ; then \
+	  rm -f $(DOC_MODULE).types; \
+	fi
+	@if echo $(SCAN_OPTIONS) | grep -q "\-\-rebuild-sections" ; then \
+	  rm -f $(DOC_MODULE)-sections.txt; \
+	fi
+
+distclean-local:
+	@rm -rf xml html $(REPORT_FILES) $(DOC_MODULE).pdf \
+	    $(DOC_MODULE)-decl-list.txt $(DOC_MODULE)-decl.txt
+	@if test "$(abs_srcdir)" != "$(abs_builddir)" ; then \
+	    rm -f $(SETUP_FILES) $(DOC_MODULE).types; \
+	fi
+
+maintainer-clean-local:
+	@rm -rf xml html
+
+install-data-local:
+	@installfiles=`echo $(builddir)/html/*`; \
+	if test "$$installfiles" = '$(builddir)/html/*'; \
+	then echo 1>&2 'Nothing to install' ; \
+	else \
+	  if test -n "$(DOC_MODULE_VERSION)"; then \
+	    installdir="$(DESTDIR)$(TARGET_DIR)-$(DOC_MODULE_VERSION)"; \
+	  else \
+	    installdir="$(DESTDIR)$(TARGET_DIR)"; \
+	  fi; \
+	  $(mkinstalldirs) $${installdir} ; \
+	  for i in $$installfiles; do \
+	    echo ' $(INSTALL_DATA) '$$i ; \
+	    $(INSTALL_DATA) $$i $${installdir}; \
+	  done; \
+	  if test -n "$(DOC_MODULE_VERSION)"; then \
+	    mv -f $${installdir}/$(DOC_MODULE).devhelp2 \
+	      $${installdir}/$(DOC_MODULE)-$(DOC_MODULE_VERSION).devhelp2; \
+	  fi; \
+	  $(GTKDOC_REBASE) --relative --dest-dir=$(DESTDIR) --html-dir=$${installdir}; \
+	fi
+
+uninstall-local:
+	@if test -n "$(DOC_MODULE_VERSION)"; then \
+	  installdir="$(DESTDIR)$(TARGET_DIR)-$(DOC_MODULE_VERSION)"; \
+	else \
+	  installdir="$(DESTDIR)$(TARGET_DIR)"; \
+	fi; \
+	rm -rf $${installdir}
+
+#
+# Require gtk-doc when making dist
+#
+dist-check-gtkdoc: docs
+#dist-check-gtkdoc:
+#	@echo "*** gtk-doc is needed to run 'make dist'.         ***"
+#	@echo "*** gtk-doc was not found when 'configure' ran.   ***"
+#	@echo "*** please install gtk-doc and rerun 'configure'. ***"
+#	@false
+
+dist-hook: dist-check-gtkdoc all-gtk-doc dist-hook-local
+	@mkdir $(distdir)/html
+	@cp ./html/* $(distdir)/html
+	@-cp ./$(DOC_MODULE).pdf $(distdir)/
+	@-cp ./$(DOC_MODULE).types $(distdir)/
+	@-cp ./$(DOC_MODULE)-sections.txt $(distdir)/
+	@cd $(distdir) && rm -f $(DISTCLEANFILES)
+	@$(GTKDOC_REBASE) --online --relative --html-dir=$(distdir)/html
+
+.PHONY : dist-hook-local docs
+
+# Add rules for generating .mo files
+$(LINGUAS:%=%.mo): %.mo: %.po
+    msgfmt -o $@ $<
+
+# Add rules for installing .mo files
+install-data-local:
+    $(mkinstalldirs) $(DESTDIR)$(datadir)/locale
+    for lang in $(LINGUAS); do \
+        $(INSTALL_DATA) $$lang.mo $(DESTDIR)$(datadir)/locale/$$lang/LC_MESSAGES/$(PACKAGE).mo; \
+    done
+
+uninstall-local:
+    for lang in $(LINGUAS); do \
+        rm -f $(DESTDIR)$(datadir)/locale/$$lang/LC_MESSAGES/$(PACKAGE).mo; \
+    done
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -140,6 +140,8 @@
         <body class="vscode-body vscode-light">
             <h1 id="enveng-webapp-development">EnvEng-WebApp-Development</h1>
 <hr>
+<p><code>./configure --disable-gettext --disable-dependency-tracking</code></p>
+<p>TODO: sort out GETTEXT and use autopoint for internalization</p>
 <h3 id="updated-workflow-with-added-tools"><strong>Updated Workflow with Added Tools</strong></h3>
 <hr>
 <h3 id="1-development-and-source-preparation"><strong>1. Development and Source Preparation</strong></h3>
@@ -244,7 +246,7 @@ Core tools that transform source code into executables and libraries.</p>
 <li><code>gcc</code>: Compiles source into object files.</li>
 <li><code>binutils</code>: Links object files into binaries/libraries.</li>
 <li><code>glibc</code>: Provides runtime support for compiled binaries.
-<strong>Example</strong>: Compile <code>src/*.c</code> into a static, portable binary.</li>
+<strong>Example</strong>: Compile <code>src/*.c</code> into a static, portable binary. <code>libglib2.0-dev</code></li>
 </ul>
 <pre><code class="language-bash">gcc -o myprogram src/*.c -static -L/path/to/glibc -I/path/to/glibc/include
 
@@ -353,6 +355,7 @@ Manage installation with symlinks for clean organization.
 </code></pre>
 <p><code>clang-tidy</code> and <code>clang-format</code> can be used for static analysis and code formatting, respectively. and <code>shellcheck</code> for shell scripts.</p>
 <p><code>intltool</code> is used for managing translations in the project. and <code>gtkdoc</code> for generating API documentation.</p>
+<p><code>dos2unix</code> and <code>unix2dos</code> are used for converting line endings between Unix and DOS formats.</p>
 </li>
 </ul>
 <hr>

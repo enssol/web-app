@@ -11,8 +11,9 @@ env_load:
 	fi
 
 # Compiler and linker definitions
-CC = gcc
-CXX = g++
+CCACHE = /usr/bin/ccache
+CC = $(CCACHE) gcc
+CXX = $(CCACHE) g++
 AM_CFLAGS = @CC1_FLAGS@
 AM_LDFLAGS = @LINK_FLAGS@ -static $(LIBS_LIBS)
 

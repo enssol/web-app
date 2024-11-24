@@ -2,6 +2,10 @@
 
 ---
 
+`./configure --disable-gettext --disable-dependency-tracking`
+
+TODO: sort out GETTEXT and use autopoint for internalization
+
 ### **Updated Workflow with Added Tools**
 
 ---
@@ -111,7 +115,7 @@ Core tools that transform source code into executables and libraries:
     -   `gcc`: Compiles source into object files.
     -   `binutils`: Links object files into binaries/libraries.
     -   `glibc`: Provides runtime support for compiled binaries.
-        **Example**: Compile `src/*.c` into a static, portable binary.
+        **Example**: Compile `src/*.c` into a static, portable binary. `libglib2.0-dev`
 
     ```bash
     gcc -o myprogram src/*.c -static -L/path/to/glibc -I/path/to/glibc/include
@@ -230,6 +234,8 @@ Create a portable, self-contained release of the project:
     `clang-tidy` and `clang-format` can be used for static analysis and code formatting, respectively. and `shellcheck` for shell scripts.
 
     `intltool` is used for managing translations in the project. and `gtkdoc` for generating API documentation.
+
+    `dos2unix` and `unix2dos` are used for converting line endings between Unix and DOS formats.
 
 ---
 

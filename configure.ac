@@ -11,8 +11,10 @@ AC_INIT([web-app],[1.0],[https://github.com/enssol/web-app/issues/new])
 AC_CONFIG_SRCDIR([include/config.h])
 AC_CONFIG_HEADERS([config.h])
 
-# Add this at the top of your configure.ac file
-AC_PROG_INTLTOOL([0.50.2])
+# Add this at the top of the file to define the new option
+AC_ARG_ENABLE([gettext],
+    [AS_HELP_STRING([--disable-gettext], [Disable gettext support])],
+    [enable_gettext=$enableval], [enable_gettext=yes])
 
 # Source the .env file if it exists
 if test -f .env; then
@@ -52,11 +54,13 @@ if test "$PKGCONF" = "no"; then
 fi
 
 # Use pkgconf to find libraries
-PKG_CHECK_MODULES([LIBS], [glib-2.0 >= 2.56.0])
+PKG_CHECK_MODULES([LIBS], [glib-2.0 >= 2.31])
 
-# Check for gettext
-AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION([0.20])
+# Remove or comment out these lines in configure.ac
+# if test "$enable_gettext" = "yes"; then
+#     AM_GNU_GETTEXT([external])
+#     AM_GNU_GETTEXT_VERSION([0.20])
+# fi
 
 # Check for flex and bison
 AC_CHECK_PROG([FLEX], [flex], [flex], [no])
@@ -69,7 +73,7 @@ if test "$BISON" = "no"; then
 fi
 
 # Check for other required tools
-AC_CHECK_PROG([COMPLEXITY], [gnu-complexity], [gnu-complexity], [no])
+AC_PATH_PROG([COMPLEXITY], [complexity], [/usr/bin/complexity], [no])
 if test "$COMPLEXITY" = "no"; then
   AC_MSG_ERROR([gnu-complexity is required])
 fi
@@ -81,9 +85,9 @@ if test "$GAWK" = "no"; then
 fi
 
 # Check for autoindent
-AC_CHECK_PROG([AUTOINDENT], [autoindent], [autoindent], [no])
-if test "$AUTOINDENT" = "no"; then
-  AC_MSG_ERROR([autoindent is required])
+AC_CHECK_PROG([INDENT], [indent], [indent], [no])
+if test "$INDENT" = "no"; then
+  AC_MSG_ERROR([indent is required])
 fi
 
 # Check for clib
@@ -157,9 +161,9 @@ if test "$XZ" = "no"; then
   AC_MSG_ERROR([xz is required])
 fi
 
-# Check for recutils
-AC_CHECK_PROG([RECUTILS], [recutils], [recutils], [no])
-if test "$RECUTILS" = "no"; then
+# Check for recutils (recsel)
+AC_CHECK_PROG([RECSEL], [recsel], [recsel], [no])
+if test "$RECSEL" = "no"; then
   AC_MSG_ERROR([recutils is required])
 fi
 
@@ -205,15 +209,6 @@ AC_CHECK_HEADERS([stdio.h stdlib.h string.h stdarg.h ctype.h sys/stat.h])
 # Checks for typedefs
 AC_TYPE_SIZE_T
 
-# Checks for structures
-AC_CHECK_HEADERS([sys/stat.h])
-
-# Checks for compiler characteristics
-AC_PROG_CC
-
-# Checks for library functions.
-AC_CHECK_FUNCS([memset strchr strdup strrchr strtol])
-
 # Checks for system services
 AC_CHECK_FUNCS([fork pipe])
 
@@ -258,9 +253,3 @@ AC_SUBST([MACROS_DIR])
 AC_SUBST([LOCALES_DIR])
 
 AC_OUTPUT
-
-# Custom command to run the fix_makefile.sh script
-AC_CONFIG_COMMANDS([fix_makefile], [
-  echo "Running fix_makefile.sh..."
-  ./fix_makefile.sh
-])
