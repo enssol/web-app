@@ -1,4 +1,4 @@
-src/main.c \
+﻿src/main.c \
 src/hello.c \
 src/config_loader.c \
 src/env_loader.c \

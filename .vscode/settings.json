@@ -95,7 +95,7 @@
   },
   "search.useIgnoreFiles": true,
   "search.useGlobalIgnoreFiles": true,
-  "workbench.startupEditor": "terminal",
+  "workbench.startupEditor": "readme",
   "diffEditor.maxComputationTime": 0,
   "prettier.useTabs": true,
   "editor.codeActions.triggerOnFocusChange": true,
@@ -112,7 +112,7 @@
   "files.autoGuessEncoding": true,
   "files.encoding": "utf8bom",
   "files.eol": "\n",
-  "files.insertFinalNewline": false,
+  "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
   "explorer.fileNesting.enabled": true,
@@ -128,7 +128,7 @@
   "C_Cpp.clang_format_fallbackStyle": "Google",
   "C_Cpp.clang_format_style": "file",
   "C_Cpp.clang_format_sortIncludes": true,
-  "C_Cpp.clang_format_path": "/usr/bin/clang-format",
+  "C_Cpp.clang_format_path": "clang-format",
   "makefile.extensionOutputFolder": "./build",
   "makefile.configurations": [
     {
@@ -143,30 +143,23 @@
   "makefile.launchConfigurations": [
     {
       "name": "Debug",
-      "binaryPath": "./build/debug/myapp"
+      "binaryPath": "./build/debug/app"
     },
     {
       "name": "Release",
-      "binaryPath": "./build/release/myapp"
+      "binaryPath": "./build/release/app"
     }
   ],
-  "makefile.makePath": "/usr/bin/make",
+  "makefile.makePath": "gmake",
   "makefile.makefilePath": "./Makefile",
   "makefile.buildLog": "./logs/build.log",
   "shellcheck.enable": true,
-  "shellcheck.executablePath": "/usr/bin/shellcheck",
+  "shellcheck.executablePath": "shellcheck",
   "shellcheck.run": "onSave",
-  "shellcheck.exclude": [
-    "SC1000", // Example: Exclude specific rule
-    "SC2000"  // Example: Exclude another specific rule
-  ],
+  "shellcheck.exclude": [],
   "shellcheck.customArgs": [
     "--severity=style", // Set severity level
     "--enable=all"      // Enable all checks
-  ],
-  "shellcheck.ignorePatterns": [
-    "**/node_modules/**", // Ignore node_modules directory
-    "**/build/**"         // Ignore build directory
   ],
   "markdown.extension.list.indentationSize": "inherit",
   "markdown.extension.print.onFileSave": true,
@@ -177,5 +170,8 @@
     "MD041": false, // Allow first line to be non-header
     "MD007": { "indent": 4 }, // Set list indentation to 4 spaces
     "MD029": { "style": "ordered" } // Enforce ordered list style
-  }
+  },
+  "prettier.configPath": ".prettierrc",
+  "linthtml.packageManager": "npm",
+  "C_Cpp.default.compilerPath": "/opt/homebrew/Cellar/gcc/14.2.0_1/bin/gcc-14"
 }

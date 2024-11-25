@@ -1,4 +1,4 @@
-*cc1:
+﻿*cc1:
   std=gnu23: -std=gnu23 \
   D_POSIX_C_SOURCE: -D_POSIX_C_SOURCE=2024L \
   D_XOPEN_SOURCE: -D_XOPEN_SOURCE=800 \
@@ -24,12 +24,21 @@
   %{!DPLATFORM_LINUX: -DPLATFORM_LINUX} \
   %{!fno-strict-aliasing: -fno-strict-aliasing} \
   %{!fdiagnostics-color=always: -fdiagnostics-color=always} \
-  -I${INCLUDE_DIR}
+  -I${INCLUDE_DIR} \
+  -I/usr/local/include/glib-2.0 \
+  -I/usr/local/lib/glib-2.0/include \
+  -I/opt/homebrew/include/glib-2.0 \
+  -I/opt/homebrew/lib/glib-2.0/include \
+  -pg -fprofile-arcs -ftest-coverage
 
 *link:
   %{L${LIB_DIR}} \
+  -L/usr/local/lib \
+  -L/opt/homebrew/lib \
   -Wl,--gc-sections \
-  -static -lmylib -Wl,-Bstatic -lc -lgcc -Wl,-Bdynamic
+  "-fuse-ld=mold"
+  -static -lmylib -Wl,-Bstatic -lc -lgcc -Wl,-Bdynamic \
+  -pg -lgcov
 
 *as:
   -march=native -mtune=generic

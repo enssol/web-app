@@ -278,7 +278,7 @@
             "/home/ubuntu/web-app",
             "/Users/adriangallo/web-app"
         ],
-        "workbench.startupEditor": "terminal",
+        "workbench.startupEditor": "readme",
         "diffEditor.maxComputationTime": 0,
         "licenser.useSPDXLicenseFormat": true,
         "prettier.useTabs": true,
@@ -296,7 +296,7 @@
         "files.autoGuessEncoding": true,
         "files.encoding": "utf8bom",
         "files.eol": "\n",
-        "files.insertFinalNewline": false,
+        "files.insertFinalNewline": true,
         "files.trimFinalNewlines": true,
         "files.trimTrailingWhitespace": true,
         "files.simpleDialog.enable": true,
@@ -344,7 +344,7 @@
         "C_Cpp.clang_format_fallbackStyle": "Google",
         "C_Cpp.clang_format_style": "file",
         "C_Cpp.clang_format_sortIncludes": true,
-        "C_Cpp.clang_format_path": "/usr/bin/clang-format", // Adjust the path if necessary
+        "C_Cpp.clang_format_path": "clang-format",
         "makefile.extensionOutputFolder": "./build",
         "makefile.configurations": [
             {
@@ -359,23 +359,20 @@
         "makefile.launchConfigurations": [
             {
                 "name": "Debug",
-                "binaryPath": "./build/debug/myapp"
+                "binaryPath": "./build/debug/app"
             },
             {
                 "name": "Release",
-                "binaryPath": "./build/release/myapp"
+                "binaryPath": "./build/release/app"
             }
         ],
-        "makefile.makePath": "/usr/bin/make",
+        "makefile.makePath": "gmake",
         "makefile.makefilePath": "./Makefile",
         "makefile.buildLog": "./logs/build.log",
         "shellcheck.enable": true,
-        "shellcheck.executablePath": "/usr/bin/shellcheck",
+        "shellcheck.executablePath": "shellcheck",
         "shellcheck.run": "onSave",
-        "shellcheck.exclude": [
-            "SC1000", // Example: Exclude specific rule
-            "SC2000"  // Example: Exclude another specific rule
-        ],
+        "shellcheck.exclude": [],
         "shellcheck.customArgs": [
             "--severity=style", // Set severity level
             "--enable=all"      // Enable all checks
@@ -394,17 +391,32 @@
             "MD033": false, // Allow inline HTML
             "MD041": false, // Allow first line to be non-header
             "MD007": { "indent": 4 }, // Set list indentation to 4 spaces
-            "MD029": { "style": "ordered" } // Enforce ordered list style
+            "MD029": { "style": "ordered" }, // Enforce ordered list style
+            "configFile": true
         },
-        "clang-format.executable": "/usr/bin/clang-format",
-        "clang-format.style": "file",
-        "clang-format.fallbackStyle": "Google",
-        "clang-tidy.executable": "/usr/bin/clang-tidy",
+        "clang-tidy.executable": "clang-tidy",
         "clang-tidy.checks": [
-            "*",
-            "-clang-analyzer-*", // Disable specific checks
-            "-cppcoreguidelines-*"
+            "bugprone-*",
+            "clang-analyzer-*",
+            "cppcoreguidelines-*",
+            "google-*",
+            "modernize-*",
+            "performance-*",
+            "readability-*",
+            "portability-*",
+            "misc-*",
+            "cert-*",
+            "linuxkernel-*",
+            "mpi-*",
+            "hicpp-*",
+            "llvm-header-guard",
+            "-modernize-deprecated-headers"
         ],
+        "prettier.configPath": ".prettierrc",
+
+        "linthtml.enable": true,
+        "linthtml.configFile": ".linthtmlrc",
+        "linthtml.packageManager": "npm"
     },
     "extensions": {
         "recommendations": [
@@ -412,7 +424,8 @@
           "ms-vscode.makefile-tools",
           "timonwong.shellcheck",
           "davidanson.vscode-markdownlint",
-          "yzhang.markdown-all-in-one"
+          "yzhang.markdown-all-in-one",
+          "kamikillerto.vscode-linthtml"
         ]
     }
 }

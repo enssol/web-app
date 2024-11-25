@@ -1,4 +1,4 @@
-# deps/Makefile.am
+﻿# deps/Makefile.am
 
 .POSIX: # Enforce POSIX mode for portability
 

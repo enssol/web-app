@@ -140,7 +140,7 @@
         <body class="vscode-body vscode-light">
             <h1 id="enveng-webapp-development">EnvEng-WebApp-Development</h1>
 <hr>
-<p><code>./configure --disable-gettext --disable-dependency-tracking</code></p>
+<p><code>./configure --disable-gettext --disable-dependency-tracking LDFLAGS=&quot;-B/opt/homebrew/bin&quot;</code></p>
 <p>TODO: sort out GETTEXT and use autopoint for internalization</p>
 <h3 id="updated-workflow-with-added-tools"><strong>Updated Workflow with Added Tools</strong></h3>
 <hr>
@@ -353,11 +353,75 @@ Manage installation with symlinks for clean organization.
 <strong>Example</strong>: Use <code>stow</code> to manage <code>bin/</code>, <code>lib/</code>, and <code>include/</code>.</p>
 <pre><code class="language-bash">stow -t /usr/local -d stow_dir myproject
 </code></pre>
-<p><code>clang-tidy</code> and <code>clang-format</code> can be used for static analysis and code formatting, respectively. and <code>shellcheck</code> for shell scripts.</p>
-<p><code>intltool</code> is used for managing translations in the project. and <code>gtkdoc</code> for generating API documentation.</p>
+<p><code>clang-tidy</code> and <code>clang-format</code>  and <code>cppcheck</code> can be used for static analysis and code formatting, respectively. and <code>shellcheck</code> for shell scripts.</p>
+<p><code>gtkdoc</code> for generating API documentation.</p>
 <p><code>dos2unix</code> and <code>unix2dos</code> are used for converting line endings between Unix and DOS formats.</p>
+<pre><code>- **`splint`**:
+</code></pre>
+<p>Perform static code analysis to identify potential issues in the C source code.
+<strong>Example</strong>: Analyze all C source files in the <code>src/</code> directory.</p>
+<pre><code class="language-bash">splint src/*.c
+  ```
+
+    - **`cscope`**:
+Generate an index <span class="hljs-keyword">for</span> navigating and searching through the C <span class="hljs-built_in">source</span> code.
+**Example**: Create a `cscope` database <span class="hljs-keyword">for</span> all C <span class="hljs-built_in">source</span> files <span class="hljs-keyword">in</span> the [src](http://_vscodecontentref_/1) directory.
+
+```bash
+cscope -b -R -s src
+  ```
+
+</code></pre>
 </li>
 </ul>
+<hr>
+<h3 id="9-profiling-and-coverage-analysis"><strong>9. Profiling and Coverage Analysis</strong></h3>
+<h4 id="profiling-with-gprof">Profiling with gprof</h4>
+<ol>
+<li>
+<p>Compile the project with profiling enabled:</p>
+<pre><code class="language-bash">make clean
+./configure CFLAGS=<span class="hljs-string">&quot;-pg&quot;</span> LDFLAGS=<span class="hljs-string">&quot;-pg&quot;</span>
+make
+</code></pre>
+</li>
+<li>
+<p>Run the application to generate profiling data:</p>
+<pre><code class="language-bash">./web-app
+</code></pre>
+</li>
+<li>
+<p>Generate the profiling report:</p>
+<pre><code class="language-bash">gprof ./web-app gmon.out &gt; gprof.out
+</code></pre>
+</li>
+<li>
+<p>View the profiling report in <code>gprof.out</code>.</p>
+</li>
+</ol>
+<h4 id="coverage-analysis-with-gcov">Coverage Analysis with gcov</h4>
+<ol>
+<li>
+<p>Compile the project with coverage enabled:</p>
+<pre><code class="language-bash">make clean
+./configure CFLAGS=<span class="hljs-string">&quot;-fprofile-arcs -ftest-coverage&quot;</span> LDFLAGS=<span class="hljs-string">&quot;-lgcov&quot;</span>
+make
+</code></pre>
+</li>
+<li>
+<p>Run the application to generate coverage data:</p>
+<pre><code class="language-bash">./web-app
+</code></pre>
+</li>
+<li>
+<p>Generate the coverage report:</p>
+<pre><code class="language-bash">make coverage
+</code></pre>
+</li>
+<li>
+<p>View the coverage report in the generated <code>.gcov</code> files.</p>
+</li>
+</ol>
 <hr>
 <h3 id="final-full-process-order"><strong>Final Full Process Order</strong></h3>
 <ol>
@@ -369,6 +433,7 @@ Manage installation with symlinks for clean organization.
 <li><strong>Navigation</strong>: <code>global</code>, <code>cflow</code>.</li>
 <li><strong>Documentation</strong>: <code>texinfo</code>.</li>
 <li><strong>Packaging</strong>: <code>xz</code>, <code>recutils</code>, <code>stow</code>.</li>
+<li><strong>Profiling and Coverage Analysis</strong>: <code>gprof</code>, <code>gcov</code>.</li>
 </ol>
 <p>This sequence incorporates <strong><code>autoindent</code></strong> for code formatting, <strong><code>autopoint</code></strong> for initializing i18n support, and <strong><code>clibs</code></strong> for lightweight library management, ensuring a smooth, modern, and portable C project workflow.</p>
 <h1 id="project-build-process">Project Build Process</h1>
@@ -1107,6 +1172,10 @@ scripts/     # Utility scripts
 <hr>
 <h2 id="license">License</h2>
 <p>This project is licensed under the <a href="LICENSE">AGPLv3</a>. See the <code>LICENSE</code> file for details.</p>
+<h2 id="build-instructions">Build Instructions</h2>
+<p>To configure the project with <code>mold</code> as the linker, run the following command:</p>
+<pre><code class="language-sh">./configure --disable-gettext --disable-dependency-tracking LDFLAGS=<span class="hljs-string">&quot;-fuse-ld=mold&quot;</span>
+</code></pre>
 
             
             

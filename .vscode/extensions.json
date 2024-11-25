@@ -5,6 +5,7 @@
     "ms-vscode.makefile-tools",
     "timonwong.shellcheck",
     "davidanson.vscode-markdownlint",
-    "yzhang.markdown-all-in-one"
+    "yzhang.markdown-all-in-one",
+    "kamikillerto.vscode-linthtml"
   ]
 }

@@ -1,4 +1,4 @@
-﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
+﻿﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 .POSIX: # Enforce POSIX mode for portability
@@ -11,11 +11,11 @@ env_load:
 	fi
 
 # Compiler and linker definitions
-CCACHE = /usr/bin/ccache
+CCACHE = ccache
 CC = $(CCACHE) gcc
 CXX = $(CCACHE) g++
-AM_CFLAGS = @CC1_FLAGS@
-AM_LDFLAGS = @LINK_FLAGS@ -static $(LIBS_LIBS)
+AM_CFLAGS = @CC1_FLAGS@ -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include
+AM_LDFLAGS = @LINK_FLAGS@ -static $(LIBS_LIBS) -L/usr/local/lib -L/opt/homebrew/lib
 
 # Output compiler choices during build
 all:
@@ -90,6 +90,17 @@ valgrind:
 perf:
 	@echo "Running gnu-perf on the binary..."
 	perf stat ./web-app
+
+# Profiling with gprof
+profile:
+    @echo "Running gprof for profiling..."
+    ./web-app
+    gprof ./web-app gmon.out > gprof.out
+
+# Coverage analysis with gcov
+coverage:
+    @echo "Running gcov for coverage analysis..."
+    find $(srcdir) -name '*.c' -exec gcov {} \;
 
 # Documentation generation
 docs:

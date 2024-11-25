@@ -1,8 +1,8 @@
-# EnvEng-WebApp-Development
+﻿# EnvEng-WebApp-Development
 
 ---
 
-`./configure --disable-gettext --disable-dependency-tracking`
+`./configure --disable-gettext --disable-dependency-tracking LDFLAGS="-B/opt/homebrew/bin"`
 
 TODO: sort out GETTEXT and use autopoint for internalization
 
@@ -231,11 +231,73 @@ Create a portable, self-contained release of the project:
     stow -t /usr/local -d stow_dir myproject
     ```
 
-    `clang-tidy` and `clang-format` can be used for static analysis and code formatting, respectively. and `shellcheck` for shell scripts.
+    `clang-tidy` and `clang-format`  and `cppcheck` can be used for static analysis and code formatting, respectively. and `shellcheck` for shell scripts.
 
-    `intltool` is used for managing translations in the project. and `gtkdoc` for generating API documentation.
+    `gtkdoc` for generating API documentation.
 
     `dos2unix` and `unix2dos` are used for converting line endings between Unix and DOS formats.
+
+        - **`splint`**:
+      Perform static code analysis to identify potential issues in the C source code.
+      **Example**: Analyze all C source files in the `src/` directory.
+
+      ```bash
+      splint src/*.c
+        ```
+
+          - **`cscope`**:
+      Generate an index for navigating and searching through the C source code.
+      **Example**: Create a `cscope` database for all C source files in the [src](http://_vscodecontentref_/1) directory.
+
+      ```bash
+      cscope -b -R -s src
+        ```
+
+---
+
+### **9. Profiling and Coverage Analysis**
+
+#### Profiling with gprof
+
+1. Compile the project with profiling enabled:
+    ```bash
+    make clean
+    ./configure CFLAGS="-pg" LDFLAGS="-pg"
+    make
+    ```
+
+2. Run the application to generate profiling data:
+    ```bash
+    ./web-app
+    ```
+
+3. Generate the profiling report:
+    ```bash
+    gprof ./web-app gmon.out > gprof.out
+    ```
+
+4. View the profiling report in `gprof.out`.
+
+#### Coverage Analysis with gcov
+
+1. Compile the project with coverage enabled:
+    ```bash
+    make clean
+    ./configure CFLAGS="-fprofile-arcs -ftest-coverage" LDFLAGS="-lgcov"
+    make
+    ```
+
+2. Run the application to generate coverage data:
+    ```bash
+    ./web-app
+    ```
+
+3. Generate the coverage report:
+    ```bash
+    make coverage
+    ```
+
+4. View the coverage report in the generated `.gcov` files.
 
 ---
 
@@ -249,6 +311,7 @@ Create a portable, self-contained release of the project:
 6. **Navigation**: `global`, `cflow`.
 7. **Documentation**: `texinfo`.
 8. **Packaging**: `xz`, `recutils`, `stow`.
+9. **Profiling and Coverage Analysis**: `gprof`, `gcov`.
 
 This sequence incorporates **`autoindent`** for code formatting, **`autopoint`** for initializing i18n support, and **`clibs`** for lightweight library management, ensuring a smooth, modern, and portable C project workflow.
 
@@ -841,3 +904,10 @@ Refer to the [CONTRIBUTING.md](CONTRIBUTING.md) file for more details.
 ## License
 
 This project is licensed under the [AGPLv3](LICENSE). See the `LICENSE` file for details.
+
+## Build Instructions
+
+To configure the project with `mold` as the linker, run the following command:
+
+```sh
+./configure --disable-gettext --disable-dependency-tracking LDFLAGS="-fuse-ld=mold"

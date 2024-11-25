@@ -1,7 +1,7 @@
-# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
+﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-# Main Root Makefile.am
+# Root Makefile.am
 
 .POSIX: # Enforce POSIX mode for portability
 
@@ -12,28 +12,15 @@ include common-rules.am
 AUTOMAKE_OPTIONS = gnu subdir-objects dist-xz
 ACLOCAL_AMFLAGS = -I m4
 
-# Source and header files
-bin_PROGRAMS = web-app
-web_app_SOURCES = $(SRC_DIR)/main.c $(SRC_DIR)/config_loader.c $(SRC_DIR)/env_loader.c $(SRC_DIR)/error_handler.c $(SRC_DIR)/garbage_collector.c $(SRC_DIR)/hello.c $(SRC_DIR)/lexer.l $(SRC_DIR)/logger.c $(SRC_DIR)/parser.y $(SRC_DIR)/validator.c
-web_app_HEADERS = $(HEADER_FILES)
-
-# Define the source files
-SRC_DIR = src
-OBJ_DIR = objects
-SRC_FILES = $(SRC_DIR)/config_loader.c $(SRC_DIR)/env_loader.c $(SRC_DIR)/main.c $(SRC_DIR)/error_handler.c $(SRC_DIR)/garbage_collector.c $(SRC_DIR)/hello.c $(SRC_DIR)/lexer.l $(SRC_DIR)/logger.c $(SRC_DIR)/parser.y $(SRC_DIR)/validator.c
-OBJ_FILES = $(SRC_FILES:.c=.o)
-
-# Define the directory for headers
-web_appdir = $(INCLUDE_DIR)
-
-# Include directories
-AM_CPPFLAGS = -I$(INCLUDE_DIR) $(LIBS_CFLAGS)
-
 # Define subdirectories
 SUBDIRS = src include etc docs m4 po bin build deps dist tmp lib objects logs m4
 
 # Additional libraries
 LDADD = -lm
+LDFLAGS += -fuse-ld=mold -L/usr/local/lib -L/opt/homebrew/lib
+
+# Include directories for glib-2.0
+AM_CPPFLAGS = -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include
 
 # Define the directory for configuration files
 configdir = $(CONFIG_DIR)
@@ -76,3 +63,14 @@ uninstall-local:
     for lang in $(LINGUAS); do \
         rm -f $(DESTDIR)$(datadir)/locale/$$lang/LC_MESSAGES/$(PACKAGE).mo; \
     done
+
+# Profiling with gprof
+profile:
+    @echo "Running gprof for profiling..."
+    ./web-app
+    gprof ./web-app gmon.out > gprof.out
+
+# Coverage analysis with gcov
+coverage:
+    @echo "Running gcov for coverage analysis..."
+    find $(srcdir) -name '*.c' -exec gcov {} \;

@@ -1,4 +1,4 @@
-# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
+﻿﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
 # SPDX-License-Identifier: 	AGPL-3.0-or-later
 
 #                                               -*- Autoconf -*-
@@ -38,7 +38,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_CHECK_TOOL([AR], [ar])
-AC_CHECK_TOOL([LD], [ld])
+AC_CHECK_TOOL([LD], [mold])
 AC_CHECK_PROG([GDB], [gdb], [gdb])
 AC_CHECK_PROG([DDD], [ddd], [ddd])
 AC_CHECK_PROG([M4], [m4], [m4])
@@ -54,13 +54,22 @@ if test "$PKGCONF" = "no"; then
 fi
 
 # Use pkgconf to find libraries
-PKG_CHECK_MODULES([LIBS], [glib-2.0 >= 2.31])
+PKG_CHECK_MODULES([LIBS], [glib-2.0], [glib])
 
-# Remove or comment out these lines in configure.ac
-# if test "$enable_gettext" = "yes"; then
-#     AM_GNU_GETTEXT([external])
-#     AM_GNU_GETTEXT_VERSION([0.20])
-# fi
+# Set PKG_CONFIG_PATH for pkg-config to find glib-2.0
+AC_SUBST([PKG_CONFIG_PATH], [$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:/opt/homebrew/lib/pkgconfig])
+
+# Check for splint
+AC_CHECK_PROG([SPLINT], [splint], [splint], [no])
+if test "$SPLINT" = "no"; then
+  AC_MSG_ERROR([splint is required])
+fi
+
+# Check for cscope
+AC_CHECK_PROG([CSCOPE], [cscope], [cscope], [no])
+if test "$CSCOPE" = "no"; then
+  AC_MSG_ERROR([cscope is required])
+fi
 
 # Check for flex and bison
 AC_CHECK_PROG([FLEX], [flex], [flex], [no])
@@ -116,9 +125,6 @@ AC_PROG_CC
 AC_CHECK_TOOL([AR], [ar])
 AC_CHECK_TOOL([LD], [ld])
 
-# Check for glibc
-AC_CHECK_LIB([c], [malloc], [], [AC_MSG_ERROR([glibc is required])])
-
 # Check for coreutils
 AC_CHECK_PROG([RM], [rm], [rm], [no])
 AC_CHECK_PROG([MKDIR], [mkdir], [mkdir], [no])
@@ -128,13 +134,20 @@ AC_CHECK_PROG([MV], [mv], [mv], [no])
 # Check for valgrind
 AC_CHECK_PROG([VALGRIND], [valgrind], [valgrind], [no])
 if test "$VALGRIND" = "no"; then
-  AC_MSG_ERROR([valgrind is required])
+  AC_MSG_WARN([valgrind is not found. Memory leak checks will be skipped.])
 fi
 
-# Check for gnu-perf
-AC_CHECK_PROG([PERF], [perf], [perf], [no])
-if test "$PERF" = "no"; then
-  AC_MSG_ERROR([gnu-perf is required])
+# Add Homebrew bin directory to PATH for macOS
+case "$host_os" in
+  darwin*)
+    PATH="/opt/homebrew/bin:$PATH"
+    ;;
+esac
+
+# Check for gnu-perf (gperf)
+AC_CHECK_PROG([GPERF], [gperf], [gperf], [no])
+if test "$GPERF" = "no"; then
+  AC_MSG_ERROR([gnu-perf (gperf) is required])
 fi
 
 # Check for cflow
@@ -188,7 +201,7 @@ fi
 # Check for clang-tidy
 AC_CHECK_PROG([CLANG_TIDY], [clang-tidy], [clang-tidy], [no])
 if test "$CLANG_TIDY" = "no"; then
-  AC_MSG_ERROR([clang-tidy is required])
+  AC_MSG_WARN([clang-tidy is not found. Code quality checks will be skipped.])
 fi
 
 # Check for cppcheck
@@ -201,6 +214,12 @@ fi
 AC_CHECK_PROG([SHELLCHECK], [shellcheck], [shellcheck], [no])
 if test "$SHELLCHECK" = "no"; then
   AC_MSG_ERROR([shellcheck is required])
+fi
+
+# Check for gcov
+AC_CHECK_PROG([GCOV], [gcov], [gcov], [no])
+if test "$GCOV" = "no"; then
+  AC_MSG_ERROR([gcov is required])
 fi
 
 # Checks for header files.

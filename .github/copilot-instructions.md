@@ -1,4 +1,4 @@
-# **Copilot Instructions for EnvEng Web Application Development**
+﻿# **Copilot Instructions for EnvEng Web Application Development**
 
 This document outlines coding standards and practices for the EnvEng Web Application development project. These instructions help align Copilot's suggestions with our project's requirements.
 
