@@ -1,6 +1,6 @@
 # Acknowledgments
 
-We would like to acknowledge the following projects, libraries, and individuals that have contributed to the development of Obligation Register:
+We would like to acknowledge the following projects, libraries, and individuals that have contributed to the development of this project:
 
 ## Dependencies
 
@@ -13,7 +13,6 @@ We would like to acknowledge the following projects, libraries, and individuals 
 ### Modules
 
 - **[cJSON](https://github.com/DaveGamble/cJSON)**: Ultralightweight JSON parser in ANSI C. Licensed under the [MIT License](https://github.com/DaveGamble/cJSON/blob/master/LICENSE).
-- **[mongoose](https://github.com/cesanta/mongoose)**: Embedded web server/library. Licensed under the [GPLv2 License](https://github.com/cesanta/mongoose/blob/master/LICENSE).
 
 ## Tools
 
