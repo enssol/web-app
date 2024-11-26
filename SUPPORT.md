@@ -16,7 +16,8 @@ Thank you for using Web-App repository! If you need help or have any questions, 
 If you need further assistance, you can contact the development team directly:
 
 - **Email**: [agallo@enveng-group.com.au](mailto:agallo@enveng-group.com.au)
-- **GitHub Discussions**: Join the conversation on our [GitHub Discussions] page.
+
+- **GitHub Discussions**: Join the conversation on our [GitHub Discussions](https://github.com/enssol/web-app/discussions) page.
 
 ## Contributing
 

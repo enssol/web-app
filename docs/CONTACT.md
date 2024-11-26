@@ -1,10 +1,27 @@
 # Contact page
 
-- **[enveng-group](https://github.com/enveng-group)** - enveng-group agallo
-
-- **[enveng-group](https://github.com/bwork005)** - enveng-group bwork005
-
 - **Email**: [agallo@enveng-group.com.au](mailto:agallo@enveng-group.com.au)
-- **Email**: [bsingh@enveng-group.com.au](mailto:bsingh@enveng-group.com.au)
 
 - **GitHub Discussions**: Join the conversation on our [GitHub Discussions](https://github.com/enssol/web-app/discussions) page.
+
+## Team Members
+
+- **Adrian Agallo** - Project Manager
+- **Adrian Agallo** - Lead Developer
+- **Bhoomi Singh** - Intern
+
+## Support
+
+For support, please our [Support Page](../SUPPORT.md).
+
+## FAQ
+
+For common questions, please visit our [FAQ page](FAQ.md).
+
+## Business Hours
+
+Monday - Friday: 8 AM - 5 PM
+
+Saturday: Closed
+
+Sunday: Closed

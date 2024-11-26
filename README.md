@@ -111,7 +111,6 @@ Follow these steps to get the development environment up and running:
 
 1. **Clone the repository**
 
-- ```bash
 - git clone <https://github.com/your-org/web-app.git>
 
 - cd web-app
@@ -168,13 +167,13 @@ Fork the repository and clone it to your local machine.
 Create a new feature or bugfix branch.
 Make your changes, ensuring your commits follow the commit guidelines.
 Submit a pull request to the develop branch for review.
-For more information, refer to our [[CONTRIBUTING.md]CONTRIBUTING.md](CONTRIBUTING.md) file.
+For more information, refer to our [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ---
 
 ### Licence
 
-This project is licensed under the [[LICENSE]AGPLv3](LICENSE). Please review the LICENCE file for details on usage and distribution.
+This project is licensed under the [LICENSE](LICENSE). Please review it for details on usage and distribution.
 
 ---
 
@@ -182,6 +181,6 @@ This project is licensed under the [[LICENSE]AGPLv3](LICENSE). Please review the
 
 For any inquiries or questions regarding this project, feel free to reach out to the team:
 
-Lead Developer: [Adrian Agallo](https://github.com/enveng-group)
+Lead Developer: [Adrian Agallo](agallo@enveng-group.com.au)
 
-Project Maintainer: [Adrian Agallo](https://github.com/enveng-group)
+Project Maintainer: [Adrian Agallo](agallo@enveng-group.com.au)

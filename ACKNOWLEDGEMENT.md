@@ -40,6 +40,6 @@ This project is licensed under the AGPLv3 License. See the [LICENSE](LICENSE) fi
 
 For any inquiries or contributions, please contact:
 
-- **Enveng Group**: [enveng-group@users.noreply.github.com](mailto:enveng-group@users.noreply.github.com)
+- **Enveng Group**: [agallo@enveng-group.com.au](mailto:agallo@enveng-group.com.au)
 
-Thank you to everyone who has contributed to the development of Obligation Register!
+Thank you to everyone who has contributed to the development of the Project!
