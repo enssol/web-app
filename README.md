@@ -111,11 +111,10 @@ Follow these steps to get the development environment up and running:
 
 1. **Clone the repository**
 
-- git clone <https://github.com/your-org/web-app.git>
-
-- cd web-app
-
----
+   ```sh
+   git clone <https://github.com/your-org/web-app.git>
+   cd web-app
+   ```
 
 ### Git Workflow
 
@@ -181,6 +180,6 @@ This project is licensed under the [LICENSE](LICENSE). Please review it for deta
 
 For any inquiries or questions regarding this project, feel free to reach out to the team:
 
-Lead Developer: [Adrian Agallo](agallo@enveng-group.com.au)
+Lead Developer: [Adrian Gallo](agallo@enveng-group.com.au)
 
-Project Maintainer: [Adrian Agallo](agallo@enveng-group.com.au)
+Project Maintainer: [Adrian Gallo](agallo@enveng-group.com.au)

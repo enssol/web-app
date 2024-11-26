@@ -127,4 +127,5 @@ This project is licensed under the [[LICENSE]AGPLv3]. Please refer to the Liscen
 If you have any questions or feedback, you can contact the maintainers via the following methods:
 
 - Open an issue in the GitHub repository.
-- Reach us at [enveng-group](https://github.com/enveng-group)** - enveng-group agallo
+- Reach us at [enveng-group](https://github.com/enveng-group) - repository.
+- Email: [agallo@enveng-group.com.au](mailto:agallo@enveng-group.com.au)

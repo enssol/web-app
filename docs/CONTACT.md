@@ -6,8 +6,8 @@
 
 ## Team Members
 
-- **Adrian Agallo** - Project Manager
-- **Adrian Agallo** - Lead Developer
+- **Adrian Gallo** - Project Manager
+- **Adrian Gallo** - Lead Developer
 - **Bhoomi Singh** - Intern
 
 ## Support

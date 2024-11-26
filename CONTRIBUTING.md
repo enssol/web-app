@@ -1,4 +1,4 @@
-# Contributing to Obligation Web-App Repository
+# Contributing to Web-App Repository
 
 Thank you for considering contributing to Web-App! We welcome contributions from everyone. By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT).
 
