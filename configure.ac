@@ -58,7 +58,7 @@ if test "$PKGCONF" = "no"; then
 fi
 
 # Use pkgconf to find libraries
-PKG_CHECK_MODULES([LIBS], [glib-2.0], [glib])
+PKG_CHECK_MODULES([LIBS], [glib-2.0])
 
 # Set PKG_CONFIG_PATH for pkg-config to find glib-2.0
 AC_SUBST([PKG_CONFIG_PATH], [$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig:/opt/homebrew/lib/pkgconfig])

@@ -29,7 +29,8 @@ int validate_config(config_t *config, const char *value)
         return -1; // Error: Null pointer
     }
 
-    strcpy(config->app_name, value);
+    strncpy(config->app_name, value, sizeof(config->app_name) - 1);
+    config->app_name[sizeof(config->app_name) - 1] = '\0';  // Ensure null termination
     return 0; // Success
 }
 

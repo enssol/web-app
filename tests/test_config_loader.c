@@ -3,21 +3,28 @@
  * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
 
-#include "config.h"
-#include "gettext.h"
-#include "unity.h"
-#include "config_loader.h"
+#include "../include/config.h"
+#include "../lib/unity.h"
+#include "../include/config_loader.h"
 #include <stdio.h>
 
 void setUp(void) {
     // Create temporary configuration files
     FILE *file = fopen("config/config.ini", "w");
-    fprintf(file, "key=value\n");
-    fclose(file);
+    if (file != NULL) {
+        fprintf(file, "key=value\n");
+        fclose(file); // This is line 20
+    } else {
+        perror("Error opening config/config.ini");
+    }
 
     file = fopen("config/config.conf", "w");
-    fprintf(file, "key=value\n");
-    fclose(file);
+    if (file != NULL) {
+        fprintf(file, "key=value\n");
+        fclose(file);
+    } else {
+        perror("Error opening config/config.conf");
+    }
 }
 
 void tearDown(void) {

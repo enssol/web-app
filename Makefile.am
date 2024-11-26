@@ -13,7 +13,7 @@ ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = src include etc docs m4 po bin build deps dist tmp lib objects logs m4
 
 # Compiler and linker definitions
-CFLAGS = -Iinclude -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include -O0 -pedantic -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800 -std=gnu23 -Wall -Wextra -Werror -fno-common -DPIC -MMD -MP
+CFLAGS = -Iinclude -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include -O0 -pedantic -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800 -std=gnu23 -Wall -Wextra -Werror -DPIC -MMD -MP
 AM_CFLAGS = $(CFLAGS)
 
 # Linker flags definition

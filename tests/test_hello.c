@@ -21,7 +21,7 @@ void setUp(void) {
 
 void tearDown(void) {
     // Restore stdout
-    freopen("/dev/tty", "w", stdout);
+    fclose(stdout);
 }
 
 void test_print_hello(void) {
