@@ -1,37 +1,72 @@
-# EnvEng-WebApp-Development
+# Web-App
 
-Development of the EnvEng web application using 5S methodology for project management and Data-Oriented Programming (DOP) for development.
+##
 
-## Project Plan Framework
+### Project overview
 
-### 1. Introduction
+The **WebApp** is designed to provide an efficient, scalable, and maintainable web application tailored to environmental engineering needs. The key goals of this project include:
 
-Project Overview:
-The project is created to create a Web Development platform for Enveng company.
-Methodologies: Explain the use of 5S for project management and DOP for development.
+- **Building a scalable, maintainable codebase.**
+- **Ensuring clarity through Data-Oriented Programming (DOP).**
+- **Maintaining an organised and efficient development process using 5S methodology.**
 
-### 2. Table of Contents
+#### Key Objectives
 
-- 5S Methodology Implementation
-- How to install and run the project
-- How to use the project
-- Credits
-- License
-- How to Contribut to the project
-- Project Timeline
-- Roles and Responsibilities
-- Monitoring and Evaluation
+- Implement user authentication and core features.
+- Optimise data handling and performance.
+- Maintain clarity and organisation throughout the project lifecycle.
 
-### 2. 5S Methodology Implementation
+---
 
-#### Sort
+### Table of Contents
+
+1. [[Project Overview](#project-overview)](#Project-overview)
+2. [[Features](#features)](#Features)
+3. [[Methodologies](#methodologies)](#Methodologies)
+    - [[5S Implementation](#5s-implementation)](#5s-implementation)
+    - [[Data-Oriented Programming](#data-oriented-programming)](#data-oriented-programming)
+4. [[Set-Up Instructions](#set-up-instructions)](#set-up-instructions)
+5. [[Git Workflow](#git-workflow)](#git-workflow)
+    - [[Branching Strategy](#branching-strategy)](#branching-strategy)
+    - [[Commit Guidelines](#commit-guidelines)](#commit-guidelines)
+6. [[CI/CD Workflow](#cicd-workflow)](#cicd-workflow)
+7. [[Contributing](#contributing)](#contributing)
+8. [[Licence](#licence)](#licence)
+9. [[Contact](#contact)](#contact)
+
+---
+
+### Features
+
+- **User Authentication and Authorisation**: Secure login and user management system.
+- **Dashboard**: Manage and visualise environmental data.
+- **API Integrations**: Fetch real-time updates from third-party sources.
+- **Performance Optimised**: Clean, maintainable, and efficient codebase ensuring smooth operation.
+
+---
+
+### Methodologies
+
+Our team uses the **5S methodology** to keep the project organised and efficient:
+
+- **Sort**: Remove unnecessary tasks, features, and code.
+- **Set in Order**: Organise files, code, and tasks for easy access.
+- **Shine**: Keep the code and project environment clean with regular reviews and automated checks.
+- **Standardise**: Establish coding standards, guidelines, and reusable templates.
+- **Sustain**: Encourage continuous improvement and regular audits to ensure long-term project health.
+
+---
+
+#### 5S Implementation
+
+##### Sort
 
 - Objective: Identify and eliminate unnecessary items from the project workspace.
 - Actions:
 Conduct an initial audit of all project resources (code, documents, tools).
 Remove or archive obsolete or redundant items.
 
-#### Set in Order
+##### Set in Order
 
 - Objective: Organize remaining items for easy access and efficiency.
 - Actions:
@@ -39,112 +74,114 @@ Establish a logical structure for code repositories.
 Create a standardized directory and file naming convention.
 Implement version control practices.
 
-#### Shine
+##### Shine
 
 - Objective: Maintain a clean and organized workspace.
 - Actions:
 Schedule regular code reviews and refactoring sessions.
 Implement automated tools for code quality checks.
 
-#### Standardize
+##### Standardize
 
 - Objective: Establish standards for organization and cleanliness.
 - Actions:
 Develop coding standards and best practices documentation.
 Create templates for common tasks and documentation.
 
-#### Sustain
+##### Sustain
 
 - Objective: Maintain and review standards consistently.
 - Actions:
 Conduct regular training sessions on 5S practices.
 Schedule periodic audits to ensure compliance with standards.
 
-### 3. Data-Oriented Programming (DOP) Implementation
+#### Data-Oriented Programming
 
-#### Data Separation
+The **Data-Oriented Programming (DOP)** methodology is employed to enhance performance, maintainability, and scalability:
 
-- Objective: Separate data from logic to improve clarity and maintainability.
-- Actions:
-Define clear data structures and schemas.
-Ensure data is stored in a centralized and accessible manner.
+- **Data Separation**: Separate data from application logic to maintain clean, reusable code.
+- **Efficient Data Handling**: Use optimised data structures that ensure high performance.
+- **Immutability**: Follow immutable data practices to ensure consistency across the application.
 
-#### Efficient Data Handling
+---
 
-- Objective: Optimize data structures and access patterns for performance.
-- Actions:
-Analyze data access patterns and optimize for CPU cache efficiency.
-Use appropriate data structures for different types of data.
+### Set-Up Instructions
 
-#### Immutability
+Follow these steps to get the development environment up and running:
 
-- Objective: Use immutable data structures to ensure consistency.
-- Actions:
-Implement immutable data structures where applicable.
-Educate the team on the benefits and usage of immutability.
+1. **Clone the repository**
 
-### 4. Integration of 5S and DOP
+- ```bash
+- git clone <https://github.com/your-org/web-app.git>
 
-#### Workflow Optimization
+- cd web-app
 
-- Objective: Ensure that 5S practices support DOP principles.
-- Actions:
-Align 5S activities with DOP requirements (e.g., organizing data structures).
-Use 5S audits to identify opportunities for improving data handling.
+---
 
-#### Continuous Improvement
+### Git Workflow
 
-- Objective: Foster a culture of continuous improvement.
-- Actions:
-Encourage team members to suggest improvements for both 5S and DOP practices.
-Regularly review and update processes based on feedback and performance metrics.
+To ensure collaboration and maintain project quality, we follow a structured Git workflow:
 
-### 3. How to install and run the project
+---
 
-Steps to run and install the project:
+#### Branching Strategy
 
-### 4. How to use the project
+- Main: The stable, production-ready branch.
+- Develop: The integration branch for new features and fixes.
+- Feature Branches: Use feature/feature-name for new features.
+- Bugfix Branches: Use bugfix/bug-description for bug fixes.
 
-Steps to use the project:
+### Commit Guidelines
 
-### 5. Credits
+- Write atomic commits focused on a single change or fix.
+- Use descriptive commit messages to ensure clarity.
+    - Example:
 
-**Enveng Group** - Organisation overseeing the project
+        - git commit -m "Add user authentication endpoint"
+        - CI/CD Workflow
 
-The following individuals have made significant contributions to the development of this project:
+We use Continuous Integration (CI) and Continuous Delivery (CD) to automate testing and deployment.
 
-- **Adrian Gallo** - Chief Information Officer (CIO)
-- **Rohan Lonkar** - Full Stack Developer
-- **Rhett Bachoup** - UI/UX Designer
-- **Kinley Zangmo** - Business Analyst
+---
 
-### 6. License
+### CI/CD Workflow
 
-Please refer to the [LICENSE](LICENSE) file for more information on licensing and usage rights.
+#### Continuous Integration (CI)
 
-### 7. How to Contribute to the project
+- Automated builds and tests run for every push to the develop branch.
+Static code analysis is used to maintain code quality.
 
-Thank you for considering contributing to Web-App! We welcome contributions from everyone. By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT).
+#### Continuous Delivery (CD)
 
-### 8. Project Timeline
+- Deployments to a staging environment are automated for integration testing.
+Production deployment requires manual approval.
+- Pipeline Example
+    - Refer to the .github/workflows/ci-cd.yml file for detailed CI/CD pipeline configuration.
 
-- Milestones: Define key milestones and deliverables.
+---
 
-- Schedule: Create a detailed project schedule with timelines for each phase.
+### Contributing
 
-### 9. Roles and Responsibilities
+We welcome contributions to improve the WebApp. If you'd like to contribute, follow these steps:
 
-#### Team Structure
+Fork the repository and clone it to your local machine.
+Create a new feature or bugfix branch.
+Make your changes, ensuring your commits follow the commit guidelines.
+Submit a pull request to the develop branch for review.
+For more information, refer to our [[CONTRIBUTING.md]CONTRIBUTING.md](CONTRIBUTING.md) file.
 
-- **Adrian Gallo** - Chief Information Officer (CIO)
-- **Rohan Lonkar** - Full Stack Developer
-- **Rhett Bachoup** - UI/UX Designer
-- **Kinley Zangmo** - Business Analyst
+---
 
-#### Accountability
+### Licence
 
-### 10. Monitoring and Evaluation
+This project is licensed under the [[LICENSE]AGPLv3](LICENSE). Please review the LICENCE file for details on usage and distribution.
 
-- Metrics: Define metrics to measure the success of 5S and DOP implementation
+---
 
-- Review: Schedule regular review meetings to assess progress and make adjustments\.
+### Contact
+
+For any inquiries or questions regarding this project, feel free to reach out to the team:
+
+Lead Developer: [Your Name](https://github.com/your-username)
+
+Project Maintainer: [Project Maintainer Name](https://github.com/maintainer-username).

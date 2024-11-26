@@ -8,11 +8,8 @@
   }
 
 {
-
-    "default": true,
-    "MD003": { "style": "atx" },
-    "MD004": { "style": "consistent" },
-    "MD007": { "indent": 2 },
-    "MD029": { "style": "ordered" },
-    "MD041": false
+  "default": true,
+  "MD013": { "line_length": 80 },
+  "MD033": false,
+  "MD041": false
 }
