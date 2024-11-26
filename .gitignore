@@ -53,16 +53,16 @@ Mkfile.old
 dkms.conf
 
 # Build artifacts
-build/
-lib/
-obj/
-bin/
-logs/
-tmp/
-m4/
-dist/
-deps/
-html/
+#build/
+#lib/
+#obj/
+#bin/
+#logs/
+#tmp/
+#m4/
+#dist/
+#deps/
+#html/
 
 # Automake files
 autom4te.cache/
@@ -82,7 +82,7 @@ tests/Makefile
 tests/Makefile.in
 
 # Development environment files
-.vscode/
+#.vscode/
 *.db
 *.db-*
 *.env*
@@ -161,3 +161,17 @@ GTAGS
 !Makefile.am
 !configure.ac
 !common-rules.am
+bin/.deps/main.Po
+build/ar-lib
+build/compile
+build/depcomp
+build/install-sh
+build/ltmain.sh
+build/missing
+build/ylwrap
+m4/libtool.m4
+m4/lt~obsolete.m4
+m4/ltoptions.m4
+m4/ltsugar.m4
+m4/ltversion.m4
+obj/src/.deps/*.Po
