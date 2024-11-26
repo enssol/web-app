@@ -1,0 +1,7 @@
+<!ENTITY package "web-app">
+<!ENTITY package_bugreport "https://github.com/enssol/web-app/issues/new">
+<!ENTITY package_name "web-app">
+<!ENTITY package_string "web-app 1.0">
+<!ENTITY package_tarname "web-app">
+<!ENTITY package_url "">
+<!ENTITY package_version "1.0">

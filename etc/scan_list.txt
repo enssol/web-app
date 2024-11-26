@@ -1,4 +1,4 @@
-﻿./autoscan.log
+./autoscan.log
 ./INSTALL
 ./LICENSE
 ./ChangeLog

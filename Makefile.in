@@ -14,6 +14,8 @@
 
 @SET_MAKE@
 
+# Root Makefile.am
+
 # -*- mode: makefile -*-
 #
 # gtk-doc.make - make rules for gtk-doc
@@ -38,7 +40,6 @@
 # Everything below here is generic #
 ####################################
 
-VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
     false; \
@@ -219,8 +220,8 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/common-rules.am \
 	$(top_srcdir)/build/ltmain.sh $(top_srcdir)/build/missing \
 	$(top_srcdir)/gtk-doc.make ABOUT-NLS AUTHORS COPYING ChangeLog \
 	INSTALL NEWS README.md build/ar-lib build/compile \
-	build/config.guess build/config.sub build/depcomp \
-	build/install-sh build/ltmain.sh build/missing build/ylwrap
+	build/config.guess build/config.sub build/install-sh \
+	build/ltmain.sh build/missing build/ylwrap
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -267,31 +268,38 @@ am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
 distcleancheck_listfiles = \
   find . \( -type f -a \! \
             \( -name .nfs* -o -name .smb* -o -name .__afs* \) \) -print
+
+# Define VPATH to search for source files in multiple directories
+VPATH = src:include:lib:deps:build:etc:po:docs:dist:tmp:objects:logs:m4:bin
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 APP_MODE = @APP_MODE@
-APP_NAME = @APP_NAME@
+
+# Define paths and other variables
+APP_NAME = web-app
 AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOGEN = @AUTOGEN@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-BIN_DIR = @BIN_DIR@
+BIN_DIR = bin
 BISON = @BISON@
-BUILD_DIR = @BUILD_DIR@
+BUILD_DIR = build
 CC = $(CCACHE) gcc
 
 # Compiler and linker definitions
 CCACHE = ccache
 CCDEPMODE = @CCDEPMODE@
-CFLAGS = @CFLAGS@
+
+# Compiler and linker definitions
+CFLAGS = -Iinclude -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include -O0 -pedantic -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800 -std=gnu23 -Wall -Wextra -Werror -fno-common -DPIC -MMD -MP
 CFLOW = @CFLOW@
 CLANG_FORMAT = @CLANG_FORMAT@
 CLANG_TIDY = @CLANG_TIDY@
 CLIB = @CLIB@
-COMPLEXITY = @COMPLEXITY@
+COMPLEXITY = complexity
 CONFIG_DIR = @CONFIG_DIR@
 CP = @CP@
 CPPCHECK = @CPPCHECK@
@@ -302,12 +310,12 @@ CYGPATH_W = @CYGPATH_W@
 DDD = @DDD@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DEPS_DIR = @DEPS_DIR@
-DIST_DIR = @DIST_DIR@
+DEPS_DIR = deps
+DIST_DIR = dist
 DLLTOOL = @DLLTOOL@
-DOCS_DIR = @DOCS_DIR@
+DOCS_DIR = docs
 DSYMUTIL = @DSYMUTIL@
-DUMPBIN = @DUMPBIN@
+DUMPBIN = tmp
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -330,7 +338,7 @@ GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
 GTKDOC_REBASE = @GTKDOC_REBASE@
 HTML_DIR = @HTML_DIR@
-INCLUDE_DIR = @INCLUDE_DIR@
+INCLUDE_DIR = include
 INDENT = @INDENT@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -338,85 +346,94 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
-LDFLAGS = @LDFLAGS@ -fuse-ld=mold -L/usr/local/lib -L/opt/homebrew/lib
+
+# Linker flags definition
+LDFLAGS = @LDFLAGS@
 LEX = @LEX@
-LEXLIB = @LEXLIB@
+
+# Handle undefined variables
+LEXLIB = -lfl
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
-LIBOBJS = @LIBOBJS@
-LIBS = @LIBS@
+LIBOBJS = 
+
+# Define glib-2.0 libraries
+LIBS = -lglib-2.0 -lm
 LIBS_CFLAGS = @LIBS_CFLAGS@
 LIBS_LIBS = @LIBS_LIBS@
 LIBTOOL = @LIBTOOL@
-LIB_DIR = @LIB_DIR@
+LIB_DIR = lib
 LIPO = @LIPO@
 LN_S = @LN_S@
-LOCALES_DIR = @LOCALES_DIR@
-LOGS_DIR = @LOGS_DIR@
-LTLIBOBJS = @LTLIBOBJS@
+LOCALES_DIR = po
+LOGS_DIR = logs
+LTLIBOBJS = 
 LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 M4 = @M4@
-MACROS_DIR = @MACROS_DIR@
+MACROS_DIR = m4
 MAKE = @MAKE@
 MAKEINFO = @MAKEINFO@
-MANIFEST_TOOL = @MANIFEST_TOOL@
+MANIFEST_TOOL = manifest-tool
 MKDIR = @MKDIR@
 MKDIR_P = @MKDIR_P@
+MT = @MT@
 MV = @MV@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
-OBJ_DIR = @OBJ_DIR@
-OTOOL = @OTOOL@
+OBJ_DIR = objects
+
+# Define the path to otool
+OTOOL = /usr/bin/otool
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
-PACKAGE_URL = @PACKAGE_URL@
+PACKAGE_URL = https://github.com/enssol/web-app
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKGCONF = @PKGCONF@
 PKG_CONFIG = @PKG_CONFIG@
-PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_LIBDIR = /usr/local/lib/pkgconfig:/opt/homebrew/lib/pkgconfig
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 RECSEL = @RECSEL@
 RM = @RM@
 SED = @SED@
-SET_MAKE = @SET_MAKE@
+SET_MAKE = $(MAKE)
 SHELL = @SHELL@
 SHELLCHECK = @SHELLCHECK@
 SPLINT = @SPLINT@
-SRC_DIR = @SRC_DIR@
+SRC_DIR = src
 STOW = @STOW@
 STRIP = @STRIP@
 TAR = @TAR@
-TESTS_DIR = @TESTS_DIR@
-TMP_DIR = @TMP_DIR@
+TESTS_DIR = tests
+TMP_DIR = tmp
 VALGRIND = @VALGRIND@
 VERSION = @VERSION@
 XZ = @XZ@
 YACC = @YACC@
-YFLAGS = @YFLAGS@
+YFLAGS = -d
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
-ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
+ac_ct_DUMPBIN = dumpbin
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
-am__quote = @am__quote@
-am__rm_f_notfound = @am__rm_f_notfound@
+am__quote = \"
+am__rm_f_notfound = rm -f
 am__tar = @am__tar@
 am__untar = @am__untar@
 am__xargs_n = @am__xargs_n@
 bindir = @bindir@
 build = @build@
-build_alias = @build_alias@
+build_alias = 
 build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
@@ -427,7 +444,7 @@ docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
-host_alias = @host_alias@
+host_alias = 
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
@@ -452,12 +469,10 @@ sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-top_build_prefix = @top_build_prefix@
+top_build_prefix = 
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 CXX = $(CCACHE) g++
-AM_CFLAGS = @CC1_FLAGS@ -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include
-AM_LDFLAGS = @LINK_FLAGS@ -static $(LIBS_LIBS) -L/usr/local/lib -L/opt/homebrew/lib
 
 # Include common rules
 
@@ -467,6 +482,8 @@ ACLOCAL_AMFLAGS = -I m4
 
 # Define subdirectories
 SUBDIRS = src include etc docs m4 po bin build deps dist tmp lib objects logs m4
+AM_CFLAGS = $(CFLAGS)
+AM_LDFLAGS = $(LDFLAGS)
 
 # Additional libraries
 LDADD = -lm
@@ -480,9 +497,14 @@ configdir = $(CONFIG_DIR)
 # Install configuration files
 dist_config_DATA = $(CONFIG_INI_FILE) $(CONFIG_CONF_FILE) $(GCC_SPEC_FILE)
 
+# Source files
+SRC_FILES = src/validator.c src/env_loader.c src/error_handler.c src/garbage_collector.c src/hello.c src/logger.c src/main.c src/config_loader.c
+
+# Object files
+OBJS = objects/validator.o objects/env_loader.o objects/error_handler.o objects/garbage_collector.o objects/hello.o objects/logger.o objects/main.o objects/config_loader.o
+
 # Clean up files
-DISTCLEANFILES = Makefile.in aclocal.m4 configure config.h.in \
-	intltool-extract intltool-merge intltool-update
+DISTCLEANFILES = Makefile.in aclocal.m4 configure config.h.in
 
 # Add gtk-doc support
 GTK_DOC_USE_LIBTOOL = 1
@@ -564,9 +586,27 @@ GTK_DOC_V_XREF_0 = @echo "  DOC   Fixing cross-references";
 GTK_DOC_V_PDF = $(GTK_DOC_V_PDF_@AM_V@)
 GTK_DOC_V_PDF_ = $(GTK_DOC_V_PDF_@AM_DEFAULT_V@)
 GTK_DOC_V_PDF_0 = @echo "  DOC   Building PDF";
+@installfiles = `echo $(builddir)/html/*`; \
+    if test "$$installfiles" = '$(builddir)/html/*'; then \
+        echo 1>&2 'Nothing to install' ; \
+    else \
+        if test -n "$(DOC_MODULE_VERSION)"; then \
+            installdir="$(DESTDIR)$(TARGET_DIR)-$(DOC_MODULE_VERSION)"; \
+        else \
+            installdir="$(DESTDIR)$(TARGET_DIR)"; \
+        fi; \
+        $(mkinstalldirs) $${installdir} ; \
+        for i in $$installfiles; do \
+            echo ' $(INSTALL_DATA) '$$i ; \
+            $(INSTALL_DATA) $$i $${installdir}; \
+        done; \
+        if test -n "$(DOC_MODULE_VERSION)"; then \
+            mv -f $${installdir}/$(DOC_MODULE).devhelp2 \
+                $${installdir}/$(DOC_MODULE)-$(DOC_MODULE_VERSION).devhelp2; \
+        fi; \
+        $(GTKDOC_REBASE) --relative --dest-dir=$(DESTDIR) --html-dir=$${installdir}; \
+    fi
 
-# Add intltool support
-INTLTOOL_FILES = intltool-extract.in intltool-merge.in intltool-update.in
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -1085,33 +1125,21 @@ uninstall-am: uninstall-dist_configDATA uninstall-local
 
 .PRECIOUS: Makefile
 
-﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
-# Root Makefile.am
 
 .POSIX: # Enforce POSIX mode for portability
-﻿﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
-.POSIX: # Enforce POSIX mode for portability
+﻿.POSIX: # Enforce POSIX mode for portability
 
 # Load environment variables if .env exists
 env_load:
 	@if [ -f .env ]; then \
-	    echo "Loading .env variables..."; \
-	    . .env; \
+		echo "Loading .env variables..."; \
+		. .env; \
 	fi
-
-# Output compiler choices during build
-all:
-    @echo "Using CC: $(CC)"
-    @echo "Using CXX: $(CXX)"
 
 # Clean build artifacts
 clean:
-    @echo "Cleaning build artifacts..."
-    rm -f cppcheck.xml cppcheck_errors.log
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log
 
 # Installation rules
 stow:
@@ -1179,14 +1207,9 @@ perf:
 
 # Profiling with gprof
 profile:
-    @echo "Running gprof for profiling..."
-    ./web-app
-    gprof ./web-app gmon.out > gprof.out
-
-# Coverage analysis with gcov
-coverage:
-    @echo "Running gcov for coverage analysis..."
-    find $(srcdir) -name '*.c' -exec gcov {} \;
+	@echo "Running gprof for profiling..."
+	./web-app
+	gprof ./web-app gmon.out > gprof.out
 
 # Documentation generation
 docs:
@@ -1209,6 +1232,10 @@ dist-xz:
 
 # Tags management
 generate_tags:
+	@if [ ! -f GTAGS ]; then \
+		echo "Initializing GNU Global..."; \
+		gtags; \
+	fi
 	@echo "Generating tags with global..."
 	global -u
 
@@ -1239,14 +1266,59 @@ install_mo_files:
 		$(INSTALL_DATA) $(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo; \
 	done
 
+# Consolidated 'all' target
+all_common: generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
+
+# Consolidated 'clean' target
+clean_common: clean_tags
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log
+
+# Consolidated 'all' target
+all: all-am all-local
+    @echo "Building all targets..."
+
+# Compilation rules for each source file
+objects/validator.o: src/validator.c
+    $(CC) $(CFLAGS) -c src/validator.c -o objects/validator.o
+
+objects/env_loader.o: src/env_loader.c
+    $(CC) $(CFLAGS) -c src/env_loader.c -o objects/env_loader.o
+
+objects/error_handler.o: src/error_handler.c
+    $(CC) $(CFLAGS) -c src/error_handler.c -o objects/error_handler.o
+
+objects/garbage_collector.o: src/garbage_collector.c
+    $(CC) $(CFLAGS) -c src/garbage_collector.c -o objects/garbage_collector.o
+
+objects/hello.o: src/hello.c
+    $(CC) $(CFLAGS) -c src/hello.c -o objects/hello.o
+
+objects/logger.o: src/logger.c
+    $(CC) $(CFLAGS) -c src/logger.c -o objects/logger.o
+
+objects/main.o: src/main.c
+    $(CC) $(CFLAGS) -c src/main.c -o objects/main.o
+
+objects/config_loader.o: src/config_loader.c
+    $(CC) $(CFLAGS) -c src/config_loader.c -o objects/config_loader.o
+
+# Rule to use otool to display shared library dependencies
+otool_deps:
+    @echo "Displaying shared library dependencies with otool..."
+    $(OTOOL) -L $(OBJS)
+
+# Include dependency files
+-include $(DEPS)
+
+# Consolidated 'clean' target
+clean: clean-am clean-local
+    @echo "Cleaning build artifacts..."
+    rm -f cppcheck.xml cppcheck_errors.log
+
 # Custom rule to generate a version file
 version.h: $(SRC_DIR)/version.txt
     @echo "#define VERSION \"`cat $(SRC_DIR)/version.txt`\"" > $(INCLUDE_DIR)/version.h
-
-# Add common rules to the build process
-all: generate_tags compile docs
-
-clean: clean_tags clean_html_docs
 
 gtkdoc-check.test: Makefile
 	$(AM_V_GEN)echo "#!/bin/sh -e" > $@; \
@@ -1448,6 +1520,18 @@ dist-hook: dist-check-gtkdoc all-gtk-doc dist-hook-local
 $(LINGUAS:%=%.mo): %.mo: %.po
     msgfmt -o $@ $<
 
+# Consolidated 'install-data-local' target
+install-data-local:
+
+# Consolidated 'uninstall-local' target
+uninstall-local:
+    @if test -n "$(DOC_MODULE_VERSION)"; then \
+        installdir="$(DESTDIR)$(TARGET_DIR)-$(DOC_MODULE_VERSION)"; \
+    else \
+        installdir="$(DESTDIR)$(TARGET_DIR)"; \
+    fi; \
+    rm -rf $${installdir}
+
 # Add rules for installing .mo files
 install-data-local:
     $(mkinstalldirs) $(DESTDIR)$(datadir)/locale
@@ -1460,11 +1544,10 @@ uninstall-local:
         rm -f $(DESTDIR)$(datadir)/locale/$$lang/LC_MESSAGES/$(PACKAGE).mo; \
     done
 
-# Profiling with gprof
+# Consolidated 'profile' target
 profile:
-    @echo "Running gprof for profiling..."
-    ./web-app
-    gprof ./web-app gmon.out > gprof.out
+    @echo "Profiling the application..."
+    gprof $(binary) > profile.txt
 
 # Coverage analysis with gcov
 coverage:

@@ -1,6 +1,3 @@
-﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: 	AGPL-3.0-or-later
-
 # docs/Makefile.am
 
 .POSIX: # Enforce POSIX mode for portability
@@ -8,8 +5,8 @@
 # Include common rules
 include ../common-rules.am
 
-# Add generate_docs to the build process
-all: generate_docs generate_html_docs
+# Add autoindent to the build process
+all: generate_docs generate_html_docs generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
 
 # Add clean_html_docs to the clean process
 clean: clean_html_docs

@@ -140,7 +140,13 @@
         <body class="vscode-body vscode-light">
             <h1 id="enveng-webapp-development">EnvEng-WebApp-Development</h1>
 <hr>
-<p><code>./configure --disable-gettext --disable-dependency-tracking LDFLAGS=&quot;-B/opt/homebrew/bin&quot;</code></p>
+<p><code>gtags</code>
+<code>autoreconf -vfi</code></p>
+<pre><code class="language-bash">./configure --disable-gettext --disable-dependency-tracking \
+  CFLAGS=<span class="hljs-string">&quot;-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk&quot;</span> \
+  LDFLAGS=<span class="hljs-string">&quot;-B/opt/homebrew/bin&quot;</span>
+</code></pre>
+<p><code>make</code></p>
 <p>TODO: sort out GETTEXT and use autopoint for internalization</p>
 <h3 id="updated-workflow-with-added-tools"><strong>Updated Workflow with Added Tools</strong></h3>
 <hr>

@@ -197,7 +197,10 @@
             "html",
             "ini",
             "conf",
-            "cfg"
+            "cfg",
+            "Makefile",
+            "Makefile.am",
+            "Makefile.in"
         ],
         "licenser.license": "AGPLv3",
         "licenser.projectName": "Enveng Group - Obligation Register",
@@ -294,7 +297,7 @@
         "diffEditor.hideUnchangedRegions.enabled": true,
         "editor.inlineSuggest.syntaxHighlightingEnabled": true,
         "files.autoGuessEncoding": true,
-        "files.encoding": "utf8bom",
+        "files.encoding": "utf8",
         "files.eol": "\n",
         "files.insertFinalNewline": true,
         "files.trimFinalNewlines": true,

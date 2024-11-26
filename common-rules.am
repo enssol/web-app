@@ -1,31 +1,21 @@
-﻿﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
-.POSIX: # Enforce POSIX mode for portability
+﻿.POSIX: # Enforce POSIX mode for portability
 
 # Load environment variables if .env exists
 env_load:
 	@if [ -f .env ]; then \
-	    echo "Loading .env variables..."; \
-	    . .env; \
+		echo "Loading .env variables..."; \
+		. .env; \
 	fi
 
 # Compiler and linker definitions
 CCACHE = ccache
 CC = $(CCACHE) gcc
 CXX = $(CCACHE) g++
-AM_CFLAGS = @CC1_FLAGS@ -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include
-AM_LDFLAGS = @LINK_FLAGS@ -static $(LIBS_LIBS) -L/usr/local/lib -L/opt/homebrew/lib
-
-# Output compiler choices during build
-all:
-    @echo "Using CC: $(CC)"
-    @echo "Using CXX: $(CXX)"
 
 # Clean build artifacts
 clean:
-    @echo "Cleaning build artifacts..."
-    rm -f cppcheck.xml cppcheck_errors.log
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log
 
 # Installation rules
 stow:
@@ -93,14 +83,9 @@ perf:
 
 # Profiling with gprof
 profile:
-    @echo "Running gprof for profiling..."
-    ./web-app
-    gprof ./web-app gmon.out > gprof.out
-
-# Coverage analysis with gcov
-coverage:
-    @echo "Running gcov for coverage analysis..."
-    find $(srcdir) -name '*.c' -exec gcov {} \;
+	@echo "Running gprof for profiling..."
+	./web-app
+	gprof ./web-app gmon.out > gprof.out
 
 # Documentation generation
 docs:
@@ -123,6 +108,10 @@ dist-xz:
 
 # Tags management
 generate_tags:
+	@if [ ! -f GTAGS ]; then \
+		echo "Initializing GNU Global..."; \
+		gtags; \
+	fi
 	@echo "Generating tags with global..."
 	global -u
 
@@ -152,3 +141,11 @@ install_mo_files:
 	for lang in en_AU; do \
 		$(INSTALL_DATA) $(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo; \
 	done
+
+# Consolidated 'all' target
+all_common: generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
+
+# Consolidated 'clean' target
+clean_common: clean_tags
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log

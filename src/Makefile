@@ -14,58 +14,60 @@
 
 
 
+# src/Makefile.am
+
 
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
-    false; \
+	false; \
   elif test -n '$(MAKE_HOST)'; then \
-    true; \
+	true; \
   elif test -n '$(MAKE_VERSION)' && test -n '$(CURDIR)'; then \
-    true; \
+	true; \
   else \
-    false; \
+	false; \
   fi; \
 }
 am__make_running_with_option = \
   case $${target_option-} in \
-      ?) ;; \
-      *) echo "am__make_running_with_option: internal error: invalid" \
-              "target option '$${target_option-}' specified" >&2; \
-         exit 1;; \
+	  ?) ;; \
+	  *) echo "am__make_running_with_option: internal error: invalid" \
+			  "target option '$${target_option-}' specified" >&2; \
+		 exit 1;; \
   esac; \
   has_opt=no; \
   sane_makeflags=$$MAKEFLAGS; \
   if $(am__is_gnu_make); then \
-    sane_makeflags=$$MFLAGS; \
+	sane_makeflags=$$MFLAGS; \
   else \
-    case $$MAKEFLAGS in \
-      *\\[\ \	]*) \
-        bs=\\; \
-        sane_makeflags=`printf '%s\n' "$$MAKEFLAGS" \
-          | sed "s/$$bs$$bs[$$bs $$bs	]*//g"`;; \
-    esac; \
+	case $$MAKEFLAGS in \
+	  *\\[\ \	]*) \
+		bs=\\; \
+		sane_makeflags=`printf '%s\n' "$$MAKEFLAGS" \
+		  | sed "s/$$bs$$bs[$$bs $$bs	]*//g"`;; \
+	esac; \
   fi; \
   skip_next=no; \
   strip_trailopt () \
   { \
-    flg=`printf '%s\n' "$$flg" | sed "s/$$1.*$$//"`; \
+	flg=`printf '%s\n' "$$flg" | sed "s/$$1.*$$//"`; \
   }; \
   for flg in $$sane_makeflags; do \
-    test $$skip_next = yes && { skip_next=no; continue; }; \
-    case $$flg in \
-      *=*|--*) continue;; \
-        -*I) strip_trailopt 'I'; skip_next=yes;; \
-      -*I?*) strip_trailopt 'I';; \
-        -*O) strip_trailopt 'O'; skip_next=yes;; \
-      -*O?*) strip_trailopt 'O';; \
-        -*l) strip_trailopt 'l'; skip_next=yes;; \
-      -*l?*) strip_trailopt 'l';; \
-      -[dEDm]) skip_next=yes;; \
-      -[JT]) skip_next=yes;; \
-    esac; \
-    case $$flg in \
-      *$$target_option*) has_opt=yes; break;; \
-    esac; \
+	test $$skip_next = yes && { skip_next=no; continue; }; \
+	case $$flg in \
+	  *=*|--*) continue;; \
+		-*I) strip_trailopt 'I'; skip_next=yes;; \
+	  -*I?*) strip_trailopt 'I';; \
+		-*O) strip_trailopt 'O'; skip_next=yes;; \
+	  -*O?*) strip_trailopt 'O';; \
+		-*l) strip_trailopt 'l'; skip_next=yes;; \
+	  -*l?*) strip_trailopt 'l';; \
+	  -[dEDm]) skip_next=yes;; \
+	  -[JT]) skip_next=yes;; \
+	esac; \
+	case $$flg in \
+	  *$$target_option*) has_opt=yes; break;; \
+	esac; \
   done; \
   test $$has_opt = yes
 am__make_dryrun = (target_option=n; $(am__make_running_with_option))
@@ -105,8 +107,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
+	$(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+	*) f=$$p;; \
   esac;
 am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
 am__install_max = 40
@@ -118,16 +120,16 @@ am__nobase_list = $(am__nobase_strip_setup); \
   for p in $$list; do echo "$$p $$p"; done | \
   sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
   $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
+	if (++n[$$2] == $(am__install_max)) \
+	  { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+	END { for (dir in files) print dir, files[dir] }'
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__uninstall_files_from_dir = { \
   { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
   || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-       $(am__cd) "$$dir" && echo $$files | $(am__xargs_n) 40 $(am__rm_f); }; \
+	   $(am__cd) "$$dir" && echo $$files | $(am__xargs_n) 40 $(am__rm_f); }; \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
@@ -139,10 +141,7 @@ libwebapp_la_OBJECTS = $(am_libwebapp_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
-am__v_lt_1 = 
-libwebapp_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(libwebapp_la_LDFLAGS) $(LDFLAGS) -o $@
+am__v_lt_1 =
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
 am__v_P_0 = false
@@ -150,11 +149,11 @@ am__v_P_1 = :
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN     " $@;
-am__v_GEN_1 = 
+am__v_GEN_1 =
 AM_V_at = $(am__v_at_$(V))
 am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
 am__v_at_0 = @
-am__v_at_1 = 
+am__v_at_1 =
 DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/build/depcomp
 am__maybe_remake_depfiles = depfiles
@@ -174,7 +173,7 @@ LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 AM_V_CC = $(am__v_CC_$(V))
 am__v_CC_ = $(am__v_CC_$(AM_DEFAULT_VERBOSITY))
 am__v_CC_0 = @echo "  CC      " $@;
-am__v_CC_1 = 
+am__v_CC_1 =
 CCLD = $(CC)
 LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -182,13 +181,13 @@ LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 AM_V_CCLD = $(am__v_CCLD_$(V))
 am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CCLD_0 = @echo "  CCLD    " $@;
-am__v_CCLD_1 = 
+am__v_CCLD_1 =
 SOURCES = $(libwebapp_la_SOURCES)
 DIST_SOURCES = $(libwebapp_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
-    n|no|NO) false;; \
-    *) (install-info --version) >/dev/null 2>&1;; \
+	n|no|NO) false;; \
+	*) (install-info --version) >/dev/null 2>&1;; \
   esac
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
@@ -205,7 +204,7 @@ am__uniquify_input = $(AWK) '\
 am__define_uniq_tagged_files = \
   list='$(am__tagged_files)'; \
   unique=`for i in $$list; do \
-    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
   done | $(am__uniquify_input)`
 am__DIST_COMMON = $(srcdir)/../common-rules.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/build/depcomp
@@ -215,7 +214,7 @@ AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
 APP_MODE = development
 APP_NAME = web-app
-AR = ar
+AR = /opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/ar
 AUTOCONF = ${SHELL} '/Users/adriangallo/web-app/build/missing' autoconf
 AUTOGEN = autogen
 AUTOHEADER = ${SHELL} '/Users/adriangallo/web-app/build/missing' autoheader
@@ -229,7 +228,7 @@ CC = $(CCACHE) gcc
 # Compiler and linker definitions
 CCACHE = ccache
 CCDEPMODE = depmode=none
-CFLAGS = -O0 -pedantic -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800 -std=gnu23 -Wall -Wextra -Werror
+CFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
 CFLOW = cflow
 CLANG_FORMAT = clang-format
 CLANG_TIDY = no
@@ -238,7 +237,7 @@ COMPLEXITY = /usr/bin/complexity
 CONFIG_DIR = etc
 CP = cp -f
 CPPCHECK = cppcheck
-CPPFLAGS = -I/opt/homebrew/opt/flex/include -I/opt/homebrew/opt/node@18/include
+CPPFLAGS = -I/opt/homebrew/include -I/opt/homebrew/opt/curl/include
 CSCOPE = cscope
 CTAGS = ctags
 CYGPATH_W = echo
@@ -250,19 +249,19 @@ DIST_DIR = dist
 DLLTOOL = false
 DOCS_DIR = docs
 DSYMUTIL = dsymutil
-DUMPBIN = 
+DUMPBIN =
 ECHO_C = \c
-ECHO_N = 
-ECHO_T = 
+ECHO_N =
+ECHO_T =
 EGREP = /usr/bin/grep -E
 ETAGS = etags
-EXEEXT = 
+EXEEXT =
 FGREP = /usr/bin/grep -F
 FILECMD = file
 FLEX = flex
 GAWK = gawk
 GCOV = gcov
-GDB = 
+GDB =
 GLOBAL = global
 GPERF = gperf
 GREP = /usr/bin/grep
@@ -275,18 +274,18 @@ GTKDOC_REBASE = /opt/homebrew/bin/gtkdoc-rebase
 HTML_DIR = ${datadir}/gtk-doc/html
 INCLUDE_DIR = include
 INDENT = indent
-INSTALL = /opt/homebrew/opt/coreutils/libexec/gnubin/install -c
+INSTALL = /opt/homebrew/bin/ginstall -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LD = /opt/homebrew/bin/mold
-LDFLAGS = -B/opt/homebrew/bin
-LEX = flex
-LEXLIB = 
+LDFLAGS = -fuse-ld=mold -static -Wl,-z,relro,-z,now -L/opt/homebrew/lib -L/opt/homebrew/opt/curl/lib
+LEX = :
+LEXLIB =
 LEX_OUTPUT_ROOT = lex.yy
-LIBOBJS = 
-LIBS = 
+LIBOBJS =
+LIBS =
 LIBS_CFLAGS = -I/opt/homebrew/Cellar/glib/2.82.2/include/glib-2.0 -I/opt/homebrew/Cellar/glib/2.82.2/lib/glib-2.0/include -I/opt/homebrew/opt/gettext/include -I/opt/homebrew/Cellar/pcre2/10.44/include
 LIBS_LIBS = -L/opt/homebrew/Cellar/glib/2.82.2/lib -lglib-2.0 -L/opt/homebrew/opt/gettext/lib -lintl
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
@@ -295,40 +294,41 @@ LIPO = lipo
 LN_S = ln -s
 LOCALES_DIR = po
 LOGS_DIR = logs
-LTLIBOBJS = 
-LT_SYS_LIBRARY_PATH = 
+LTLIBOBJS =
+LT_SYS_LIBRARY_PATH =
 M4 = m4
 MACROS_DIR = m4
 MAKE = make
 MAKEINFO = ${SHELL} '/Users/adriangallo/web-app/build/missing' makeinfo
 MANIFEST_TOOL = :
 MKDIR = mkdir
-MKDIR_P = /opt/homebrew/opt/coreutils/libexec/gnubin/mkdir -p
+MKDIR_P = /opt/homebrew/bin/gmkdir -p
+MT = :
 MV = mv -f
-NM = /usr/bin/nm -B
+NM = /opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/nm
 NMEDIT = nmedit
 OBJDUMP = objdump
 OBJEXT = o
 OBJ_DIR = objects
-OTOOL = otool
+OTOOL = /usr/bin/otool
 OTOOL64 = :
 PACKAGE = web-app
 PACKAGE_BUGREPORT = https://github.com/enssol/web-app/issues/new
 PACKAGE_NAME = web-app
 PACKAGE_STRING = web-app 1.0
 PACKAGE_TARNAME = web-app
-PACKAGE_URL = 
+PACKAGE_URL =
 PACKAGE_VERSION = 1.0
 PATH_SEPARATOR = :
 PKGCONF = pkgconf
-PKG_CONFIG = /opt/homebrew/opt/pkgconf/bin/pkg-config
-PKG_CONFIG_LIBDIR = 
-PKG_CONFIG_PATH = /opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig::/usr/local/lib/pkgconfig:/opt/homebrew/lib/pkgconfig
+PKG_CONFIG = /opt/homebrew/bin/pkg-config
+PKG_CONFIG_LIBDIR =
+PKG_CONFIG_PATH = /opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig::/usr/local/lib/pkgconfig:/opt/homebrew/lib/pkgconfig
 RANLIB = ranlib
 RECSEL = recsel
 RM = rm -f
-SED = /opt/homebrew/opt/gnu-sed/libexec/gnubin/sed
-SET_MAKE = 
+SED = /opt/homebrew/bin/gsed
+SET_MAKE =
 SHELL = /bin/sh
 SHELLCHECK = shellcheck
 SPLINT = splint
@@ -342,24 +342,24 @@ VALGRIND = no
 VERSION = 1.0
 XZ = xz
 YACC = bison -y
-YFLAGS = 
+YFLAGS =
 abs_builddir = /Users/adriangallo/web-app/src
 abs_srcdir = /Users/adriangallo/web-app/src
 abs_top_builddir = /Users/adriangallo/web-app
 abs_top_srcdir = /Users/adriangallo/web-app
-ac_ct_AR = ar
+ac_ct_AR = /opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/ar
 ac_ct_CC = /opt/homebrew/Cellar/gcc/14.2.0_1/bin/gcc-14
-ac_ct_DUMPBIN = 
+ac_ct_DUMPBIN =
 am__include = include
 am__leading_dot = .
-am__quote = 
-am__rm_f_notfound = 
+am__quote =
+am__rm_f_notfound =
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
 am__xargs_n = xargs -n
 bindir = ${exec_prefix}/bin
 build = aarch64-apple-darwin24.1.0
-build_alias = 
+build_alias =
 build_cpu = aarch64
 build_os = darwin24.1.0
 build_vendor = apple
@@ -370,7 +370,7 @@ docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
 host = aarch64-apple-darwin24.1.0
-host_alias = 
+host_alias =
 host_cpu = aarch64
 host_os = darwin24.1.0
 host_vendor = apple
@@ -394,36 +394,28 @@ sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 srcdir = .
 sysconfdir = ${prefix}/etc
-target_alias = 
+target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 CXX = $(CCACHE) g++
-AM_CFLAGS = @CC1_FLAGS@ -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include
-AM_LDFLAGS = @LINK_FLAGS@ -static $(LIBS_LIBS) -L/usr/local/lib -L/opt/homebrew/lib
 
 # Include common rules
 
 # Define the source files for the src directory
 lib_LTLIBRARIES = libwebapp.la
 libwebapp_la_SOURCES = config_loader.c env_loader.c error_handler.c garbage_collector.c hello.c logger.c main.c validator.c parser.c lexer.c
-libwebapp_la_LDFLAGS = -static
-
-# Flex and Bison rules
-BUILT_SOURCES = parser.c lexer.c
-CLEANFILES = parser.c lexer.c parser.h
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(srcdir)/../common-rules.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
-	    *$$dep*) \
-	      ( cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh ) \
-	        && { if test -f $@; then exit 0; else break; fi; }; \
-	      exit 1;; \
+		*$$dep*) \
+		  ( cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh ) \
+			&& { if test -f $@; then exit 0; else break; fi; }; \
+		  exit 1;; \
 	  esac; \
 	done; \
 	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/Makefile'; \
@@ -432,10 +424,10 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(srcdir)/../common-rules.am $(am_
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
-	    cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh;; \
+		cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh;; \
 	  *) \
-	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__maybe_remake_depfiles)'; \
-	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__maybe_remake_depfiles);; \
+		echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__maybe_remake_depfiles)'; \
+		cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__maybe_remake_depfiles);; \
 	esac;
 $(srcdir)/../common-rules.am $(am__empty):
 
@@ -453,7 +445,7 @@ install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
 	list2=; for p in $$list; do \
 	  if test -f $$p; then \
-	    list2="$$list2 $$p"; \
+		list2="$$list2 $$p"; \
 	  else :; fi; \
 	done; \
 	test -z "$$list2" || { \
@@ -476,13 +468,13 @@ clean-libLTLIBRARIES:
 	-$(am__rm_f) $(lib_LTLIBRARIES)
 	@list='$(lib_LTLIBRARIES)'; \
 	locs=`for p in $$list; do echo $$p; done | \
-	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
-	      sort -u`; \
+		  sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+		  sort -u`; \
 	echo rm -f $${locs}; \
 	$(am__rm_f) $${locs}
 
-libwebapp.la: $(libwebapp_la_OBJECTS) $(libwebapp_la_DEPENDENCIES) $(EXTRA_libwebapp_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libwebapp_la_LINK) -rpath $(libdir) $(libwebapp_la_OBJECTS) $(libwebapp_la_LIBADD) $(LIBS)
+libwebapp.la: $(libwebapp_la_OBJECTS) $(libwebapp_la_DEPENDENCIES) $(EXTRA_libwebapp_la_DEPENDENCIES)
+	$(AM_V_CCLD)$(LINK) -rpath $(libdir) $(libwebapp_la_OBJECTS) $(libwebapp_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -511,24 +503,24 @@ am--depfiles: $(am__depfiles_remade)
 #	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
 #	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
 #	$(am__mv) $$depbase.Tpo $$depbase.Po
-#	$(AM_V_CC)source='$<' object='$@' libtool=no 
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+#	$(AM_V_CC)source='$<' object='$@' libtool=no
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp)
 	$(AM_V_CC)$(COMPILE) -c -o $@ $<
 
 .c.obj:
 #	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
 #	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
 #	$(am__mv) $$depbase.Tpo $$depbase.Po
-#	$(AM_V_CC)source='$<' object='$@' libtool=no 
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+#	$(AM_V_CC)source='$<' object='$@' libtool=no
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp)
 	$(AM_V_CC)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .c.lo:
 #	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
 #	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
 #	$(am__mv) $$depbase.Tpo $$depbase.Plo
-#	$(AM_V_CC)source='$<' object='$@' libtool=yes 
-#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) 
+#	$(AM_V_CC)source='$<' object='$@' libtool=yes
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp)
 	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
@@ -550,11 +542,11 @@ tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
 	  test -n "$$unique" || unique=$$empty_fix; \
 	  if test $$# -gt 0; then \
-	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	      "$$@" $$unique; \
+		$(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+		  "$$@" $$unique; \
 	  else \
-	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	      $$unique; \
+		$(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+		  $$unique; \
 	  fi; \
 	fi
 ctags: ctags-am
@@ -564,7 +556,7 @@ ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	$(am__define_uniq_tagged_files); \
 	test -z "$(CTAGS_ARGS)$$unique" \
 	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
-	     $$unique
+		 $$unique
 
 GTAGS:
 	here=`$(am__cd) $(top_builddir) && pwd` \
@@ -580,9 +572,9 @@ cscopelist-am: $(am__tagged_files)
 	esac; \
 	for i in $$list; do \
 	  if test -f "$$i"; then \
-	    echo "$(subdir)/$$i"; \
+		echo "$(subdir)/$$i"; \
 	  else \
-	    echo "$$sdir/$$i"; \
+		echo "$$sdir/$$i"; \
 	  fi; \
 	done >> $(top_builddir)/cscope.files
 
@@ -597,7 +589,7 @@ distdir-am: $(DISTFILES)
 	list='$(DISTFILES)'; \
 	  dist_files=`for file in $$list; do echo $$file; done | \
 	  sed -e "s|^$$srcdirstrip/||;t" \
-	      -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
+		  -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
 	case $$dist_files in \
 	  */*) $(MKDIR_P) `echo "$$dist_files" | \
 			   sed '/\//!d;s|^|$(distdir)/|;s,/[^/]*$$,,' | \
@@ -606,33 +598,30 @@ distdir-am: $(DISTFILES)
 	for file in $$dist_files; do \
 	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
 	  if test -d $$d/$$file; then \
-	    dir=`echo "/$$file" | sed -e 's,/[^/]*$$,,'`; \
-	    if test -d "$(distdir)/$$file"; then \
-	      find "$(distdir)/$$file" -type d ! -perm -700 -exec chmod u+rwx {} \;; \
-	    fi; \
-	    if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \
-	      cp -fpR $(srcdir)/$$file "$(distdir)$$dir" || exit 1; \
-	      find "$(distdir)/$$file" -type d ! -perm -700 -exec chmod u+rwx {} \;; \
-	    fi; \
-	    cp -fpR $$d/$$file "$(distdir)$$dir" || exit 1; \
+		dir=`echo "/$$file" | sed -e 's,/[^/]*$$,,'`; \
+		if test -d "$(distdir)/$$file"; then \
+		  find "$(distdir)/$$file" -type d ! -perm -700 -exec chmod u+rwx {} \;; \
+		fi; \
+		if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \
+		  cp -fpR $(srcdir)/$$file "$(distdir)$$dir" || exit 1; \
+		  find "$(distdir)/$$file" -type d ! -perm -700 -exec chmod u+rwx {} \;; \
+		fi; \
+		cp -fpR $$d/$$file "$(distdir)$$dir" || exit 1; \
 	  else \
-	    test -f "$(distdir)/$$file" \
-	    || cp -p $$d/$$file "$(distdir)/$$file" \
-	    || exit 1; \
+		test -f "$(distdir)/$$file" \
+		|| cp -p $$d/$$file "$(distdir)/$$file" \
+		|| exit 1; \
 	  fi; \
 	done
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-am
+check: check-am
 all-am: Makefile $(LTLIBRARIES) all-local
 installdirs:
 	for dir in "$(DESTDIR)$(libdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-am
-install-exec: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-exec-am
+install: install-am
+install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
 
@@ -643,17 +632,16 @@ installcheck: installcheck-am
 install-strip:
 	if test -z '$(STRIP)'; then \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
-	    install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
-	      install; \
+		install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
+		  install; \
 	else \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
-	    install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
-	    "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'" install; \
+		install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
+		"INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'" install; \
 	fi
 mostlyclean-generic:
 
 clean-generic:
-	-$(am__rm_f) $(CLEANFILES)
 
 distclean-generic:
 	-$(am__rm_f) $(CONFIG_CLEAN_FILES)
@@ -662,7 +650,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-$(am__rm_f) $(BUILT_SOURCES)
 clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 	mostlyclean-am
 
@@ -693,7 +680,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-data-local
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -750,52 +737,40 @@ ps-am:
 
 uninstall-am: uninstall-libLTLIBRARIES
 
-.MAKE: all check install install-am install-exec install-strip
+.MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local am--depfiles check \
 	check-am clean clean-generic clean-libLTLIBRARIES \
 	clean-libtool cscopelist-am ctags ctags-am distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am \
-	install-data-local install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-libLTLIBRARIES install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am \
+	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags tags-am uninstall uninstall-am uninstall-libLTLIBRARIES
 
 .PRECIOUS: Makefile
 
-﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: 	AGPL-3.0-or-later
-
-# src/Makefile.am
 
 .POSIX: # Enforce POSIX mode for portability
-﻿﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
-.POSIX: # Enforce POSIX mode for portability
+﻿.POSIX: # Enforce POSIX mode for portability
 
 # Load environment variables if .env exists
 env_load:
 	@if [ -f .env ]; then \
-	    echo "Loading .env variables..."; \
-	    . .env; \
+		echo "Loading .env variables..."; \
+		. .env; \
 	fi
-
-# Output compiler choices during build
-all:
-    @echo "Using CC: $(CC)"
-    @echo "Using CXX: $(CXX)"
 
 # Clean build artifacts
 clean:
-    @echo "Cleaning build artifacts..."
-    rm -f cppcheck.xml cppcheck_errors.log
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log
 
 # Installation rules
 stow:
@@ -863,14 +838,9 @@ perf:
 
 # Profiling with gprof
 profile:
-    @echo "Running gprof for profiling..."
-    ./web-app
-    gprof ./web-app gmon.out > gprof.out
-
-# Coverage analysis with gcov
-coverage:
-    @echo "Running gcov for coverage analysis..."
-    find $(srcdir) -name '*.c' -exec gcov {} \;
+	@echo "Running gprof for profiling..."
+	./web-app
+	gprof ./web-app gmon.out > gprof.out
 
 # Documentation generation
 docs:
@@ -893,6 +863,10 @@ dist-xz:
 
 # Tags management
 generate_tags:
+	@if [ ! -f GTAGS ]; then \
+		echo "Initializing GNU Global..."; \
+		gtags; \
+	fi
 	@echo "Generating tags with global..."
 	global -u
 
@@ -922,43 +896,35 @@ install_mo_files:
 	for lang in en_AU; do \
 		$(INSTALL_DATA) $(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo; \
 	done
-parser.c parser.h: parser.y
-    bison -d -o $(OBJ_DIR)/parser.c $(SRC_DIR)/parser.y
-lexer.c: lexer.l parser.h
-    flex -o $(OBJ_DIR)/lexer.c $(SRC_DIR)/lexer.l
+
+# Consolidated 'all' target
+all_common: generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
+
+# Consolidated 'clean' target
+clean_common: clean_tags
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log
 
 # Add autoindent to the build process
-all: autoindent generate_tags generate_metadata process_metadata include_metadata splint cscope
+all: all_common
 
 # Define splint target
 .PHONY: splint
 splint:
-    @echo "Running splint static code analysis..."
-    splint $(SRC_DIR)/*.c
+	@echo "Running splint static code analysis..."
+	splint $(SRC_DIR)/*.c
 
 # Define cscope target
 .PHONY: cscope
 cscope:
-    @echo "Generating cscope database..."
-    cscope -b -R -s $(SRC_DIR)
+	@echo "Generating cscope database..."
+	cscope -b -R -s $(SRC_DIR)
 
 # Add gettext rules
 all-local: generate_mo_files
-install-data-local: install_mo_files
 
 # Add clean_tags to the clean process
-clean: clean_tags
-
-# Profiling with gprof
-profile:
-    @echo "Running gprof for profiling..."
-    ./web-app
-    gprof ./web-app gmon.out > gprof.out
-
-# Coverage analysis with gcov
-coverage:
-    @echo "Running gcov for coverage analysis..."
-    find . -name '*.c' -exec gcov {} \;
+clean: clean_common
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

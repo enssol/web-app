@@ -1,4 +1,4 @@
-﻿tests/test_validator.c
+tests/test_validator.c
 tests/test_logger.c
 tests/test_hello.c
 tests/test_garbage_collector.c

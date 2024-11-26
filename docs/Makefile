@@ -14,6 +14,8 @@
 
 
 
+# docs/Makefile.am
+
 
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -159,7 +161,7 @@ AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
 APP_MODE = development
 APP_NAME = web-app
-AR = ar
+AR = /opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/ar
 AUTOCONF = ${SHELL} '/Users/adriangallo/web-app/build/missing' autoconf
 AUTOGEN = autogen
 AUTOHEADER = ${SHELL} '/Users/adriangallo/web-app/build/missing' autoheader
@@ -173,7 +175,7 @@ CC = $(CCACHE) gcc
 # Compiler and linker definitions
 CCACHE = ccache
 CCDEPMODE = depmode=none
-CFLAGS = -O0 -pedantic -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800 -std=gnu23 -Wall -Wextra -Werror
+CFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
 CFLOW = cflow
 CLANG_FORMAT = clang-format
 CLANG_TIDY = no
@@ -182,7 +184,7 @@ COMPLEXITY = /usr/bin/complexity
 CONFIG_DIR = etc
 CP = cp -f
 CPPCHECK = cppcheck
-CPPFLAGS = -I/opt/homebrew/opt/flex/include -I/opt/homebrew/opt/node@18/include
+CPPFLAGS = -I/opt/homebrew/include -I/opt/homebrew/opt/curl/include
 CSCOPE = cscope
 CTAGS = ctags
 CYGPATH_W = echo
@@ -219,14 +221,14 @@ GTKDOC_REBASE = /opt/homebrew/bin/gtkdoc-rebase
 HTML_DIR = ${datadir}/gtk-doc/html
 INCLUDE_DIR = include
 INDENT = indent
-INSTALL = /opt/homebrew/opt/coreutils/libexec/gnubin/install -c
+INSTALL = /opt/homebrew/bin/ginstall -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LD = /opt/homebrew/bin/mold
-LDFLAGS = -B/opt/homebrew/bin
-LEX = flex
+LDFLAGS = -fuse-ld=mold -static -Wl,-z,relro,-z,now -L/opt/homebrew/lib -L/opt/homebrew/opt/curl/lib
+LEX = :
 LEXLIB = 
 LEX_OUTPUT_ROOT = lex.yy
 LIBOBJS = 
@@ -247,14 +249,15 @@ MAKE = make
 MAKEINFO = ${SHELL} '/Users/adriangallo/web-app/build/missing' makeinfo
 MANIFEST_TOOL = :
 MKDIR = mkdir
-MKDIR_P = /opt/homebrew/opt/coreutils/libexec/gnubin/mkdir -p
+MKDIR_P = /opt/homebrew/bin/gmkdir -p
+MT = :
 MV = mv -f
-NM = /usr/bin/nm -B
+NM = /opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/nm
 NMEDIT = nmedit
 OBJDUMP = objdump
 OBJEXT = o
 OBJ_DIR = objects
-OTOOL = otool
+OTOOL = /usr/bin/otool
 OTOOL64 = :
 PACKAGE = web-app
 PACKAGE_BUGREPORT = https://github.com/enssol/web-app/issues/new
@@ -265,13 +268,13 @@ PACKAGE_URL =
 PACKAGE_VERSION = 1.0
 PATH_SEPARATOR = :
 PKGCONF = pkgconf
-PKG_CONFIG = /opt/homebrew/opt/pkgconf/bin/pkg-config
+PKG_CONFIG = /opt/homebrew/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
-PKG_CONFIG_PATH = /opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig::/usr/local/lib/pkgconfig:/opt/homebrew/lib/pkgconfig
+PKG_CONFIG_PATH = /opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig::/usr/local/lib/pkgconfig:/opt/homebrew/lib/pkgconfig
 RANLIB = ranlib
 RECSEL = recsel
 RM = rm -f
-SED = /opt/homebrew/opt/gnu-sed/libexec/gnubin/sed
+SED = /opt/homebrew/bin/gsed
 SET_MAKE = 
 SHELL = /bin/sh
 SHELLCHECK = shellcheck
@@ -291,7 +294,7 @@ abs_builddir = /Users/adriangallo/web-app/docs
 abs_srcdir = /Users/adriangallo/web-app/docs
 abs_top_builddir = /Users/adriangallo/web-app
 abs_top_srcdir = /Users/adriangallo/web-app
-ac_ct_AR = ar
+ac_ct_AR = /opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/ar
 ac_ct_CC = /opt/homebrew/Cellar/gcc/14.2.0_1/bin/gcc-14
 ac_ct_DUMPBIN = 
 am__include = include
@@ -345,8 +348,6 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 CXX = $(CCACHE) g++
-AM_CFLAGS = @CC1_FLAGS@ -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include
-AM_LDFLAGS = @LINK_FLAGS@ -static $(LIBS_LIBS) -L/usr/local/lib -L/opt/homebrew/lib
 
 # Define the documentation files for the docs directory
 dist_doc_DATA = user_guide.md developer_guide.md api_reference.md
@@ -580,33 +581,21 @@ uninstall-am: uninstall-dist_docDATA
 
 .PRECIOUS: Makefile
 
-﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: 	AGPL-3.0-or-later
-
-# docs/Makefile.am
 
 .POSIX: # Enforce POSIX mode for portability
-﻿﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
-.POSIX: # Enforce POSIX mode for portability
+﻿.POSIX: # Enforce POSIX mode for portability
 
 # Load environment variables if .env exists
 env_load:
 	@if [ -f .env ]; then \
-	    echo "Loading .env variables..."; \
-	    . .env; \
+		echo "Loading .env variables..."; \
+		. .env; \
 	fi
-
-# Output compiler choices during build
-all:
-    @echo "Using CC: $(CC)"
-    @echo "Using CXX: $(CXX)"
 
 # Clean build artifacts
 clean:
-    @echo "Cleaning build artifacts..."
-    rm -f cppcheck.xml cppcheck_errors.log
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log
 
 # Installation rules
 stow:
@@ -674,14 +663,9 @@ perf:
 
 # Profiling with gprof
 profile:
-    @echo "Running gprof for profiling..."
-    ./web-app
-    gprof ./web-app gmon.out > gprof.out
-
-# Coverage analysis with gcov
-coverage:
-    @echo "Running gcov for coverage analysis..."
-    find $(srcdir) -name '*.c' -exec gcov {} \;
+	@echo "Running gprof for profiling..."
+	./web-app
+	gprof ./web-app gmon.out > gprof.out
 
 # Documentation generation
 docs:
@@ -704,6 +688,10 @@ dist-xz:
 
 # Tags management
 generate_tags:
+	@if [ ! -f GTAGS ]; then \
+		echo "Initializing GNU Global..."; \
+		gtags; \
+	fi
 	@echo "Generating tags with global..."
 	global -u
 
@@ -734,10 +722,18 @@ install_mo_files:
 		$(INSTALL_DATA) $(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo; \
 	done
 
+# Consolidated 'all' target
+all_common: generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
+
+# Consolidated 'clean' target
+clean_common: clean_tags
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log
+
 # Include common rules
 
-# Add generate_docs to the build process
-all: generate_docs generate_html_docs
+# Add autoindent to the build process
+all: generate_docs generate_html_docs generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
 
 # Add clean_html_docs to the clean process
 clean: clean_html_docs

@@ -1,8 +1,16 @@
-﻿# EnvEng-WebApp-Development
+# EnvEng-WebApp-Development
 
 ---
+`gtags`
+`autoreconf -vfi`
 
-`./configure --disable-gettext --disable-dependency-tracking LDFLAGS="-B/opt/homebrew/bin"`
+```bash
+./configure --disable-gettext --disable-dependency-tracking \
+  CFLAGS="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" \
+  LDFLAGS="-B/opt/homebrew/bin"
+```
+
+`make`
 
 TODO: sort out GETTEXT and use autopoint for internalization
 

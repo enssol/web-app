@@ -1,4 +1,4 @@
-﻿include/config.h \
+include/config.h \
 include/config_loader.h \
 include/env_loader.h \
 include/error_handler.h \

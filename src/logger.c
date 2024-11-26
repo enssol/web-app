@@ -1,13 +1,12 @@
-﻿/**
+/**
  * Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
  * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
 
-#include "config.h"
-#include "gettext.h"
+#include "../include/config.h"
 #include <stdio.h>
 #include <stdarg.h>
-#include "logger.h"
+#include "../include/logger.h"
 
 void init_logger() {
     // Initialize logging system

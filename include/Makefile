@@ -14,6 +14,7 @@
 
 
 
+# include/Makefile.am
 
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -98,8 +99,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/gtk-doc.m4 \
 	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-DIST_COMMON = $(srcdir)/Makefile.am $(include_HEADERS) \
-	$(am__DIST_COMMON)
+DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
@@ -123,51 +123,7 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-  || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-       $(am__cd) "$$dir" && echo $$files | $(am__xargs_n) 40 $(am__rm_f); }; \
-  }
-am__installdirs = "$(DESTDIR)$(includedir)"
-HEADERS = $(include_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
-# Read a list of newline-separated strings from the standard input,
-# and print each of them once, without duplicates.  Input order is
-# *not* preserved.
-am__uniquify_input = $(AWK) '\
-  BEGIN { nonempty = 0; } \
-  { items[$$0] = 1; nonempty = 1; } \
-  END { if (nonempty) { for (i in items) print i; }; } \
-'
-# Make sure the list of sources is unique.  This is necessary because,
-# e.g., the same source file might be shared among _SOURCES variables
-# for different programs/libraries.
-am__define_uniq_tagged_files = \
-  list='$(am__tagged_files)'; \
-  unique=`for i in $$list; do \
-    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-  done | $(am__uniquify_input)`
 am__DIST_COMMON = $(srcdir)/../common-rules.am $(srcdir)/Makefile.in
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = ${SHELL} '/Users/adriangallo/web-app/build/missing' aclocal-1.17
@@ -175,7 +131,7 @@ AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
 APP_MODE = development
 APP_NAME = web-app
-AR = ar
+AR = /opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/ar
 AUTOCONF = ${SHELL} '/Users/adriangallo/web-app/build/missing' autoconf
 AUTOGEN = autogen
 AUTOHEADER = ${SHELL} '/Users/adriangallo/web-app/build/missing' autoheader
@@ -189,7 +145,7 @@ CC = $(CCACHE) gcc
 # Compiler and linker definitions
 CCACHE = ccache
 CCDEPMODE = depmode=none
-CFLAGS = -O0 -pedantic -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800 -std=gnu23 -Wall -Wextra -Werror
+CFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
 CFLOW = cflow
 CLANG_FORMAT = clang-format
 CLANG_TIDY = no
@@ -198,7 +154,7 @@ COMPLEXITY = /usr/bin/complexity
 CONFIG_DIR = etc
 CP = cp -f
 CPPCHECK = cppcheck
-CPPFLAGS = -I/opt/homebrew/opt/flex/include -I/opt/homebrew/opt/node@18/include
+CPPFLAGS = -I/opt/homebrew/include -I/opt/homebrew/opt/curl/include
 CSCOPE = cscope
 CTAGS = ctags
 CYGPATH_W = echo
@@ -235,14 +191,14 @@ GTKDOC_REBASE = /opt/homebrew/bin/gtkdoc-rebase
 HTML_DIR = ${datadir}/gtk-doc/html
 INCLUDE_DIR = include
 INDENT = indent
-INSTALL = /opt/homebrew/opt/coreutils/libexec/gnubin/install -c
+INSTALL = /opt/homebrew/bin/ginstall -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LD = /opt/homebrew/bin/mold
-LDFLAGS = -B/opt/homebrew/bin
-LEX = flex
+LDFLAGS = -fuse-ld=mold -static -Wl,-z,relro,-z,now -L/opt/homebrew/lib -L/opt/homebrew/opt/curl/lib
+LEX = :
 LEXLIB = 
 LEX_OUTPUT_ROOT = lex.yy
 LIBOBJS = 
@@ -263,14 +219,15 @@ MAKE = make
 MAKEINFO = ${SHELL} '/Users/adriangallo/web-app/build/missing' makeinfo
 MANIFEST_TOOL = :
 MKDIR = mkdir
-MKDIR_P = /opt/homebrew/opt/coreutils/libexec/gnubin/mkdir -p
+MKDIR_P = /opt/homebrew/bin/gmkdir -p
+MT = :
 MV = mv -f
-NM = /usr/bin/nm -B
+NM = /opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/nm
 NMEDIT = nmedit
 OBJDUMP = objdump
 OBJEXT = o
 OBJ_DIR = objects
-OTOOL = otool
+OTOOL = /usr/bin/otool
 OTOOL64 = :
 PACKAGE = web-app
 PACKAGE_BUGREPORT = https://github.com/enssol/web-app/issues/new
@@ -281,13 +238,13 @@ PACKAGE_URL =
 PACKAGE_VERSION = 1.0
 PATH_SEPARATOR = :
 PKGCONF = pkgconf
-PKG_CONFIG = /opt/homebrew/opt/pkgconf/bin/pkg-config
+PKG_CONFIG = /opt/homebrew/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
-PKG_CONFIG_PATH = /opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig::/usr/local/lib/pkgconfig:/opt/homebrew/lib/pkgconfig
+PKG_CONFIG_PATH = /opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig::/usr/local/lib/pkgconfig:/opt/homebrew/lib/pkgconfig
 RANLIB = ranlib
 RECSEL = recsel
 RM = rm -f
-SED = /opt/homebrew/opt/gnu-sed/libexec/gnubin/sed
+SED = /opt/homebrew/bin/gsed
 SET_MAKE = 
 SHELL = /bin/sh
 SHELLCHECK = shellcheck
@@ -307,7 +264,7 @@ abs_builddir = /Users/adriangallo/web-app/include
 abs_srcdir = /Users/adriangallo/web-app/include
 abs_top_builddir = /Users/adriangallo/web-app
 abs_top_srcdir = /Users/adriangallo/web-app
-ac_ct_AR = ar
+ac_ct_AR = /opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/ar
 ac_ct_CC = /opt/homebrew/Cellar/gcc/14.2.0_1/bin/gcc-14
 ac_ct_DUMPBIN = 
 am__include = include
@@ -359,13 +316,6 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 CXX = $(CCACHE) g++
-AM_CFLAGS = @CC1_FLAGS@ -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include
-AM_LDFLAGS = @LINK_FLAGS@ -static $(LIBS_LIBS) -L/usr/local/lib -L/opt/homebrew/lib
-
-# Include common rules
-
-# Define the header files for the include directory
-include_HEADERS = config.h config_loader.h env_loader.h error_handler.h garbage_collector.h hello.h logger.h parser.h validator.h gettext.h
 all: all-am
 
 .SUFFIXES:
@@ -405,79 +355,12 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-includeHEADERS: $(include_HEADERS)
-	@$(NORMAL_INSTALL)
-	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(includedir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(includedir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(includedir)'"; \
-	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(includedir)" || exit $$?; \
-	done
+tags TAGS:
 
-uninstall-includeHEADERS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(includedir)'; $(am__uninstall_files_from_dir)
+ctags CTAGS:
 
-ID: $(am__tagged_files)
-	$(am__define_uniq_tagged_files); mkid -fID $$unique
-tags: tags-am
-TAGS: tags
+cscope cscopelist:
 
-tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
-	set x; \
-	here=`pwd`; \
-	$(am__define_uniq_tagged_files); \
-	shift; \
-	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
-	  test -n "$$unique" || unique=$$empty_fix; \
-	  if test $$# -gt 0; then \
-	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	      "$$@" $$unique; \
-	  else \
-	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	      $$unique; \
-	  fi; \
-	fi
-ctags: ctags-am
-
-CTAGS: ctags
-ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
-	$(am__define_uniq_tagged_files); \
-	test -z "$(CTAGS_ARGS)$$unique" \
-	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
-	     $$unique
-
-GTAGS:
-	here=`$(am__cd) $(top_builddir) && pwd` \
-	  && $(am__cd) $(top_srcdir) \
-	  && gtags -i $(GTAGS_ARGS) "$$here"
-cscopelist: cscopelist-am
-
-cscopelist-am: $(am__tagged_files)
-	list='$(am__tagged_files)'; \
-	case "$(srcdir)" in \
-	  [\\/]* | ?:[\\/]*) sdir="$(srcdir)" ;; \
-	  *) sdir=$(subdir)/$(srcdir) ;; \
-	esac; \
-	for i in $$list; do \
-	  if test -f "$$i"; then \
-	    echo "$(subdir)/$$i"; \
-	  else \
-	    echo "$$sdir/$$i"; \
-	  fi; \
-	done >> $(top_builddir)/cscope.files
-
-distclean-tags:
-	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 distdir: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) distdir-am
 
@@ -513,11 +396,8 @@ distdir-am: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(HEADERS)
+all-am: Makefile
 installdirs:
-	for dir in "$(DESTDIR)$(includedir)"; do \
-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -552,7 +432,7 @@ clean-am: clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -f Makefile
-distclean-am: clean-am distclean-generic distclean-tags
+distclean-am: clean-am distclean-generic
 
 dvi: dvi-am
 
@@ -566,7 +446,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-includeHEADERS
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -610,53 +490,39 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-includeHEADERS
+uninstall-am:
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
-	clean-libtool cscopelist-am ctags ctags-am distclean \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-includeHEADERS install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am tags tags-am uninstall uninstall-am \
-	uninstall-includeHEADERS
+.PHONY: all all-am check check-am clean clean-generic clean-libtool \
+	cscopelist-am ctags-am distclean distclean-generic \
+	distclean-libtool distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags-am uninstall uninstall-am
 
 .PRECIOUS: Makefile
 
-﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: 	AGPL-3.0-or-later
-
-# include/Makefile.am
 
 .POSIX: # Enforce POSIX mode for portability
-﻿﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
-.POSIX: # Enforce POSIX mode for portability
+﻿.POSIX: # Enforce POSIX mode for portability
 
 # Load environment variables if .env exists
 env_load:
 	@if [ -f .env ]; then \
-	    echo "Loading .env variables..."; \
-	    . .env; \
+		echo "Loading .env variables..."; \
+		. .env; \
 	fi
-
-# Output compiler choices during build
-all:
-    @echo "Using CC: $(CC)"
-    @echo "Using CXX: $(CXX)"
 
 # Clean build artifacts
 clean:
-    @echo "Cleaning build artifacts..."
-    rm -f cppcheck.xml cppcheck_errors.log
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log
 
 # Installation rules
 stow:
@@ -724,14 +590,9 @@ perf:
 
 # Profiling with gprof
 profile:
-    @echo "Running gprof for profiling..."
-    ./web-app
-    gprof ./web-app gmon.out > gprof.out
-
-# Coverage analysis with gcov
-coverage:
-    @echo "Running gcov for coverage analysis..."
-    find $(srcdir) -name '*.c' -exec gcov {} \;
+	@echo "Running gprof for profiling..."
+	./web-app
+	gprof ./web-app gmon.out > gprof.out
 
 # Documentation generation
 docs:
@@ -754,6 +615,10 @@ dist-xz:
 
 # Tags management
 generate_tags:
+	@if [ ! -f GTAGS ]; then \
+		echo "Initializing GNU Global..."; \
+		gtags; \
+	fi
 	@echo "Generating tags with global..."
 	global -u
 
@@ -784,8 +649,18 @@ install_mo_files:
 		$(INSTALL_DATA) $(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo; \
 	done
 
-# Add generate_tags to the build process
-all: generate_tags
+# Consolidated 'all' target
+all_common: generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
+
+# Consolidated 'clean' target
+clean_common: clean_tags
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log
+
+# Include common rules
+
+# Add autoindent to the build process
+all: generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
 
 # Add clean_tags to the clean process
 clean: clean_tags

@@ -1,12 +1,11 @@
-﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: 	AGPL-3.0-or-later
-
 # po/Makefile.am
 
-.POSIX: # Enforce POSIX mode for portability
+#.POSIX: # Enforce POSIX mode for portability
 
 # Include common rules
-include ../common-rules.am
+#include ../common-rules.am
+
+#all: generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
 
 # Add this at the top of the file to define the conditional
 # if ENABLE_GETTEXT
@@ -70,16 +69,6 @@ include ../common-rules.am
 #             ln -s "../LC_MESSAGES/$(DOMAIN).mo" "$(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo" 2>/dev/null || \
 #             cp -p "$(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(DOMAIN).mo" "$(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo"; \
 #             echo "installing $$realcat link as $(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo"; \
-#         done; \
-#     done
-
-# uninstall-local:
-#     catalogs='$(CATALOGS)'; \
-#     for cat in $$catalogs; do \
-#         cat=`basename $$cat`; \
-#         lang=`echo $$cat | sed -e 's/\.gmo$$//'`; \
-#         for lc in LC_MESSAGES $(EXTRA_LOCALE_CATEGORIES); do \
-#             rm -f $(DESTDIR)$(localedir)/$$lang/$$lc/$(DOMAIN).mo; \
 #         done; \
 #     done
 

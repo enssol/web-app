@@ -1,6 +1,3 @@
-﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: 	AGPL-3.0-or-later
-
 # build/Makefile.am
 
 .POSIX: # Enforce POSIX mode for portability
@@ -22,8 +19,8 @@ process_build:
     @echo "Processing auxiliary files with gawk..."
     @gawk -f ../etc/process_files.gawk build/*.sh
 
-# Add process_build, autoindent, clib_install, generate_tags, and stow to the build process
-all: process_build autoindent clib_install generate_tags stow
+# Add autoindent to the build process
+all: process_build autoindent clib_install generate_tags stow generate_metadata process_metadata include_metadata splint cscope
 
 clean:
     rm -f build_script.sh

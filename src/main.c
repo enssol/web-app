@@ -1,20 +1,20 @@
-﻿/**
+/**
  * Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
  * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
 
-#include "config.h"
+#include "../include/config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "config_loader.h"
-#include "env_loader.h"
-#include "logger.h"
-#include "garbage_collector.h"
-#include "error_handler.h"
-#include "validator.h"
-#include "hello.h"
+#include "../include/config_loader.h"
+#include "../include/env_loader.h"
+#include "../include/logger.h"
+#include "../include/garbage_collector.h"
+#include "../include/error_handler.h"
+#include "../include/validator.h"
+#include "../include/hello.h"
 
 // Define constants and global variables
 #define APP_NAME "App"

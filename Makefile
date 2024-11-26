@@ -14,6 +14,8 @@
 
 
 
+# Root Makefile.am
+
 # -*- mode: makefile -*-
 #
 # gtk-doc.make - make rules for gtk-doc
@@ -38,58 +40,57 @@
 # Everything below here is generic #
 ####################################
 
-
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
-    false; \
+	false; \
   elif test -n '$(MAKE_HOST)'; then \
-    true; \
+	true; \
   elif test -n '$(MAKE_VERSION)' && test -n '$(CURDIR)'; then \
-    true; \
+	true; \
   else \
-    false; \
+	false; \
   fi; \
 }
 am__make_running_with_option = \
   case $${target_option-} in \
-      ?) ;; \
-      *) echo "am__make_running_with_option: internal error: invalid" \
-              "target option '$${target_option-}' specified" >&2; \
-         exit 1;; \
+	  ?) ;; \
+	  *) echo "am__make_running_with_option: internal error: invalid" \
+			  "target option '$${target_option-}' specified" >&2; \
+		 exit 1;; \
   esac; \
   has_opt=no; \
   sane_makeflags=$$MAKEFLAGS; \
   if $(am__is_gnu_make); then \
-    sane_makeflags=$$MFLAGS; \
+	sane_makeflags=$$MFLAGS; \
   else \
-    case $$MAKEFLAGS in \
-      *\\[\ \	]*) \
-        bs=\\; \
-        sane_makeflags=`printf '%s\n' "$$MAKEFLAGS" \
-          | sed "s/$$bs$$bs[$$bs $$bs	]*//g"`;; \
-    esac; \
+	case $$MAKEFLAGS in \
+	  *\\[\ \	]*) \
+		bs=\\; \
+		sane_makeflags=`printf '%s\n' "$$MAKEFLAGS" \
+		  | sed "s/$$bs$$bs[$$bs $$bs	]*//g"`;; \
+	esac; \
   fi; \
   skip_next=no; \
   strip_trailopt () \
   { \
-    flg=`printf '%s\n' "$$flg" | sed "s/$$1.*$$//"`; \
+	flg=`printf '%s\n' "$$flg" | sed "s/$$1.*$$//"`; \
   }; \
   for flg in $$sane_makeflags; do \
-    test $$skip_next = yes && { skip_next=no; continue; }; \
-    case $$flg in \
-      *=*|--*) continue;; \
-        -*I) strip_trailopt 'I'; skip_next=yes;; \
-      -*I?*) strip_trailopt 'I';; \
-        -*O) strip_trailopt 'O'; skip_next=yes;; \
-      -*O?*) strip_trailopt 'O';; \
-        -*l) strip_trailopt 'l'; skip_next=yes;; \
-      -*l?*) strip_trailopt 'l';; \
-      -[dEDm]) skip_next=yes;; \
-      -[JT]) skip_next=yes;; \
-    esac; \
-    case $$flg in \
-      *$$target_option*) has_opt=yes; break;; \
-    esac; \
+	test $$skip_next = yes && { skip_next=no; continue; }; \
+	case $$flg in \
+	  *=*|--*) continue;; \
+		-*I) strip_trailopt 'I'; skip_next=yes;; \
+	  -*I?*) strip_trailopt 'I';; \
+		-*O) strip_trailopt 'O'; skip_next=yes;; \
+	  -*O?*) strip_trailopt 'O';; \
+		-*l) strip_trailopt 'l'; skip_next=yes;; \
+	  -*l?*) strip_trailopt 'l';; \
+	  -[dEDm]) skip_next=yes;; \
+	  -[JT]) skip_next=yes;; \
+	esac; \
+	case $$flg in \
+	  *$$target_option*) has_opt=yes; break;; \
+	esac; \
   done; \
   test $$has_opt = yes
 am__make_dryrun = (target_option=n; $(am__make_running_with_option))
@@ -137,11 +138,11 @@ am__v_P_1 = :
 AM_V_GEN = $(am__v_GEN_$(V))
 am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))
 am__v_GEN_0 = @echo "  GEN     " $@;
-am__v_GEN_1 = 
+am__v_GEN_1 =
 AM_V_at = $(am__v_at_$(V))
 am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
 am__v_at_0 = @
-am__v_at_1 = 
+am__v_at_1 =
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
@@ -154,13 +155,13 @@ RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	tags-recursive uninstall-recursive
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
-    n|no|NO) false;; \
-    *) (install-info --version) >/dev/null 2>&1;; \
+	n|no|NO) false;; \
+	*) (install-info --version) >/dev/null 2>&1;; \
   esac
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
+	$(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+	*) f=$$p;; \
   esac;
 am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
 am__install_max = 40
@@ -172,16 +173,16 @@ am__nobase_list = $(am__nobase_strip_setup); \
   for p in $$list; do echo "$$p $$p"; done | \
   sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
   $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
+	if (++n[$$2] == $(am__install_max)) \
+	  { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+	END { for (dir in files) print dir, files[dir] }'
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 am__uninstall_files_from_dir = { \
   { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
   || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-       $(am__cd) "$$dir" && echo $$files | $(am__xargs_n) 40 $(am__rm_f); }; \
+	   $(am__cd) "$$dir" && echo $$files | $(am__xargs_n) 40 $(am__rm_f); }; \
   }
 am__installdirs = "$(DESTDIR)$(configdir)"
 DATA = $(dist_config_DATA)
@@ -209,7 +210,7 @@ am__uniquify_input = $(AWK) '\
 am__define_uniq_tagged_files = \
   list='$(am__tagged_files)'; \
   unique=`for i in $$list; do \
-    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
   done | $(am__uniquify_input)`
 DIST_SUBDIRS = $(SUBDIRS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/common-rules.am \
@@ -219,16 +220,16 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/common-rules.am \
 	$(top_srcdir)/build/ltmain.sh $(top_srcdir)/build/missing \
 	$(top_srcdir)/gtk-doc.make ABOUT-NLS AUTHORS COPYING ChangeLog \
 	INSTALL NEWS README.md build/ar-lib build/compile \
-	build/config.guess build/config.sub build/depcomp \
-	build/install-sh build/ltmain.sh build/missing build/ylwrap
+	build/config.guess build/config.sub build/install-sh \
+	build/ltmain.sh build/missing build/ylwrap
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
 am__remove_distdir = \
   if test -d "$(distdir)"; then \
-    find "$(distdir)" -type d ! -perm -700 -exec chmod u+rwx {} ';' \
-      ; rm -rf "$(distdir)" \
-      || { sleep 5 && rm -rf "$(distdir)"; }; \
+	find "$(distdir)" -type d ! -perm -700 -exec chmod u+rwx {} ';' \
+	  ; rm -rf "$(distdir)" \
+	  || { sleep 5 && rm -rf "$(distdir)"; }; \
   else :; fi
 am__post_remove_distdir = $(am__remove_distdir)
 am__relativize = \
@@ -238,22 +239,22 @@ am__relativize = \
   sed_last='s,^.*/\([^/]*\)$$,\1,'; \
   sed_butlast='s,/*[^/]*$$,,'; \
   while test -n "$$dir1"; do \
-    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
-    if test "$$first" != "."; then \
-      if test "$$first" = ".."; then \
-        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
-        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
-      else \
-        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
-        if test "$$first2" = "$$first"; then \
-          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
-        else \
-          dir2="../$$dir2"; \
-        fi; \
-        dir0="$$dir0"/"$$first"; \
-      fi; \
-    fi; \
-    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
+	first=`echo "$$dir1" | sed -e "$$sed_first"`; \
+	if test "$$first" != "."; then \
+	  if test "$$first" = ".."; then \
+		dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
+		dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
+	  else \
+		first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
+		if test "$$first2" = "$$first"; then \
+		  dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
+		else \
+		  dir2="../$$dir2"; \
+		fi; \
+		dir0="$$dir0"/"$$first"; \
+	  fi; \
+	fi; \
+	dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
   done; \
   reldir="$$dir2"
 DIST_ARCHIVES = $(distdir).tar.gz $(distdir).tar.xz
@@ -266,13 +267,18 @@ am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
   | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
 distcleancheck_listfiles = \
   find . \( -type f -a \! \
-            \( -name .nfs* -o -name .smb* -o -name .__afs* \) \) -print
+			\( -name .nfs* -o -name .smb* -o -name .__afs* \) \) -print
+
+# Define VPATH to search for source files in multiple directories
+VPATH = src:include:lib:deps:build:etc:po:docs:dist:tmp:objects:logs:m4:bin
 ACLOCAL = ${SHELL} '/Users/adriangallo/web-app/build/missing' aclocal-1.17
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
 APP_MODE = development
+
+# Define paths and other variables
 APP_NAME = web-app
-AR = ar
+AR = /opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/ar
 AUTOCONF = ${SHELL} '/Users/adriangallo/web-app/build/missing' autoconf
 AUTOGEN = autogen
 AUTOHEADER = ${SHELL} '/Users/adriangallo/web-app/build/missing' autoheader
@@ -286,16 +292,18 @@ CC = $(CCACHE) gcc
 # Compiler and linker definitions
 CCACHE = ccache
 CCDEPMODE = depmode=none
-CFLAGS = -O0 -pedantic -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800 -std=gnu23 -Wall -Wextra -Werror
+
+# Compiler and linker definitions
+CFLAGS = -Iinclude -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include -O0 -pedantic -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800 -std=gnu23 -Wall -Wextra -Werror -fno-common -DPIC -MMD -MP
 CFLOW = cflow
 CLANG_FORMAT = clang-format
 CLANG_TIDY = no
 CLIB = clib
-COMPLEXITY = /usr/bin/complexity
+COMPLEXITY = complexity
 CONFIG_DIR = etc
 CP = cp -f
 CPPCHECK = cppcheck
-CPPFLAGS = -I/opt/homebrew/opt/flex/include -I/opt/homebrew/opt/node@18/include
+CPPFLAGS = -I/opt/homebrew/include -I/opt/homebrew/opt/curl/include
 CSCOPE = cscope
 CTAGS = ctags
 CYGPATH_W = echo
@@ -307,19 +315,19 @@ DIST_DIR = dist
 DLLTOOL = false
 DOCS_DIR = docs
 DSYMUTIL = dsymutil
-DUMPBIN = 
+DUMPBIN = tmp
 ECHO_C = \c
-ECHO_N = 
-ECHO_T = 
+ECHO_N =
+ECHO_T =
 EGREP = /usr/bin/grep -E
 ETAGS = etags
-EXEEXT = 
+EXEEXT =
 FGREP = /usr/bin/grep -F
 FILECMD = file
 FLEX = flex
 GAWK = gawk
 GCOV = gcov
-GDB = 
+GDB =
 GLOBAL = global
 GPERF = gperf
 GREP = /usr/bin/grep
@@ -332,18 +340,24 @@ GTKDOC_REBASE = /opt/homebrew/bin/gtkdoc-rebase
 HTML_DIR = ${datadir}/gtk-doc/html
 INCLUDE_DIR = include
 INDENT = indent
-INSTALL = /opt/homebrew/opt/coreutils/libexec/gnubin/install -c
+INSTALL = /opt/homebrew/bin/ginstall -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LD = /opt/homebrew/bin/mold
-LDFLAGS = -B/opt/homebrew/bin -fuse-ld=mold -L/usr/local/lib -L/opt/homebrew/lib
-LEX = flex
-LEXLIB = 
+
+# Linker flags definition
+LDFLAGS = -fuse-ld=mold -static -Wl,-z,relro,-z,now -L/opt/homebrew/lib -L/opt/homebrew/opt/curl/lib
+LEX = :
+
+# Handle undefined variables
+LEXLIB = -lfl
 LEX_OUTPUT_ROOT = lex.yy
-LIBOBJS = 
-LIBS = 
+LIBOBJS =
+
+# Define glib-2.0 libraries
+LIBS = -lglib-2.0 -lm
 LIBS_CFLAGS = -I/opt/homebrew/Cellar/glib/2.82.2/include/glib-2.0 -I/opt/homebrew/Cellar/glib/2.82.2/lib/glib-2.0/include -I/opt/homebrew/opt/gettext/include -I/opt/homebrew/Cellar/pcre2/10.44/include
 LIBS_LIBS = -L/opt/homebrew/Cellar/glib/2.82.2/lib -lglib-2.0 -L/opt/homebrew/opt/gettext/lib -lintl
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
@@ -352,40 +366,43 @@ LIPO = lipo
 LN_S = ln -s
 LOCALES_DIR = po
 LOGS_DIR = logs
-LTLIBOBJS = 
-LT_SYS_LIBRARY_PATH = 
+LTLIBOBJS =
+LT_SYS_LIBRARY_PATH =
 M4 = m4
 MACROS_DIR = m4
 MAKE = make
 MAKEINFO = ${SHELL} '/Users/adriangallo/web-app/build/missing' makeinfo
-MANIFEST_TOOL = :
+MANIFEST_TOOL = manifest-tool
 MKDIR = mkdir
-MKDIR_P = /opt/homebrew/opt/coreutils/libexec/gnubin/mkdir -p
+MKDIR_P = /opt/homebrew/bin/gmkdir -p
+MT = :
 MV = mv -f
-NM = /usr/bin/nm -B
+NM = /opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/nm
 NMEDIT = nmedit
 OBJDUMP = objdump
 OBJEXT = o
 OBJ_DIR = objects
-OTOOL = otool
+
+# Define the path to otool
+OTOOL = /usr/bin/otool
 OTOOL64 = :
 PACKAGE = web-app
 PACKAGE_BUGREPORT = https://github.com/enssol/web-app/issues/new
 PACKAGE_NAME = web-app
 PACKAGE_STRING = web-app 1.0
 PACKAGE_TARNAME = web-app
-PACKAGE_URL = 
+PACKAGE_URL = https://github.com/enssol/web-app
 PACKAGE_VERSION = 1.0
 PATH_SEPARATOR = :
 PKGCONF = pkgconf
-PKG_CONFIG = /opt/homebrew/opt/pkgconf/bin/pkg-config
-PKG_CONFIG_LIBDIR = 
-PKG_CONFIG_PATH = /opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/lib/pkgconfig::/usr/local/lib/pkgconfig:/opt/homebrew/lib/pkgconfig
+PKG_CONFIG = /opt/homebrew/bin/pkg-config
+PKG_CONFIG_LIBDIR = /usr/local/lib/pkgconfig:/opt/homebrew/lib/pkgconfig
+PKG_CONFIG_PATH = /opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig:/opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/curl/lib/pkgconfig:/usr/lib/pkgconfig::/usr/local/lib/pkgconfig:/opt/homebrew/lib/pkgconfig
 RANLIB = ranlib
 RECSEL = recsel
 RM = rm -f
-SED = /opt/homebrew/opt/gnu-sed/libexec/gnubin/sed
-SET_MAKE = 
+SED = /opt/homebrew/bin/gsed
+SET_MAKE = $(MAKE)
 SHELL = /bin/sh
 SHELLCHECK = shellcheck
 SPLINT = splint
@@ -399,24 +416,24 @@ VALGRIND = no
 VERSION = 1.0
 XZ = xz
 YACC = bison -y
-YFLAGS = 
+YFLAGS = -d
 abs_builddir = /Users/adriangallo/web-app
 abs_srcdir = /Users/adriangallo/web-app
 abs_top_builddir = /Users/adriangallo/web-app
 abs_top_srcdir = /Users/adriangallo/web-app
-ac_ct_AR = ar
+ac_ct_AR = /opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/ar
 ac_ct_CC = /opt/homebrew/Cellar/gcc/14.2.0_1/bin/gcc-14
-ac_ct_DUMPBIN = 
+ac_ct_DUMPBIN = dumpbin
 am__include = include
 am__leading_dot = .
-am__quote = 
-am__rm_f_notfound = 
+am__quote = \"
+am__rm_f_notfound = rm -f
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
 am__xargs_n = xargs -n
 bindir = ${exec_prefix}/bin
 build = aarch64-apple-darwin24.1.0
-build_alias = 
+build_alias =
 build_cpu = aarch64
 build_os = darwin24.1.0
 build_vendor = apple
@@ -427,7 +444,7 @@ docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
 host = aarch64-apple-darwin24.1.0
-host_alias = 
+host_alias =
 host_cpu = aarch64
 host_os = darwin24.1.0
 host_vendor = apple
@@ -451,13 +468,11 @@ sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
 srcdir = .
 sysconfdir = ${prefix}/etc
-target_alias = 
-top_build_prefix = 
+target_alias =
+top_build_prefix =
 top_builddir = .
 top_srcdir = .
 CXX = $(CCACHE) g++
-AM_CFLAGS = @CC1_FLAGS@ -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include
-AM_LDFLAGS = @LINK_FLAGS@ -static $(LIBS_LIBS) -L/usr/local/lib -L/opt/homebrew/lib
 
 # Include common rules
 
@@ -467,6 +482,8 @@ ACLOCAL_AMFLAGS = -I m4
 
 # Define subdirectories
 SUBDIRS = src include etc docs m4 po bin build deps dist tmp lib objects logs m4
+AM_CFLAGS = $(CFLAGS)
+AM_LDFLAGS = $(LDFLAGS)
 
 # Additional libraries
 LDADD = -lm
@@ -480,9 +497,14 @@ configdir = $(CONFIG_DIR)
 # Install configuration files
 dist_config_DATA = $(CONFIG_INI_FILE) $(CONFIG_CONF_FILE) $(GCC_SPEC_FILE)
 
+# Source files
+SRC_FILES = src/validator.c src/env_loader.c src/error_handler.c src/garbage_collector.c src/hello.c src/logger.c src/main.c src/config_loader.c
+
+# Object files
+OBJS = objects/validator.o objects/env_loader.o objects/error_handler.o objects/garbage_collector.o objects/hello.o objects/logger.o objects/main.o objects/config_loader.o
+
 # Clean up files
-DISTCLEANFILES = Makefile.in aclocal.m4 configure config.h.in \
-	intltool-extract intltool-merge intltool-update
+DISTCLEANFILES = Makefile.in aclocal.m4 configure config.h.in
 
 # Add gtk-doc support
 GTK_DOC_USE_LIBTOOL = 1
@@ -490,7 +512,7 @@ GTK_DOC_USE_LIBTOOL = 1
 GTKDOC_CC = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(INCLUDES) $(GTKDOC_DEPS_CFLAGS) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 #GTKDOC_LD = $(CC) $(GTKDOC_DEPS_LIBS) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS)
 GTKDOC_LD = $(LIBTOOL) --tag=CC --mode=link $(CC) $(GTKDOC_DEPS_LIBS) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS)
-#GTKDOC_RUN = 
+#GTKDOC_RUN =
 GTKDOC_RUN = $(LIBTOOL) --mode=execute
 
 # We set GPATH here; this gives us semantics for GNU make
@@ -529,9 +551,9 @@ REPORT_FILES = \
 	$(DOC_MODULE)-unused.txt
 
 CLEANFILES = $(SCANOBJ_FILES) $(REPORT_FILES) $(DOC_STAMPS) gtkdoc-check.test
-#HTML_BUILD_STAMP = 
+#HTML_BUILD_STAMP =
 HTML_BUILD_STAMP = html-build.stamp
-PDF_BUILD_STAMP = 
+PDF_BUILD_STAMP =
 #PDF_BUILD_STAMP = pdf-build.stamp
 
 #### setup ####
@@ -564,9 +586,27 @@ GTK_DOC_V_XREF_0 = @echo "  DOC   Fixing cross-references";
 GTK_DOC_V_PDF = $(GTK_DOC_V_PDF_$(V))
 GTK_DOC_V_PDF_ = $(GTK_DOC_V_PDF_$(AM_DEFAULT_VERBOSITY))
 GTK_DOC_V_PDF_0 = @echo "  DOC   Building PDF";
+@installfiles = `echo $(builddir)/html/*`; \
+	if test "$$installfiles" = '$(builddir)/html/*'; then \
+		echo 1>&2 'Nothing to install' ; \
+	else \
+		if test -n "$(DOC_MODULE_VERSION)"; then \
+			installdir="$(DESTDIR)$(TARGET_DIR)-$(DOC_MODULE_VERSION)"; \
+		else \
+			installdir="$(DESTDIR)$(TARGET_DIR)"; \
+		fi; \
+		$(mkinstalldirs) $${installdir} ; \
+		for i in $$installfiles; do \
+			echo ' $(INSTALL_DATA) '$$i ; \
+			$(INSTALL_DATA) $$i $${installdir}; \
+		done; \
+		if test -n "$(DOC_MODULE_VERSION)"; then \
+			mv -f $${installdir}/$(DOC_MODULE).devhelp2 \
+				$${installdir}/$(DOC_MODULE)-$(DOC_MODULE_VERSION).devhelp2; \
+		fi; \
+		$(GTKDOC_REBASE) --relative --dest-dir=$(DESTDIR) --html-dir=$${installdir}; \
+	fi
 
-# Add intltool support
-INTLTOOL_FILES = intltool-extract.in intltool-merge.in intltool-update.in
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -576,11 +616,11 @@ am--refresh: Makefile
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(srcdir)/common-rules.am $(top_srcdir)/gtk-doc.make $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
-	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --gnu'; \
-	      $(am__cd) $(srcdir) && $(AUTOMAKE) --gnu \
+		*$$dep*) \
+		  echo ' cd $(srcdir) && $(AUTOMAKE) --gnu'; \
+		  $(am__cd) $(srcdir) && $(AUTOMAKE) --gnu \
 		&& exit 0; \
-	      exit 1;; \
+		  exit 1;; \
 	  esac; \
 	done; \
 	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu Makefile'; \
@@ -589,11 +629,11 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am $(srcdir)/common-rules.am $(top_sr
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
-	    echo ' $(SHELL) ./config.status'; \
-	    $(SHELL) ./config.status;; \
+		echo ' $(SHELL) ./config.status'; \
+		$(SHELL) ./config.status;; \
 	  *) \
-	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles)'; \
-	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles);; \
+		echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles)'; \
+		cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles);; \
 	esac;
 $(srcdir)/common-rules.am $(top_srcdir)/gtk-doc.make $(am__empty):
 
@@ -613,7 +653,7 @@ config.h: stamp-h1
 stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
 	$(AM_V_at)rm -f stamp-h1
 	$(AM_V_GEN)cd $(top_builddir) && $(SHELL) ./config.status config.h
-$(srcdir)/config.h.in:  $(am__configure_deps) 
+$(srcdir)/config.h.in:  $(am__configure_deps)
 	$(AM_V_GEN)($(am__cd) $(top_srcdir) && $(AUTOHEADER))
 	$(AM_V_at)rm -f stamp-h1
 	$(AM_V_at)touch $@
@@ -673,10 +713,10 @@ $(am__recursive_targets):
 	for subdir in $$list; do \
 	  echo "Making $$target in $$subdir"; \
 	  if test "$$subdir" = "."; then \
-	    dot_seen=yes; \
-	    local_target="$$target-am"; \
+		dot_seen=yes; \
+		local_target="$$target-am"; \
 	  else \
-	    local_target="$$target"; \
+		local_target="$$target"; \
 	  fi; \
 	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
 	  || eval $$failcom; \
@@ -702,8 +742,8 @@ tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	fi; \
 	list='$(SUBDIRS)'; for subdir in $$list; do \
 	  if test "$$subdir" = .; then :; else \
-	    test ! -f $$subdir/TAGS || \
-	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
+		test ! -f $$subdir/TAGS || \
+		  set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
 	  fi; \
 	done; \
 	$(am__define_uniq_tagged_files); \
@@ -711,11 +751,11 @@ tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
 	  test -n "$$unique" || unique=$$empty_fix; \
 	  if test $$# -gt 0; then \
-	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	      "$$@" $$unique; \
+		$(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+		  "$$@" $$unique; \
 	  else \
-	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	      $$unique; \
+		$(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+		  $$unique; \
 	  fi; \
 	fi
 ctags: ctags-recursive
@@ -725,7 +765,7 @@ ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	$(am__define_uniq_tagged_files); \
 	test -z "$(CTAGS_ARGS)$$unique" \
 	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
-	     $$unique
+		 $$unique
 
 GTAGS:
 	here=`$(am__cd) $(top_builddir) && pwd` \
@@ -747,9 +787,9 @@ cscopelist-am: $(am__tagged_files)
 	esac; \
 	for i in $$list; do \
 	  if test -f "$$i"; then \
-	    echo "$(subdir)/$$i"; \
+		echo "$(subdir)/$$i"; \
 	  else \
-	    echo "$$sdir/$$i"; \
+		echo "$$sdir/$$i"; \
 	  fi; \
 	done >> $(top_builddir)/cscope.files
 
@@ -767,7 +807,7 @@ distdir-am: $(DISTFILES)
 	list='$(DISTFILES)'; \
 	  dist_files=`for file in $$list; do echo $$file; done | \
 	  sed -e "s|^$$srcdirstrip/||;t" \
-	      -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
+		  -e "s|^$$topsrcdirstrip/|$(top_builddir)/|;t"`; \
 	case $$dist_files in \
 	  */*) $(MKDIR_P) `echo "$$dist_files" | \
 			   sed '/\//!d;s|^|$(distdir)/|;s,/[^/]*$$,,' | \
@@ -776,44 +816,44 @@ distdir-am: $(DISTFILES)
 	for file in $$dist_files; do \
 	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
 	  if test -d $$d/$$file; then \
-	    dir=`echo "/$$file" | sed -e 's,/[^/]*$$,,'`; \
-	    if test -d "$(distdir)/$$file"; then \
-	      find "$(distdir)/$$file" -type d ! -perm -700 -exec chmod u+rwx {} \;; \
-	    fi; \
-	    if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \
-	      cp -fpR $(srcdir)/$$file "$(distdir)$$dir" || exit 1; \
-	      find "$(distdir)/$$file" -type d ! -perm -700 -exec chmod u+rwx {} \;; \
-	    fi; \
-	    cp -fpR $$d/$$file "$(distdir)$$dir" || exit 1; \
+		dir=`echo "/$$file" | sed -e 's,/[^/]*$$,,'`; \
+		if test -d "$(distdir)/$$file"; then \
+		  find "$(distdir)/$$file" -type d ! -perm -700 -exec chmod u+rwx {} \;; \
+		fi; \
+		if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \
+		  cp -fpR $(srcdir)/$$file "$(distdir)$$dir" || exit 1; \
+		  find "$(distdir)/$$file" -type d ! -perm -700 -exec chmod u+rwx {} \;; \
+		fi; \
+		cp -fpR $$d/$$file "$(distdir)$$dir" || exit 1; \
 	  else \
-	    test -f "$(distdir)/$$file" \
-	    || cp -p $$d/$$file "$(distdir)/$$file" \
-	    || exit 1; \
+		test -f "$(distdir)/$$file" \
+		|| cp -p $$d/$$file "$(distdir)/$$file" \
+		|| exit 1; \
 	  fi; \
 	done
 	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
 	  if test "$$subdir" = .; then :; else \
-	    $(am__make_dryrun) \
-	      || test -d "$(distdir)/$$subdir" \
-	      || $(MKDIR_P) "$(distdir)/$$subdir" \
-	      || exit 1; \
-	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
-	    $(am__relativize); \
-	    new_distdir=$$reldir; \
-	    dir1=$$subdir; dir2="$(top_distdir)"; \
-	    $(am__relativize); \
-	    new_top_distdir=$$reldir; \
-	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
-	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
-	    ($(am__cd) $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$new_top_distdir" \
-	        distdir="$$new_distdir" \
+		$(am__make_dryrun) \
+		  || test -d "$(distdir)/$$subdir" \
+		  || $(MKDIR_P) "$(distdir)/$$subdir" \
+		  || exit 1; \
+		dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
+		$(am__relativize); \
+		new_distdir=$$reldir; \
+		dir1=$$subdir; dir2="$(top_distdir)"; \
+		$(am__relativize); \
+		new_top_distdir=$$reldir; \
+		echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
+		echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
+		($(am__cd) $$subdir && \
+		  $(MAKE) $(AM_MAKEFLAGS) \
+			top_distdir="$$new_top_distdir" \
+			distdir="$$new_distdir" \
 		am__remove_distdir=: \
 		am__skip_length_check=: \
 		am__skip_mode_fix=: \
-	        distdir) \
-	      || exit 1; \
+			distdir) \
+		  || exit 1; \
 	  fi; \
 	done
 	$(MAKE) $(AM_MAKEFLAGS) \
@@ -844,14 +884,14 @@ dist-zstd: distdir
 
 dist-tarZ: distdir
 	@echo WARNING: "Support for distribution archives compressed with" \
-		       "legacy program 'compress' is deprecated." >&2
+			   "legacy program 'compress' is deprecated." >&2
 	@echo WARNING: "It will be removed altogether in Automake 2.0" >&2
 	tardir=$(distdir) && $(am__tar) | compress -c >$(distdir).tar.Z
 	$(am__post_remove_distdir)
 
 dist-shar: distdir
 	@echo WARNING: "Support for shar distribution archives is" \
-	               "deprecated." >&2
+				   "deprecated." >&2
 	@echo WARNING: "It will be removed altogether in Automake 2.0" >&2
 	shar $(distdir) | eval GZIP= gzip $(GZIP_ENV) -c >$(distdir).shar.gz
 	$(am__post_remove_distdir)
@@ -897,9 +937,9 @@ distcheck: dist
 	  && am__cwd=`pwd` \
 	  && $(am__cd) $(distdir)/_build/sub \
 	  && ../../configure \
-	    $(AM_DISTCHECK_CONFIGURE_FLAGS) \
-	    $(DISTCHECK_CONFIGURE_FLAGS) \
-	    --srcdir=../.. --prefix="$$dc_install_base" \
+		$(AM_DISTCHECK_CONFIGURE_FLAGS) \
+		$(DISTCHECK_CONFIGURE_FLAGS) \
+		--srcdir=../.. --prefix="$$dc_install_base" \
 	  && $(MAKE) $(AM_MAKEFLAGS) \
 	  && $(MAKE) $(AM_MAKEFLAGS) $(AM_DISTCHECK_DVI_TARGET) \
 	  && $(MAKE) $(AM_MAKEFLAGS) check \
@@ -907,15 +947,15 @@ distcheck: dist
 	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
 	  && $(MAKE) $(AM_MAKEFLAGS) uninstall \
 	  && $(MAKE) $(AM_MAKEFLAGS) distuninstallcheck_dir="$$dc_install_base" \
-	        distuninstallcheck \
+			distuninstallcheck \
 	  && chmod -R a-w "$$dc_install_base" \
 	  && ({ \
-	       (cd ../.. && umask 077 && mkdir "$$dc_destdir") \
-	       && $(MAKE) $(AM_MAKEFLAGS) DESTDIR="$$dc_destdir" install \
-	       && $(MAKE) $(AM_MAKEFLAGS) DESTDIR="$$dc_destdir" uninstall \
-	       && $(MAKE) $(AM_MAKEFLAGS) DESTDIR="$$dc_destdir" \
-	            distuninstallcheck_dir="$$dc_destdir" distuninstallcheck; \
-	      } || { rm -rf "$$dc_destdir"; exit 1; }) \
+		   (cd ../.. && umask 077 && mkdir "$$dc_destdir") \
+		   && $(MAKE) $(AM_MAKEFLAGS) DESTDIR="$$dc_destdir" install \
+		   && $(MAKE) $(AM_MAKEFLAGS) DESTDIR="$$dc_destdir" uninstall \
+		   && $(MAKE) $(AM_MAKEFLAGS) DESTDIR="$$dc_destdir" \
+				distuninstallcheck_dir="$$dc_destdir" distuninstallcheck; \
+		  } || { rm -rf "$$dc_destdir"; exit 1; }) \
 	  && rm -rf "$$dc_destdir" \
 	  && $(MAKE) $(AM_MAKEFLAGS) dist \
 	  && rm -rf $(DIST_ARCHIVES) \
@@ -929,7 +969,7 @@ distcheck: dist
 distuninstallcheck:
 	@test -n '$(distuninstallcheck_dir)' || { \
 	  echo 'ERROR: trying to run $@ with an empty' \
-	       '$$(distuninstallcheck_dir)' >&2; \
+		   '$$(distuninstallcheck_dir)' >&2; \
 	  exit 1; \
 	}; \
 	$(am__cd) '$(distuninstallcheck_dir)' || { \
@@ -938,11 +978,11 @@ distuninstallcheck:
 	}; \
 	test `$(am__distuninstallcheck_listfiles) | wc -l` -eq 0 \
 	   || { echo "ERROR: files left after uninstall:" ; \
-	        if test -n "$(DESTDIR)"; then \
-	          echo "  (check DESTDIR support)"; \
-	        fi ; \
-	        $(distuninstallcheck_listfiles) ; \
-	        exit 1; } >&2
+			if test -n "$(DESTDIR)"; then \
+			  echo "  (check DESTDIR support)"; \
+			fi ; \
+			$(distuninstallcheck_listfiles) ; \
+			exit 1; } >&2
 distcleancheck: distclean
 	@if test '$(srcdir)' = . ; then \
 	  echo "ERROR: distcleancheck can only run from a VPATH build" ; \
@@ -950,8 +990,8 @@ distcleancheck: distclean
 	fi
 	@test `$(distcleancheck_listfiles) | wc -l` -eq 0 \
 	  || { echo "ERROR: files left in build directory after distclean:" ; \
-	       $(distcleancheck_listfiles) ; \
-	       exit 1; } >&2
+		   $(distcleancheck_listfiles) ; \
+		   exit 1; } >&2
 check-am: all-am
 check: check-recursive
 all-local:
@@ -973,12 +1013,12 @@ installcheck: installcheck-recursive
 install-strip:
 	if test -z '$(STRIP)'; then \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
-	    install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
-	      install; \
+		install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
+		  install; \
 	else \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
-	    install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
-	    "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'" install; \
+		install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
+		"INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'" install; \
 	fi
 mostlyclean-generic:
 
@@ -1085,33 +1125,21 @@ uninstall-am: uninstall-dist_configDATA uninstall-local
 
 .PRECIOUS: Makefile
 
-﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
-# Root Makefile.am
 
 .POSIX: # Enforce POSIX mode for portability
-﻿﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: AGPL-3.0-or-later
-
-.POSIX: # Enforce POSIX mode for portability
+﻿.POSIX: # Enforce POSIX mode for portability
 
 # Load environment variables if .env exists
 env_load:
 	@if [ -f .env ]; then \
-	    echo "Loading .env variables..."; \
-	    . .env; \
+		echo "Loading .env variables..."; \
+		. .env; \
 	fi
-
-# Output compiler choices during build
-all:
-    @echo "Using CC: $(CC)"
-    @echo "Using CXX: $(CXX)"
 
 # Clean build artifacts
 clean:
-    @echo "Cleaning build artifacts..."
-    rm -f cppcheck.xml cppcheck_errors.log
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log
 
 # Installation rules
 stow:
@@ -1179,14 +1207,9 @@ perf:
 
 # Profiling with gprof
 profile:
-    @echo "Running gprof for profiling..."
-    ./web-app
-    gprof ./web-app gmon.out > gprof.out
-
-# Coverage analysis with gcov
-coverage:
-    @echo "Running gcov for coverage analysis..."
-    find $(srcdir) -name '*.c' -exec gcov {} \;
+	@echo "Running gprof for profiling..."
+	./web-app
+	gprof ./web-app gmon.out > gprof.out
 
 # Documentation generation
 docs:
@@ -1209,6 +1232,10 @@ dist-xz:
 
 # Tags management
 generate_tags:
+	@if [ ! -f GTAGS ]; then \
+		echo "Initializing GNU Global..."; \
+		gtags; \
+	fi
 	@echo "Generating tags with global..."
 	global -u
 
@@ -1239,14 +1266,59 @@ install_mo_files:
 		$(INSTALL_DATA) $(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo; \
 	done
 
+# Consolidated 'all' target
+all_common: generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
+
+# Consolidated 'clean' target
+clean_common: clean_tags
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log
+
+# Consolidated 'all' target
+all: all-am all-local
+	@echo "Building all targets..."
+
+# Compilation rules for each source file
+objects/validator.o: src/validator.c
+	$(CC) $(CFLAGS) -c src/validator.c -o objects/validator.o
+
+objects/env_loader.o: src/env_loader.c
+	$(CC) $(CFLAGS) -c src/env_loader.c -o objects/env_loader.o
+
+objects/error_handler.o: src/error_handler.c
+	$(CC) $(CFLAGS) -c src/error_handler.c -o objects/error_handler.o
+
+objects/garbage_collector.o: src/garbage_collector.c
+	$(CC) $(CFLAGS) -c src/garbage_collector.c -o objects/garbage_collector.o
+
+objects/hello.o: src/hello.c
+	$(CC) $(CFLAGS) -c src/hello.c -o objects/hello.o
+
+objects/logger.o: src/logger.c
+	$(CC) $(CFLAGS) -c src/logger.c -o objects/logger.o
+
+objects/main.o: src/main.c
+	$(CC) $(CFLAGS) -c src/main.c -o objects/main.o
+
+objects/config_loader.o: src/config_loader.c
+	$(CC) $(CFLAGS) -c src/config_loader.c -o objects/config_loader.o
+
+# Rule to use otool to display shared library dependencies
+otool_deps:
+	@echo "Displaying shared library dependencies with otool..."
+	$(OTOOL) -L $(OBJS)
+
+# Include dependency files
+-include $(DEPS)
+
+# Consolidated 'clean' target
+clean: clean-am clean-local
+	@echo "Cleaning build artifacts..."
+	rm -f cppcheck.xml cppcheck_errors.log
+
 # Custom rule to generate a version file
 version.h: $(SRC_DIR)/version.txt
-    @echo "#define VERSION \"`cat $(SRC_DIR)/version.txt`\"" > $(INCLUDE_DIR)/version.h
-
-# Add common rules to the build process
-all: generate_tags compile docs
-
-clean: clean_tags clean_html_docs
+	@echo "#define VERSION \"`cat $(SRC_DIR)/version.txt`\"" > $(INCLUDE_DIR)/version.h
 
 gtkdoc-check.test: Makefile
 	$(AM_V_GEN)echo "#!/bin/sh -e" > $@; \
@@ -1266,12 +1338,12 @@ setup-build.stamp:
 	-$(GTK_DOC_V_SETUP)if test "$(abs_srcdir)" != "$(abs_builddir)" ; then \
 	  files=`echo $(SETUP_FILES) $(DOC_MODULE).types`; \
 	  if test "x$$files" != "x" ; then \
-	    for file in $$files ; do \
-	      destdir=`dirname $(abs_builddir)/$$file`; \
-	      test -d "$$destdir" || mkdir -p "$$destdir"; \
-	      test -f $(abs_srcdir)/$$file && \
-	        cp -pf $(abs_srcdir)/$$file $(abs_builddir)/$$file || true; \
-	    done; \
+		for file in $$files ; do \
+		  destdir=`dirname $(abs_builddir)/$$file`; \
+		  test -d "$$destdir" || mkdir -p "$$destdir"; \
+		  test -f $(abs_srcdir)/$$file && \
+			cp -pf $(abs_srcdir)/$$file $(abs_builddir)/$$file || true; \
+		done; \
 	  fi; \
 	fi
 	$(AM_V_at)touch setup-build.stamp
@@ -1286,15 +1358,15 @@ scan-build.stamp: setup-build.stamp $(HFILE_GLOB) $(CFILE_GLOB)
 	  scanobj_options=""; \
 	  gtkdoc-scangobj 2>&1 --help | grep  >/dev/null "\--verbose"; \
 	  if test "$$?" = "0"; then \
-	    if test "x$(V)" = "x1"; then \
-	      scanobj_options="--verbose"; \
-	    fi; \
+		if test "x$(V)" = "x1"; then \
+		  scanobj_options="--verbose"; \
+		fi; \
 	  fi; \
 	  CC="$(GTKDOC_CC)" LD="$(GTKDOC_LD)" RUN="$(GTKDOC_RUN)" CFLAGS="$(GTKDOC_CFLAGS) $(CFLAGS)" LDFLAGS="$(GTKDOC_LIBS) $(LDFLAGS)" \
 	  gtkdoc-scangobj $(SCANGOBJ_OPTIONS) $$scanobj_options --module=$(DOC_MODULE); \
 	else \
 	  for i in $(SCANOBJ_FILES) ; do \
-	    test -f $$i || touch $$i ; \
+		test -f $$i || touch $$i ; \
 	  done \
 	fi
 	$(AM_V_at)touch scan-build.stamp
@@ -1333,7 +1405,7 @@ html-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files) $(expand_con
 	gtkdoc-mkhtml 2>&1 --help | grep  >/dev/null "\--verbose"; \
 	if test "$$?" = "0"; then \
 	  if test "x$(V)" = "x1"; then \
-	    mkhtml_options="$$mkhtml_options --verbose"; \
+		mkhtml_options="$$mkhtml_options --verbose"; \
 	  fi; \
 	fi; \
 	gtkdoc-mkhtml 2>&1 --help | grep  >/dev/null "\--path"; \
@@ -1356,16 +1428,16 @@ pdf-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files) $(expand_cont
 	gtkdoc-mkpdf 2>&1 --help | grep  >/dev/null "\--verbose"; \
 	if test "$$?" = "0"; then \
 	  if test "x$(V)" = "x1"; then \
-	    mkpdf_options="$$mkpdf_options --verbose"; \
+		mkpdf_options="$$mkpdf_options --verbose"; \
 	  fi; \
 	fi; \
 	if test "x$(HTML_IMAGES)" != "x"; then \
 	  for img in $(HTML_IMAGES); do \
-	    part=`dirname $$img`; \
-	    echo $$mkpdf_options | grep >/dev/null "\--imgdir=$$part "; \
-	    if test $$? != 0; then \
-	      mkpdf_options="$$mkpdf_options --imgdir=$$part"; \
-	    fi; \
+		part=`dirname $$img`; \
+		echo $$mkpdf_options | grep >/dev/null "\--imgdir=$$part "; \
+		if test $$? != 0; then \
+		  mkpdf_options="$$mkpdf_options --imgdir=$$part"; \
+		fi; \
 	  done; \
 	fi; \
 	gtkdoc-mkpdf --path="$(abs_srcdir)" $$mkpdf_options $(DOC_MODULE) $(DOC_MAIN_SGML_FILE) $(MKPDF_OPTIONS)
@@ -1385,9 +1457,9 @@ clean-local:
 
 distclean-local:
 	@rm -rf xml html $(REPORT_FILES) $(DOC_MODULE).pdf \
-	    $(DOC_MODULE)-decl-list.txt $(DOC_MODULE)-decl.txt
+		$(DOC_MODULE)-decl-list.txt $(DOC_MODULE)-decl.txt
 	@if test "$(abs_srcdir)" != "$(abs_builddir)" ; then \
-	    rm -f $(SETUP_FILES) $(DOC_MODULE).types; \
+		rm -f $(SETUP_FILES) $(DOC_MODULE).types; \
 	fi
 
 maintainer-clean-local:
@@ -1399,18 +1471,18 @@ install-data-local:
 	then echo 1>&2 'Nothing to install' ; \
 	else \
 	  if test -n "$(DOC_MODULE_VERSION)"; then \
-	    installdir="$(DESTDIR)$(TARGET_DIR)-$(DOC_MODULE_VERSION)"; \
+		installdir="$(DESTDIR)$(TARGET_DIR)-$(DOC_MODULE_VERSION)"; \
 	  else \
-	    installdir="$(DESTDIR)$(TARGET_DIR)"; \
+		installdir="$(DESTDIR)$(TARGET_DIR)"; \
 	  fi; \
 	  $(mkinstalldirs) $${installdir} ; \
 	  for i in $$installfiles; do \
-	    echo ' $(INSTALL_DATA) '$$i ; \
-	    $(INSTALL_DATA) $$i $${installdir}; \
+		echo ' $(INSTALL_DATA) '$$i ; \
+		$(INSTALL_DATA) $$i $${installdir}; \
 	  done; \
 	  if test -n "$(DOC_MODULE_VERSION)"; then \
-	    mv -f $${installdir}/$(DOC_MODULE).devhelp2 \
-	      $${installdir}/$(DOC_MODULE)-$(DOC_MODULE_VERSION).devhelp2; \
+		mv -f $${installdir}/$(DOC_MODULE).devhelp2 \
+		  $${installdir}/$(DOC_MODULE)-$(DOC_MODULE_VERSION).devhelp2; \
 	  fi; \
 	  $(GTKDOC_REBASE) --relative --dest-dir=$(DESTDIR) --html-dir=$${installdir}; \
 	fi
@@ -1446,30 +1518,41 @@ dist-hook: dist-check-gtkdoc all-gtk-doc dist-hook-local
 
 # Add rules for generating .mo files
 $(LINGUAS:%=%.mo): %.mo: %.po
-    msgfmt -o $@ $<
+	msgfmt -o $@ $<
+
+# Consolidated 'install-data-local' target
+install-data-local:
+
+# Consolidated 'uninstall-local' target
+uninstall-local:
+	@if test -n "$(DOC_MODULE_VERSION)"; then \
+		installdir="$(DESTDIR)$(TARGET_DIR)-$(DOC_MODULE_VERSION)"; \
+	else \
+		installdir="$(DESTDIR)$(TARGET_DIR)"; \
+	fi; \
+	rm -rf $${installdir}
 
 # Add rules for installing .mo files
 install-data-local:
-    $(mkinstalldirs) $(DESTDIR)$(datadir)/locale
-    for lang in $(LINGUAS); do \
-        $(INSTALL_DATA) $$lang.mo $(DESTDIR)$(datadir)/locale/$$lang/LC_MESSAGES/$(PACKAGE).mo; \
-    done
+	$(mkinstalldirs) $(DESTDIR)$(datadir)/locale
+	for lang in $(LINGUAS); do \
+		$(INSTALL_DATA) $$lang.mo $(DESTDIR)$(datadir)/locale/$$lang/LC_MESSAGES/$(PACKAGE).mo; \
+	done
 
 uninstall-local:
-    for lang in $(LINGUAS); do \
-        rm -f $(DESTDIR)$(datadir)/locale/$$lang/LC_MESSAGES/$(PACKAGE).mo; \
-    done
+	for lang in $(LINGUAS); do \
+		rm -f $(DESTDIR)$(datadir)/locale/$$lang/LC_MESSAGES/$(PACKAGE).mo; \
+	done
 
-# Profiling with gprof
+# Consolidated 'profile' target
 profile:
-    @echo "Running gprof for profiling..."
-    ./web-app
-    gprof ./web-app gmon.out > gprof.out
+	@echo "Profiling the application..."
+	gprof $(binary) > profile.txt
 
 # Coverage analysis with gcov
 coverage:
-    @echo "Running gcov for coverage analysis..."
-    find $(srcdir) -name '*.c' -exec gcov {} \;
+	@echo "Running gcov for coverage analysis..."
+	find $(srcdir) -name '*.c' -exec gcov {} \;
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

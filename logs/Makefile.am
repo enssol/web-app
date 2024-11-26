@@ -1,6 +1,3 @@
-﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: 	AGPL-3.0-or-later
-
 # logs/Makefile.am
 
 .POSIX: # Enforce POSIX mode for portability
@@ -23,8 +20,8 @@ process_logs:
     @echo "Processing log files with gawk..."
     @gawk -f ../etc/process_files.gawk logs/*.log
 
-# Add complexity_logs and process_logs to the build process
-all: complexity_logs process_logs generate_tags
+# Add autoindent to the build process
+all: complexity_logs process_logs generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
 
 clean:
     rm -f *.log

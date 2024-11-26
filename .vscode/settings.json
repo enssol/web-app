@@ -110,7 +110,7 @@
   "diffEditor.hideUnchangedRegions.enabled": true,
   "editor.inlineSuggest.syntaxHighlightingEnabled": true,
   "files.autoGuessEncoding": true,
-  "files.encoding": "utf8bom",
+  "files.encoding": "utf8",
   "files.eol": "\n",
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": true,

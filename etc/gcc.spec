@@ -1,4 +1,4 @@
-﻿*cc1:
+*cc1:
   std=gnu23: -std=gnu23 \
   D_POSIX_C_SOURCE: -D_POSIX_C_SOURCE=2024L \
   D_XOPEN_SOURCE: -D_XOPEN_SOURCE=800 \
@@ -36,7 +36,7 @@
   -L/usr/local/lib \
   -L/opt/homebrew/lib \
   -Wl,--gc-sections \
-  "-fuse-ld=mold"
+  "-fuse-ld=mold" \
   -static -lmylib -Wl,-Bstatic -lc -lgcc -Wl,-Bdynamic \
   -pg -lgcov
 

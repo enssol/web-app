@@ -75,7 +75,7 @@ build=aarch64-apple-darwin24.1.0
 build_os=darwin24.1.0
 
 # A sed program that does not truncate output.
-SED="/opt/homebrew/opt/gnu-sed/libexec/gnubin/sed"
+SED="/opt/homebrew/bin/gsed"
 
 # Sed that helps us avoid accidentally triggering echo(1) options like -n.
 Xsed="$SED -e 1s/^X//"
@@ -90,7 +90,7 @@ EGREP="/usr/bin/grep -E"
 FGREP="/usr/bin/grep -F"
 
 # A BSD- or MS-compatible name lister.
-NM="/usr/bin/nm -B"
+NM="/opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/nm"
 
 # Whether we need soft or hard links.
 LN_S="ln -s"
@@ -144,7 +144,7 @@ DLLTOOL="false"
 sharedlib_from_linklib_cmd="printf %s\\n"
 
 # The archiver.
-AR="ar"
+AR="/opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/ar"
 
 # Flags to create an archive (by configure).
 lt_ar_flags=cr
@@ -153,7 +153,7 @@ lt_ar_flags=cr
 AR_FLAGS=${ARFLAGS-"$lt_ar_flags"}
 
 # How to feed a file listing to the archiver.
-archiver_list_spec=""
+archiver_list_spec="@"
 
 # A symbol stripping program.
 STRIP="strip"
@@ -167,25 +167,25 @@ old_postuninstall_cmds=""
 lock_old_archive_extraction=yes
 
 # A C compiler.
-LTCC="/opt/homebrew/Cellar/gcc/14.2.0_1/bin/gcc-14"
+LTCC="ccache gcc"
 
 # LTCC compiler flags.
-LTCFLAGS="-O0 -pedantic -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800 -std=gnu23 -Wall -Wextra -Werror"
+LTCFLAGS="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 
 # Take the output of nm and produce a listing of raw symbols and C names.
-global_symbol_pipe=""
+global_symbol_pipe="/opt/homebrew/bin/gsed -n -e 's/^.*[	 ]\\([ABCDGIRSTW][ABCDGIRSTW]*\\)[	 ][	 ]*_\\([_A-Za-z][_A-Za-z0-9]*\\)\$/\\1 _\\2 \\2/p' | /opt/homebrew/bin/gsed '/ __gnu_lto/d'"
 
 # Transform the output of nm in a proper C declaration.
-global_symbol_to_cdecl=""
+global_symbol_to_cdecl="/opt/homebrew/bin/gsed -n -e 's/^T .* \\(.*\\)\$/extern int \\1();/p' -e 's/^[ABCDGIRSTW][ABCDGIRSTW]* .* \\(.*\\)\$/extern char \\1;/p'"
 
 # Transform the output of nm into a list of symbols to manually relocate.
 global_symbol_to_import=""
 
 # Transform the output of nm in a C name address pair.
-global_symbol_to_c_name_address="/opt/homebrew/opt/gnu-sed/libexec/gnubin/sed -n -e 's/^: \\(.*\\) .*\$/  {\"\\1\", (void *) 0},/p' -e 's/^[ABCDGIRSTW][ABCDGIRSTW]* .* \\(.*\\)\$/  {\"\\1\", (void *) \\&\\1},/p'"
+global_symbol_to_c_name_address="/opt/homebrew/bin/gsed -n -e 's/^: \\(.*\\) .*\$/  {\"\\1\", (void *) 0},/p' -e 's/^[ABCDGIRSTW][ABCDGIRSTW]* .* \\(.*\\)\$/  {\"\\1\", (void *) \\&\\1},/p'"
 
 # Transform the output of nm in a C name address pair when lib prefix is needed.
-global_symbol_to_c_name_address_lib_prefix="/opt/homebrew/opt/gnu-sed/libexec/gnubin/sed -n -e 's/^: \\(.*\\) .*\$/  {\"\\1\", (void *) 0},/p' -e 's/^[ABCDGIRSTW][ABCDGIRSTW]* .* \\(lib.*\\)\$/  {\"\\1\", (void *) \\&\\1},/p' -e 's/^[ABCDGIRSTW][ABCDGIRSTW]* .* \\(.*\\)\$/  {\"lib\\1\", (void *) \\&\\1},/p'"
+global_symbol_to_c_name_address_lib_prefix="/opt/homebrew/bin/gsed -n -e 's/^: \\(.*\\) .*\$/  {\"\\1\", (void *) 0},/p' -e 's/^[ABCDGIRSTW][ABCDGIRSTW]* .* \\(lib.*\\)\$/  {\"\\1\", (void *) \\&\\1},/p' -e 's/^[ABCDGIRSTW][ABCDGIRSTW]* .* \\(.*\\)\$/  {\"lib\\1\", (void *) \\&\\1},/p'"
 
 # The name lister interface.
 nm_interface="BSD nm"
@@ -221,7 +221,7 @@ NMEDIT="nmedit"
 LIPO="lipo"
 
 # ldd/readelf like tool for Mach-O binaries on Mac OS X.
-OTOOL="otool"
+OTOOL="/usr/bin/otool"
 
 # ldd/readelf like tool for 64 bit Mach-O binaries on Mac OS X 10.4.
 OTOOL64=":"

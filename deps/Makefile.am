@@ -1,4 +1,4 @@
-﻿# deps/Makefile.am
+# deps/Makefile.am
 
 .POSIX: # Enforce POSIX mode for portability
 
@@ -18,8 +18,9 @@ depsdir = $(srcdir)/deps
 dist_noinst_DATA = $(DEPS_FILES)
 
 # Hook to generate the dependency files list before building
-all: $(gen_deps_list) clib_install generate_tags cflow
+all: $(gen_deps_list) clib_install generate_tags cflow autoindent generate_metadata process_metadata include_metadata splint cscope
     @$(gen_deps_list)
 
 # Add clean_tags to the clean process
 clean: clean_tags
+    rm -f $(DEPS_FILES)

@@ -1,16 +1,16 @@
-﻿/**
+/**
  * Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
  * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
 
-#include "config.h"
+#include "../include/config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "config_loader.h"
-#include "validator.h"
-#include "logger.h"
-#include "error_handler.h"
+#include "../include/config_loader.h"
+#include "../include/validator.h"
+#include "../include/logger.h"
+#include "../include/error_handler.h"
 
 int load_ini_config(const char *filename) {
     FILE *file = fopen(filename, "r");

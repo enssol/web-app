@@ -1,7 +1,4 @@
-﻿﻿# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: 	AGPL-3.0-or-later
-
-#                                               -*- Autoconf -*-
+﻿#                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
 # Autoconf configuration file for the web-app project.
@@ -30,8 +27,15 @@ AC_CONFIG_MACRO_DIRS([m4])
 AM_PROG_AR
 LT_INIT
 
+# Linker flags
+LDFLAGS="-fuse-ld=mold -static -Wl,-z,relro,-z,now -L/opt/homebrew/lib -L/opt/homebrew/opt/curl/lib"
+LDFLAGS=$(echo $LDFLAGS | sed 's/-single_module//g')
+AC_SUBST([LDFLAGS])
+
+
 # Check for required programs
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_PROG_YACC
 AC_PROG_LEX([noyywrap])
 AC_PROG_INSTALL
@@ -118,18 +122,24 @@ if test "$CCACHE" != "no"; then
   CXX="ccache g++"
 fi
 
-# Check for gcc
-AC_PROG_CC
-
 # Check for binutils
 AC_CHECK_TOOL([AR], [ar])
 AC_CHECK_TOOL([LD], [ld])
+
+# Set the path to use your preferred ar
+AC_SUBST([AR], [/opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/ar])
+
+# Set the path to use your preferred nm
+AC_SUBST([NM], [/opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/nm])
 
 # Check for coreutils
 AC_CHECK_PROG([RM], [rm], [rm], [no])
 AC_CHECK_PROG([MKDIR], [mkdir], [mkdir], [no])
 AC_CHECK_PROG([CP], [cp], [cp], [no])
 AC_CHECK_PROG([MV], [mv], [mv], [no])
+
+# No-op for MT
+AC_SUBST([MT], [:])
 
 # Check for valgrind
 AC_CHECK_PROG([VALGRIND], [valgrind], [valgrind], [no])
@@ -221,6 +231,13 @@ AC_CHECK_PROG([GCOV], [gcov], [gcov], [no])
 if test "$GCOV" = "no"; then
   AC_MSG_ERROR([gcov is required])
 fi
+
+# Ensure otool is available
+AC_PATH_PROG(OTOOL, otool, /usr/bin/otool)
+if test -z "$OTOOL"; then
+  AC_MSG_ERROR([otool is required but not found])
+fi
+AC_SUBST(OTOOL)
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdio.h stdlib.h string.h stdarg.h ctype.h sys/stat.h])
