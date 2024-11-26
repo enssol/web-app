@@ -182,6 +182,6 @@ This project is licensed under the [[LICENSE]AGPLv3](LICENSE). Please review the
 
 For any inquiries or questions regarding this project, feel free to reach out to the team:
 
-Lead Developer: [Your Name](https://github.com/your-username)
+Lead Developer: [Adrian Agallo](https://github.com/enveng-group)
 
-Project Maintainer: [Project Maintainer Name](https://github.com/maintainer-username).
+Project Maintainer: [Adrian Agallo](https://github.com/enveng-group)

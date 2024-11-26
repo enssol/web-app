@@ -1,37 +1,4 @@
-\# The enssol is the owner of the repository
-
-\# No changes should be committed without a review from one of the team members
-
-\# Owners for the entire repository
-
-* @enssol
-
-\# Specific directory or file owners
-
-/docs/ @enssol
-/src/ @enssol
-
-\# Exclude ignored files and directories (follow .gitignore rules)
-
-\# These files are typically ignored, and should not have a code owner assigned
-
-\# Ignored log files
-
-*.log
-
-\# Ignored build directories
-
-/build/
-
-\# Ignored node_modules
-
-/node_modules/
-
-\# Ignored temporary or environment files
-
-*.env
-
-\# Owners for specific file types
-
-*.js @enssol
-*.py @enssol
+* @agallo
+/docs/ @agallo
+/src/ @agallo
+README.md @agallo
