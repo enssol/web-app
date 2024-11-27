@@ -1,4 +1,4 @@
-﻿# Prerequisites
+# Prerequisites
 *.d
 
 # Object files
@@ -190,3 +190,27 @@ m4/po.m4
 m4/progtest.m4
 
 .flaskenv*
+tests/.deps/test_config_loader.Po
+tests/.deps/test_env_loader.Po
+tests/.deps/test_error_handler.Po
+tests/.deps/test_garbage_collector.Po
+tests/.deps/test_hello.Po
+tests/.deps/test_logger.Po
+tests/.deps/test_main.Po
+tests/.deps/test_validator.Po
+src/Makefile.in
+src/Makefile.in
+configure~
+libtool
+src/Makefile.in
+src/Makefile.in
+confdefs.h
+configure~
+configure~
+conftest.c
+conftest.err
+conftest.l
+configure~
+Makefile.in
+configure~
+Makefile.in

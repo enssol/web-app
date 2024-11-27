@@ -2,11 +2,21 @@
 
 include ../common-rules.am
 
-bin_PROGRAMS = web-app$(EXEEXT)
-web_app_SOURCES = ../objects/*.o
+OBJDIR = $(top_builddir)/objects
 
-web-app$(EXEEXT): $(web_app_SOURCES)
-	$(CC) $(LDFLAGS) -o $@ $(web_app_SOURCES)
+OBJS = $(OBJDIR)/config_loader.o $(OBJDIR)/env_loader.o $(OBJDIR)/error_handler.o \
+	   $(OBJDIR)/garbage_collector.o $(OBJDIR)/hello.o $(OBJDIR)/logger.o \
+	   $(OBJDIR)/main.o $(OBJDIR)/validator.o
+
+CLEANFILES = $(OBJS)
+
+all: my_program
+
+my_program: $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $(OBJS)
+
+$(OBJDIR)/%.o: ../src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f web-app
+	rm -f my_program $(OBJS)

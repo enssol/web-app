@@ -1,5 +1,5 @@
 ﻿AC_INIT([EnvEng Web Application],[1.0],[support@example.com])
-AC_PREREQ([2.72])
+AC_PREREQ([2.71])
 
 # Specify the auxiliary build directory as 'build'
 AC_CONFIG_AUX_DIR([build])
@@ -106,7 +106,7 @@ AC_SUBST([AR], [/opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/
 AC_SUBST([NM], [/opt/homebrew/Cellar/binutils/2.43.1/aarch64-apple-darwin24.1.0/bin/nm])
 
 # Compiler flags
-CFLAGS="-static -Iinclude -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include -O0 -pedantic -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800 -std=c23 -Wall -Wextra -Werror -DPIC -MMD -MP"
+CFLAGS="-static -Iinclude -I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include -I/opt/homebrew/include/glib-2.0 -I/opt/homebrew/lib/glib-2.0/include -O0 -pedantic -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800 -std=c17 -Wall -Wextra -Werror -DPIC -MMD -MP"
 AC_SUBST([CFLAGS])
 
 # No-op for MT

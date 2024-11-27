@@ -3,7 +3,7 @@
 These instructions help align Copilot's suggestions with our project's requirements.
 
 ## General Guidelines
-- Adhere to ISO/IEC 9899:2024 (C Standard), POSIX.1-2024, and X/Open 800 compliance in all code suggestions.
+- Adhere to ISO/IEC 9899:2018 (C Standard), POSIX.1-2024, and X/Open 800 compliance in all code suggestions.
 - Ensure all code is portable, cross-platform, and cross-architecture. Avoid platform-specific features unless encapsulated for easy replacement.
 
 ## Code Structure

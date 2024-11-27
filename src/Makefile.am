@@ -14,3 +14,7 @@ parser.c: parser.y
 
 lexer.c: lexer.l
 	flex -o $@ $<
+
+# Add this rule to compile config_loader.c
+../objects/config_loader.o: config_loader.c
+    $(CC) $(CFLAGS) -c config_loader.c -o ../objects/config_loader.o

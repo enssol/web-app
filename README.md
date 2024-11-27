@@ -285,7 +285,7 @@ This document outlines coding standards and practices for the EnvEng Web Applica
    - **Purpose**: Enforce standards and optimize builds.
    - **Best Practices**:
      - Use `CFLAGS` and `LDFLAGS` to set compiler and linker flags.
-     - Ensure flags like `-std=c23`, `-pedantic`, and `-Wall` are included for ISO C compliance.
+     - Ensure flags like `-std=c17`, `-pedantic`, and `-Wall` are included for ISO C compliance.
      - Use `AC_SUBST` to substitute these flags into the Makefiles.
 
 3. **Conditional Features**:
