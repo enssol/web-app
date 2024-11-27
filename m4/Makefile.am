@@ -1,15 +1,10 @@
-# m4/Makefile.am
+.POSIX:
 
-.POSIX: # Enforce POSIX mode for portability
-
-# Include common rules
 include ../common-rules.am
 
-# Add autoindent to the build process
-all: generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
+M4FILES = *.m4
 
-# Add clean_tags to the clean process
-clean: clean_tags
+dist_noinst_DATA = $(M4FILES)
 
-# Define the directory for m4 macros
-ACLOCAL_AMFLAGS = -I m4
+all:
+	@echo "M4 files managed here."

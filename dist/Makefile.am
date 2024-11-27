@@ -1,15 +1,14 @@
-# dist/Makefile.am
+.POSIX:
 
-.POSIX: # Enforce POSIX mode for portability
-
-# Include common rules
 include ../common-rules.am
 
-# Add autoindent to the build process
-all: generate_tags cflow dist-xz generate_metadata process_metadata include_metadata stow autoindent splint cscope
+DISTFILES = ../bin/web-app ../docs/* ../etc/config.ini ../LICENSE ../README.md
+dist_ARCHIVES = web-app.tar.xz
 
-# Add clean_tags to the clean process
-clean: clean_tags
+all: dist
 
-# Define the distribution files for the dist directory
-dist_noinst_DATA = README.md LICENSE INSTALL AUTHORS ChangeLog NEWS
+dist: $(DISTFILES)
+	tar -cJf $(dist_ARCHIVES) $(DISTFILES)
+
+clean:
+	rm -f $(dist_ARCHIVES)

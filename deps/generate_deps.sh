@@ -1,6 +1,14 @@
-# Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
-# SPDX-License-Identifier: 	AGPL-3.0-or-later
+#!/bin/bash
+# Generate dependencies for all C files in the src/ directory
 
-# deps/generate_deps.sh
-#!/bin/sh
-find "$(dirname "$0")" -name '*.d' > "$(dirname "$0")/deps_list.txt"
+# Loop through all C source files
+for src_file in src/*.c; do
+    # Get the corresponding dependency file name
+    dep_file="${src_file%.c}.d"
+
+    # Use gcc to generate the dependencies for each source file
+    gcc -M "${src_file}" > "${dep_file}"
+
+    # Optionally, you can include other flags or dependencies
+    # Example: gcc -M -Iinclude $src_file > $dep_file
+done

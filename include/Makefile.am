@@ -1,12 +1,9 @@
-# include/Makefile.am
+.POSIX:
 
-.POSIX: # Enforce POSIX mode for portability
-
-# Include common rules
 include ../common-rules.am
 
-# Add autoindent to the build process
-all: generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
+noinst_HEADERS = config_loader.h env_loader.h error_handler.h \
+garbage_collector.h hello.h logger.h validator.h
 
-# Add clean_tags to the clean process
-clean: clean_tags
+all:
+	@echo "Header files managed here."

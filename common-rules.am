@@ -1,151 +1,16 @@
-﻿.POSIX: # Enforce POSIX mode for portability
+﻿.POSIX:
 
-# Load environment variables if .env exists
-env_load:
-	@if [ -f .env ]; then \
-		echo "Loading .env variables..."; \
-		. .env; \
-	fi
+# Standard rules
+.PHONY: all clean distclean check
 
-# Compiler and linker definitions
-CCACHE = ccache
-CC = $(CCACHE) gcc
-CXX = $(CCACHE) g++
+all:
+	@echo "Building project..."
 
-# Clean build artifacts
 clean:
-	@echo "Cleaning build artifacts..."
-	rm -f cppcheck.xml cppcheck_errors.log
+	rm -rf *.o *.tmp *.log
 
-# Installation rules
-stow:
-	@echo "Managing installation with stow..."
-	stow -t /usr/local -d $(STOW_DIR) $(PACKAGE)
+distclean: clean
+	rm -rf Makefile config.status config.log
 
-# Formatting and static analysis
-autoindent:
-	@echo "Running autoindent on source files..."
-	autoindent -config .autoindentrc $(srcdir)/*.c
-
-autoindent_headers:
-	@echo "Running autoindent on header files..."
-	autoindent -config .autoindentrc $(srcdir)/*.h
-
-clang_format:
-	@echo "Running clang-format on source files..."
-	find $(srcdir) -name '*.c' -o -name '*.h' | xargs clang-format -i
-
-clang_tidy:
-	@echo "Running clang-tidy on source files..."
-	find $(srcdir) -name '*.c' -o -name '*.h' | xargs clang-tidy --fix --format-style=google -- -std=gnu23 -D_POSIX_C_SOURCE=2024L -D_XOPEN_SOURCE=800
-
-cppcheck:
-	@echo "Running cppcheck on source files..."
-	cppcheck --enable=all --std=gnu23 --platform=unix64 --suppress=missingIncludeSystem --xml --xml-version=2 $(srcdir) 2> cppcheck.xml
-
-shellcheck:
-	@echo "Running shellcheck on shell scripts..."
-	find $(srcdir) -name '*.sh' | xargs shellcheck
-
-log_issues:
-	@echo "Logging issues that cannot be fixed automatically..."
-	grep -i "error" cppcheck.xml > cppcheck_errors.log || true
-
-# Metadata management with recutils
-generate_metadata:
-	@echo "Generating metadata with recutils..."
-	recfix -r $(RECS_FILES)
-
-process_metadata:
-	@echo "Processing metadata with recutils..."
-	recfix -r $(RECS_FILES)
-
-include_metadata:
-	@echo "Including metadata in the release archive..."
-	tar --append --file=$(PACKAGE)-$(VERSION).tar.xz $(RECS_FILES)
-
-# Debugging tools
-gdb:
-	@echo "Running gdb on the binary..."
-	gdb ./web-app
-
-ddd:
-	@echo "Running ddd on the binary..."
-	ddd ./web-app
-
-valgrind:
-	@echo "Running valgrind on the binary..."
-	valgrind --leak-check=full --show-leak-kinds=all ./web-app
-
-perf:
-	@echo "Running gnu-perf on the binary..."
-	perf stat ./web-app
-
-# Profiling with gprof
-profile:
-	@echo "Running gprof for profiling..."
-	./web-app
-	gprof ./web-app gmon.out > gprof.out
-
-# Documentation generation
-docs:
-	@echo "Generating documentation with texinfo..."
-	makeinfo --html --no-split -o docs/manual.html docs/manual.texi
-	makeinfo --pdf -o docs/manual.pdf docs/manual.texi
-
-generate_html_docs:
-	@echo "Generating HTML documentation with texinfo..."
-	makeinfo --html --no-split -o $(DOCS_DIR)/manual.html $(DOCS_DIR)/manual.texi
-
-clean_html_docs:
-	@echo "Cleaning generated HTML documentation..."
-	rm -f $(DOCS_DIR)/manual.html
-
-# Distribution packaging
-dist-xz:
-	@echo "Creating distribution archive with xz..."
-	tar -cJf $(PACKAGE)-$(VERSION).tar.xz $(DISTFILES)
-
-# Tags management
-generate_tags:
-	@if [ ! -f GTAGS ]; then \
-		echo "Initializing GNU Global..."; \
-		gtags; \
-	fi
-	@echo "Generating tags with global..."
-	global -u
-
-clean_tags:
-	@echo "Cleaning tags..."
-	rm -f GPATH GRTAGS GSYMS GTAGS
-
-# Generated code and templates
-generate_code:
-	@echo "Generating code from templates with autogen..."
-	autogen -T $(CONFIG_DIR)/code_template.def -o $(SRC_DIR)/generated_code.c
-
-generate_docs:
-	@echo "Generating documentation from templates with autogen..."
-	autogen -T $(DOCS_DIR)/doc_template.def -o $(DOCS_DIR)/generated_docs.md
-
-# gettext and internationalization
-generate_mo_files:
-	@echo "Generating .mo files from .po files..."
-	for lang in en_AU; do \
-		mkdir -p $(localedir)/$$lang/LC_MESSAGES; \
-		msgfmt -o $(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo $(srcdir)/po/$$lang.po; \
-	done
-
-install_mo_files:
-	@echo "Installing .mo files..."
-	for lang in en_AU; do \
-		$(INSTALL_DATA) $(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo $(DESTDIR)$(localedir)/$$lang/LC_MESSAGES/$(GETTEXT_PACKAGE).mo; \
-	done
-
-# Consolidated 'all' target
-all_common: generate_tags autoindent generate_metadata process_metadata include_metadata splint cscope
-
-# Consolidated 'clean' target
-clean_common: clean_tags
-	@echo "Cleaning build artifacts..."
-	rm -f cppcheck.xml cppcheck_errors.log
+check:
+	@echo "Running tests..."

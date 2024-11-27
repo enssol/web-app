@@ -14,659 +14,154 @@
 
 TODO: sort out GETTEXT and use autopoint for internalization
 
-### **Updated Workflow with Added Tools**
+# **Copilot Instructions for EnvEng Web Application Development**
+
+This document outlines coding standards and practices for the EnvEng Web Application development project. These instructions help align Copilot's suggestions with our project's requirements.
 
 ---
 
-### **1. Development and Source Preparation**
+## **1. General Guidelines**
 
-Tools used during the early stages to write, structure, and analyze the source code:
-
--   **`bison` + `flex`**:
-    Generate parsers (`.c` files) and lexers (`.l` files).
-    **Example**: Converts `parser.y` → `parser.c` and `lexer.l` → `lexer.c`.
-
--   **`gnu-complexity`**:
-    Analyze maintainability by calculating metrics like cyclomatic complexity.
-    **Example**: Ensure `src/*.c` has manageable complexity.
-
--   **`gawk`**:
-    Process source files, metadata, or logs for automation.
-    **Example**: Generate dynamic Makefile content or filter analysis output.
-
--   **`autoindent`**:
-    Automatically format C code to adhere to style guidelines.
-    **Example**: Format `src/*.c` for readability and consistency.
-    Run after writing or editing code:
-    ```bash
-    autoindent -gnu src/*.c
-    ```
+- Adhere to **ISO/IEC 9899:2024** (C Standard), **POSIX.1-2024**, and **X/Open 800** compliance in all code suggestions.
+- Ensure all code is portable, cross-platform, and cross-architecture. Avoid platform-specific features unless encapsulated for easy replacement.
 
 ---
 
-### **2. Build System Initialization**
+## **2. Code Structure**
 
-Tools that create and configure the build system, defining the project structure:
+### File Organization
 
--   **`autoconf` + `automake` + `libtool` + `m4`**:
+- Maintain the following directory structure:
 
-    -   `autoconf`: Generates the `configure` script.
-    -   `automake`: Creates `Makefile.in` from `Makefile.am`.
-    -   `libtool`: Ensures portability of libraries and static linking.
-    -   `m4`: Processes macros for `configure.ac`.
+```
+.
+├── ABOUT-NLS
+├── AUTHORS
+├── COPYING
+├── ChangeLog
+├── INSTALL
+├── LICENSE
+├── Makefile
+├── Makefile.am
+├── Makefile.in
+├── NEWS
+├── README.html
+├── README.md
+├── bin
+│   └── Makefile.am
+├── build
+│   ├── Makefile.am
+│   ├── build_script.sh
+│   ├── configurationCache.log
+│   ├── dryrun.log
+│   └── targets.log
+├── clib.json
+├── common-rules.am
+├── configure.ac
+├── configure~
+├── deps
+│   ├── Makefile.am
+│   └── generate_deps.sh
+├── dist
+│   └── Makefile.am
+├── docs
+│   ├── Makefile
+│   └── Makefile.am
+├── etc
+│   ├── Makefile
+│   ├── Makefile.am
+│   ├── config.conf
+│   ├── config.ini
+│   ├── gcc.spec
+│   ├── header_sources.txt
+│   ├── process_files.gawk
+│   ├── scan_list.txt
+│   ├── sources.txt
+│   └── test_sources.txt
+├── gtk-doc.make
+├── include
+│   ├── Makefile
+│   ├── Makefile.am
+│   ├── config.h
+│   ├── config_loader.h
+│   ├── env_loader.h
+│   ├── error_handler.h
+│   ├── garbage_collector.h
+│   ├── hello.h
+│   ├── logger.h
+│   └── validator.h
+├── intltool-extract.in
+├── intltool-merge.in
+├── intltool-update.in
+├── lib
+│   ├── Makefile.am
+│   └── unity.h
+├── libtool
+├── logs
+│   └── Makefile.am
+├── m4
+│   └── Makefile.am
+├── objects
+│   └── Makefile.am
+├── package-lock.json
+├── package.json
+├── po
+│   ├── ChangeLog
+│   ├── LINGUAS
+│   ├── Makefile.am
+│   └── POTFILES.in
+├── src
+│   ├── Makefile
+│   ├── Makefile.am
+│   ├── Makefile.in
+│   ├── config_loader.c
+│   ├── env_loader.c
+│   ├── error_handler.c
+│   ├── garbage_collector.c
+│   ├── hello.c
+│   ├── lexer.l
+│   ├── logger.c
+│   ├── main.c
+│   ├── parser.y
+│   └── validator.c
+├── stamp-h1
+├── tests
+│   ├── Makefile.am
+│   ├── test_config_loader.c
+│   ├── test_env_loader.c
+│   ├── test_error_handler.c
+│   ├── test_garbage_collector.c
+│   ├── test_hello.c
+│   ├── test_logger.c
+│   ├── test_main.c
+│   └── test_validator.c
+├── tmp
+│   └── Makefile.am
+├── web-app.code-workspace
+└── xml
+    └── gtkdocentities.ent
+```
 
-    **Example**: `autoreconf -i` generates the build system files.
+- Use **snake_case** for file names, e.g., `data_manager.c`, `user_auth.h`.
 
--   **`autopoint`**:
-    Used to set up the project for internationalization by creating the necessary `po` files and adding gettext support.
-    **Example**: Initializes i18n files during `autoreconf`:
-    ```bash
-    autopoint
-    ```
+### Naming Conventions
 
----
-
-### **3. Dependency and Build Configuration**
-
-Tools that resolve dependencies and system requirements before building:
-
--   **`pkgconf`**:
-    Checks and resolves library dependencies.
-    **Example**: Finds `-lpthread` or `-lm` for linking.
-
-    ```bash
-    pkgconf --cflags --libs glib-2.0
-    ```
-
--   **`gettext`**:
-    Prepares i18n files and ensures the build system handles localization.
-    **Example**: Generates `.mo` and `.po` files.
-
-    ```bash
-    xgettext -o po/messages.pot src/*.c
-    msginit -i po/messages.pot -o po/en.po
-    msgfmt -o po/en.mo po/en.po
-    ```
-
--   **`autoenv`**:
-    Automatically sets environment variables from a `.env` file.
-    **Example**: Exports `CFLAGS` or `LDFLAGS` automatically:
-
-    ```bash
-    echo "export CFLAGS=-static" > .env
-    ```
-
--   **`clibs`**:
-    Downloads and manages external C libraries.
-    **Example**: Use Clibs to fetch lightweight libraries:
-
-    ```bash
-    clib install kgabis/parson
-    ```
-
--   **`ccache`**:
-    Caches intermediate build artifacts to reduce build times.
-    **Example**: Use `ccache` to speed up subsequent builds:
-    ```bash
-    ccache gcc -o myprogram myprogram.c
-    ```
-
----
-
-### **4. Compilation and Linking**
-
-Core tools that transform source code into executables and libraries:
-
--   **`gcc` + `binutils` + `glibc`**:
-    Core tools that transform source code into executables and libraries.
-
-    -   `gcc`: Compiles source into object files.
-    -   `binutils`: Links object files into binaries/libraries.
-    -   `glibc`: Provides runtime support for compiled binaries.
-        **Example**: Compile `src/*.c` into a static, portable binary. `libglib2.0-dev`
-
-    ```bash
-    gcc -o myprogram src/*.c -static -L/path/to/glibc -I/path/to/glibc/include
-
-    ```
-
--   **`coreutils`**:
-    Provides essential utilities (`rm`, `mkdir`, etc.) during build and install.
-    **Example**: Use `coreutils` commands in the build process:
-    ```bash
-    rm -rf build/
-    mkdir build
-    cp src/*.c build/
-    mv build/myprogram /usr/local/bin/
-    ```
-
----
-
-### **5. Testing and Profiling**
-
-Tools for debugging, testing, and optimizing binaries:
-
--   **`gdb` + `ddd`**:
-    Debug binaries to diagnose issues.
-
-    -   `gdb`: Command-line debugger.
-    -   `ddd`: Graphical frontend for `gdb`.
-        **Example**: Use `gdb` to debug a program:
-
-    ```bash
-    gdb ./myprogram
-
-    ```
-
--   **`valgrind`**:
-    Detect memory leaks and inefficiencies.
-    **Example**: Use `valgrind` to check for memory leaks:
-
-    ```bash
-    valgrind --leak-check=full --show-leak-kinds=all ./web-app
-
-    ```
-
--   **`gnu-perf`**:
-    Measure performance metrics like CPU usage and cache bottlenecks.
-    `perf stat ./web-app`
+- **Variables**: Use `snake_case` (e.g., `user_id`).
+- **Functions**: Use `camelCase` (e.g., `processData`).
+- **Constants**: Use `UPPER_CASE` (e.g., `MAX_BUFFER_SIZE`).
 
 ---
 
-### **6. Code Navigation and Analysis**
+## **3. Coding Practices**
 
-Enhance understanding and navigation of the codebase:
+### Data Handling (Aligned with Data-Oriented Programming)
 
--   **`global`**:
-    Navigate the source code using tags.
-    **Example**: Locate function definitions or references.
+- **Separation**: Keep data definitions separate from logic. Define data structures in header files and implement logic in C files.
+- **Immutability**: Use immutable data structures whenever applicable.
 
-    ```bash
-    global -u
-    global -x main
-    ```
+### Error Handling
 
--   **`cflow`**:
-    Visualize function dependencies using call graphs.
-    **Example**: Outputs `main → foo → bar`.
-    ```bash
-    cflow src/main.c
-    ```
-
----
-
-### **7. Documentation**
-
--   **`texinfo`**:
-    Generate documentation in formats like HTML, PDF, and Info.
-    **Example**: Produce `docs/manual.html` and `docs/manual.pdf`.
-
-    ```bash
-    makeinfo --html --no-split -o docs/manual.html docs/manual.texi
-    makeinfo --pdf -o docs/manual.pdf docs/manual.texi
-    ```
-
--   **`autogen`**:
-    If you want to use the autogen package from apt, you would typically use it for generating code and documentation from templates,
-
----
-
-### **8. Packaging and Distribution**
-
-Create a portable, self-contained release of the project:
-
--   **`xz`**:
-    Compress the final distribution archive into `.tar.xz`.
-    **Example**: `make dist` creates `myproject-1.0.tar.xz`.
-
-    ```bash
-    tar -cJf myproject-1.0.tar.xz myproject-1.0/
-    ```
-
--   **`recutils`**:
-    Store and manage metadata (e.g., dependency records).
-    **Example**: Include structured metadata in the release archive.
-
-    ```bash
-    recfix -r metadata.rec
-    ```
-
--   **`stow`**:
-    Manage installation with symlinks for clean organization.
-    **Example**: Use `stow` to manage `bin/`, `lib/`, and `include/`.
-
-    ```bash
-    stow -t /usr/local -d stow_dir myproject
-    ```
-
-    `clang-tidy` and `clang-format`  and `cppcheck` can be used for static analysis and code formatting, respectively. and `shellcheck` for shell scripts.
-
-    `gtkdoc` for generating API documentation.
-
-    `dos2unix` and `unix2dos` are used for converting line endings between Unix and DOS formats.
-
-        - **`splint`**:
-      Perform static code analysis to identify potential issues in the C source code.
-      **Example**: Analyze all C source files in the `src/` directory.
-
-      ```bash
-      splint src/*.c
-        ```
-
-          - **`cscope`**:
-      Generate an index for navigating and searching through the C source code.
-      **Example**: Create a `cscope` database for all C source files in the [src](http://_vscodecontentref_/1) directory.
-
-      ```bash
-      cscope -b -R -s src
-        ```
-
----
-
-### **9. Profiling and Coverage Analysis**
-
-#### Profiling with gprof
-
-1. Compile the project with profiling enabled:
-    ```bash
-    make clean
-    ./configure CFLAGS="-pg" LDFLAGS="-pg"
-    make
-    ```
-
-2. Run the application to generate profiling data:
-    ```bash
-    ./web-app
-    ```
-
-3. Generate the profiling report:
-    ```bash
-    gprof ./web-app gmon.out > gprof.out
-    ```
-
-4. View the profiling report in `gprof.out`.
-
-#### Coverage Analysis with gcov
-
-1. Compile the project with coverage enabled:
-    ```bash
-    make clean
-    ./configure CFLAGS="-fprofile-arcs -ftest-coverage" LDFLAGS="-lgcov"
-    make
-    ```
-
-2. Run the application to generate coverage data:
-    ```bash
-    ./web-app
-    ```
-
-3. Generate the coverage report:
-    ```bash
-    make coverage
-    ```
-
-4. View the coverage report in the generated `.gcov` files.
-
----
-
-### **Final Full Process Order**
-
-1. **Development Tools**: `bison`, `flex`, `gnu-complexity`, `gawk`, `autoindent`.
-2. **Build System Setup**: `autoconf`, `automake`, `libtool`, `m4`, `autogen`, `autopoint`.
-3. **Dependency Configuration**: `pkgconf`, `gettext`, `autoenv`, `clibs`, `cache`.
-4. **Compilation**: `gcc`, `binutils`, `glibc`, `coreutils`.
-5. **Testing and Debugging**: `gdb`, `ddd`, `valgrind`, `gnu-perf`.
-6. **Navigation**: `global`, `cflow`.
-7. **Documentation**: `texinfo`.
-8. **Packaging**: `xz`, `recutils`, `stow`.
-9. **Profiling and Coverage Analysis**: `gprof`, `gcov`.
-
-This sequence incorporates **`autoindent`** for code formatting, **`autopoint`** for initializing i18n support, and **`clibs`** for lightweight library management, ensuring a smooth, modern, and portable C project workflow.
-
-# Project Build Process
-
-## 1. Preprocessing
-
--   File Inclusion: Replace #include directives with the contents of the specified header files.
-    -   **Tool**: `gcc -E`
-    -   **Input File Extension**: `.c`, `.h`
-    -   **Output File Extension**: `.i`
-    -   **Input Directory**: `src/`
-    -   **Output Directory**: `build/`
--   Macro Expansion: Replace macros defined with #define with their corresponding values.
-    -   **Tool**: `gcc -E`
-    -   **Input File Extension**: `.c`, `.h`
-    -   **Output File Extension**: `.i`
-    -   **Input Directory**: `src/`
-    -   **Output Directory**: `build/`
--   Conditional Compilation: Evaluate #if, #ifdef, #ifndef, #else, and #endif directives to include or exclude parts of the code.
-    -   **Tool**: `gcc -E`
-    -   **Input File Extension**: `.c`, `.h`
-    -   **Output File Extension**: `.i`
-    -   **Input Directory**: `src/`
-    -   **Output Directory**: `build/`
--   Line Control: Process #line directives to control line numbers and filenames in error messages and debugging information.
-    -   **Tool**: `gcc -E`
-    -   **Input File Extension**: `.c`, `.h`
-    -   **Output File Extension**: `.i`
-    -   **Input Directory**: `src/`
-    -   **Output Directory**: `build/`
--   Removing Comments: Strip out all comments from the source code.
-    -   **Tool**: `gcc -E`
-    -   **Input File Extension**: `.c`, `.h`
-    -   **Output File Extension**: `.i`
-    -   **Input Directory**: `src/`
-    -   **Output Directory**: `build/`
-
-## 2. Compilation
-
--   Lexical Analysis: Convert the sequence of characters in the source code into a sequence of tokens.
-    -   **Tool**: `gcc -S`
-    -   **Input File Extension**: `.i`
-    -   **Output File Extension**: `.s`
-    -   **Input Directory**: `build/`
-    -   **Output Directory**: `build/`
--   Syntax Analysis: Parse the tokens to generate an Abstract Syntax Tree (AST) based on the grammar of the language.
-    -   **Tool**: `gcc -S`
-    -   **Input File Extension**: `.i`
-    -   **Output File Extension**: `.s`
-    -   **Input Directory**: `build/`
-    -   **Output Directory**: `build/`
--   Semantic Analysis: Check the AST for semantic errors (e.g., type checking, variable declaration).
-    -   **Tool**: `gcc -S`
-    -   **Input File Extension**: `.i`
-    -   **Output File Extension**: `.s`
-    -   **Input Directory**: `build/`
-    -   **Output Directory**: `build/`
--   Intermediate Code Generation: Translate the AST into an intermediate representation (IR), which is a lower-level code that is easier to optimize.
-    -   **Tool**: `gcc -S`
-    -   **Input File Extension**: `.i`
-    -   **Output File Extension**: `.s`
-    -   **Input Directory**: `build/`
-    -   **Output Directory**: `build/`
--   Optimization: Perform optimizations on the IR to improve performance (e.g., constant folding, dead code elimination).
-    -   **Tool**: `gcc -S`
-    -   **Input File Extension**: `.i`
-    -   **Output File Extension**: `.s`
-    -   **Input Directory**: `build/`
-    -   **Output Directory**: `build/`
--   Code Generation: Convert the optimized IR into assembly code.
-    -   **Tool**: `gcc -S`
-    -   **Input File Extension**: `.i`
-    -   **Output File Extension**: `.s`, `.asm`
-    -   **Input Directory**: `build/`
-    -   **Output Directory**: `build/`
-
-## 3. Assembly
-
--   Assembly Translation: Translate the assembly code into machine code (binary instructions).
-    -   **Tool**: `as`
-    -   **Input File Extension**: `.s`, `.asm`
-    -   **Output File Extension**: `.o`
-    -   **Input Directory**: `build/`
-    -   **Output Directory**: `obj/`
--   Object File Creation: Package the machine code into an object file (.o), including metadata such as symbol tables and relocation information.
-    -   **Tool**: `as`
-    -   **Input File Extension**: `.s`, `.asm`
-    -   **Output File Extension**: `.o`
-    -   **Input Directory**: `build/`
-    -   **Output Directory**: `obj/`
-
-## 4. Linking
-
--   Combining Object Files: Merge multiple object files into a single executable.
-    -   **Tool**: `ld`
-    -   **Input File Extension**: `.o`
-    -   **Output File Extension**: `.out`, `.exe`
-    -   **Input Directory**: `obj/`
-    -   **Output Directory**: `bin/`
--   Symbol Resolution: Resolve references to symbols (functions, variables) across object files.
-    -   **Tool**: `ld`
-    -   **Input File Extension**: `.o`
-    -   **Output File Extension**: `.out`, `.exe`
-    -   **Input Directory**: `obj/`
-    -   **Output Directory**: `bin/`
--   Library Linking: Link against static or dynamic libraries, resolving references to library functions.
-    -   **Tool**: `ld`
-    -   **Input File Extension**: `.o`, `.a`, `.so`
-    -   **Output File Extension**: `.out`, `.exe`
-    -   **Input Directory**: `obj/`, `lib/`
-    -   **Output Directory**: `bin/`
--   Relocation: Adjust addresses in the code and data sections to reflect their final positions in memory.
-    -   **Tool**: `ld`
-    -   **Input File Extension**: `.o`
-    -   **Output File Extension**: `.out`, `.exe`
-    -   **Input Directory**: `obj/`
-    -   **Output Directory**: `bin/`
--   Executable Creation: Generate the final executable file, including headers and metadata required for execution.
-    -   **Tool**: `ld`
-    -   **Input File Extension**: `.o`
-    -   **Output File Extension**: `.out`, `.exe`
-    -   **Input Directory**: `obj/`
-    -   **Output Directory**: `bin/`
-
-## 5. Dependency Generation
-
--   Dependency Generation: Generate dependency files to track which files need to be recompiled when a source file changes.
-    -   **Tool**: `gcc -M`
-    -   **Input File Extension**: `.c`, `.h`
-    -   **Output File Extension**: `.d`
-    -   **Input Directory**: `src/`
-    -   **Output Directory**: `build/`
-
-## 6. Optimization Tools and Techniques
-
--   Compiler Optimization Flags: Improve performance and efficiency of the generated code.
-    -   **Tool**: `gcc`
-    -   **Flags**: `-O0`, `-O1`, `-O2`, `-O3`, `-Os`, `-Ofast`, `-flto`
--   Profile-Guided Optimization (PGO): Use profiling data to optimize the program.
-    -   **Tool**: `gcc`
-    -   **Steps**: `-fprofile-generate`, `-fprofile-use`
--   Interprocedural Optimization (IPO): Perform optimizations across function and file boundaries.
-    -   **Tool**: `gcc`
-    -   **Flag**: `-flto`
--   Vectorization: Enable automatic vectorization of loops.
-    -   **Tool**: `gcc`
-    -   **Flags**: `-ftree-vectorize`, `-march=native`
--   Inlining: Enable function inlining.
-    -   **Tool**: `gcc`
-    -   **Flags**: `-finline-functions`, `-finline-limit=N`
--   Loop Optimization: Improve performance of loops.
-    -   **Tool**: `gcc`
-    -   **Flags**: `-funroll-loops`, `-floop-interchange`, `-floop-block`, `-floop-parallelize-all`
--   Dead Code Elimination: Remove code that does not affect the program's output.
-    -   **Tool**: `gcc`
-    -   **Flag**: `-fdce`
--   Constant Folding: Evaluate constant expressions at compile time.
-    -   **Tool**: `gcc`
-    -   **Flag**: `-ftree-ccp`
-
-## 7. Other Common Tools
-
--   **Tool**: `make`
-    -   **Command**: `make`
-    -   **Description**: Automates the build process by reading `Makefile` instructions.
--   **Tool**: `gdb`
-    -   **Command**: `gdb`
-    -   **Description**: Debugs the executable, providing source-level debugging information.
--   **Tool**: `strip`
-    -   **Command**: `strip`
-    -   **Description**: Removes symbols from the executable to reduce its size.
--   **Tool**: `objdump`
-    -   **Command**: `objdump`
-    -   **Description**: Displays information about object files.
--   **Tool**: `nm`
-    -   **Command**: `nm`
-    -   **Description**: Lists symbols from object files.
--   **Tool**: `ranlib`
-    -   **Command**: `ranlib`
-    -   **Description**: Generates an index to the contents of an archive.
-
-8. Other Common File Types
-    - Precompiled Headers: Speed up compilation by precompiling frequently included headers.
-        - **File Extension**: `.gch`
-        - **Directory**: `build/`
-    - Assembly Listings: Human-readable versions of the assembly code, often used for debugging and analysis.
-        - **File Extension**: `.lst`
-        - **Directory**: `build/`
-    - Map Files: Provide detailed information about the memory layout of the program.
-        - **File Extension**: `.map`
-        - **Directory**: `build/`
-    - Debug Information: Contain additional information used by debuggers to provide source-level debugging.
-        - **File Extension**: `.dbg`
-        - **Directory**: `build/`
-    - Intermediate Object Files: Similar to `.o` files but may be used in different contexts or by different tools.
-        - **File Extension**: `.obj`
-        - **Directory**: `obj/`
-    - Configuration Files: Store settings and parameters for the build process or the application.
-        - **File Extension**: `.cfg`, `.conf`
-        - **Directory**: `config/`
-    - Log Files: Record the output of the build process or the execution of the application.
-        - **File Extension**: `.log`
-        - **Directory**: `logs/`
-    - Temporary Files: Created during the build process, often used for intermediate steps.
-        - **File Extension**: `.tmp`
-        - **Directory**: `tmp/`
-    - Documentation Files: Provide information about the project, such as README files, manuals, and guides.
-        - **File Extension**: `.md`, `.txt`, `.pdf`
-        - **Directory**: `docs/`
-    - Script Files: Used to automate the build process or other tasks.
-        - **File Extension**: `.sh`, `.bat`, `.ps1`
-        - **Directory**: `scripts/`
-
-## Summary
-
--   Preprocessing:
-    -   File Inclusion
-    -   Macro Expansion
-    -   Conditional Compilation
-    -   Line Control
-    -   Removing Comments
--   Compilation:
-    -   Lexical Analysis
-    -   Syntax Analysis
-    -   Semantic Analysis
-    -   Intermediate Code Generation
-    -   Optimization
-    -   Code Generation
--   Assembly:
-    -   Assembly Translation
-    -   Object File Creation
--   Linking:
-    -   Combining Object Files
-    -   Symbol Resolution
-    -   Library Linking
-    -   Relocation
-    -   Executable Creation
--   Dependency Generation:
-    -   Dependency Generation
--   Optimization Tools and Techniques:
-    -   Compiler Optimization Flags
-    -   Profile-Guided Optimization (PGO)
-    -   Interprocedural Optimization (IPO)
-    -   Vectorization
-    -   Inlining
-    -   Loop Optimization
-    -   Dead Code Elimination
-    -   Constant Folding
--   Other Common Tools:
-    -   make
-    -   gdb
-    -   strip
-    -   objdump
-    -   nm
-    -   ranlib
-
-Each of these micro stages contributes to transforming the high-level C source code into a runnable executable program.
-
-Here is a set of **coding standards** derived from the provided information, aligned with the requirements for ISO/IEC 9899:2024, POSIX.1-2024, and X/Open 800 compliance, and incorporating the principles of 5S methodology and Data-Oriented Programming (DOP):
-
----
-
-### **Coding Standards for EnvEng Web Application Development**
-
-#### **1. General Standards**
-
-1.1 **Compliance**
-
--   All code must adhere to the ISO/IEC 9899:2024 (C Standard).
--   Code must be compliant with POSIX.1-2024 and X/Open 800 for portability and interoperability.
-
-    1.2 **Portability**
-
--   Ensure the codebase is compatible across multiple platforms, architectures, and operating systems.
--   Avoid platform-specific features unless necessary, and encapsulate such dependencies to enable easy replacement.
-
-    1.3 **Self-Containment**
-
--   All modules should be self-contained, with no reliance on external configurations or environment-specific details unless explicitly defined.
-
----
-
-#### **2. File and Repository Structure (Aligned with 5S: Set in Order)**
-
-2.1 **Directory Structure**
-
--   Use a logical and consistent directory structure, e.g.,:
-
-    ```
-    src/         # Source code files
-    include/     # Header files
-    tests/       # Unit and integration tests
-    docs/        # Documentation
-    build/       # Build outputs
-    scripts/     # Utility scripts
-    ```
-
-    2.2 **File Naming**
-
--   Use descriptive, snake_case naming for files (e.g., `data_manager.c`, `user_auth.h`).
-
-    2.3 **Version Control**
-
--   All source code must be tracked using a version control system (e.g., Git).
--   Commit messages should follow a standardized format:
-    ```
-    [Type] Short Description (e.g., [Fix] Resolved memory leak in data processing)
-    ```
-
----
-
-#### **3. Coding Practices (Aligned with DOP and 5S Principles)**
-
-3.1 **Clarity and Maintainability**
-
--   Separate data and logic by defining clear data structures in header files and encapsulating logic in C files.
--   Write modular and reusable functions.
-
-    3.2 **Coding Style**
-
--   Follow a consistent style for readability:
-
-    -   Indentation: 4 spaces (no tabs).
-    -   Brace style: Place braces on a new line.
-        ```c
-        if (condition)
-        {
-            // Code block
-        }
-        ```
-    -   Naming:
-        -   Variables: `snake_case` (e.g., `user_id`).
-        -   Functions: `camelCase` (e.g., `processData`).
-        -   Constants: `UPPER_CASE` (e.g., `MAX_BUFFER_SIZE`).
-
-    3.3 **Data Handling**
-
--   Use immutable data structures whenever possible.
--   Avoid global variables; instead, use well-defined interfaces.
--   Centralize configuration and constants for reuse (e.g., `config.h`).
-
-    3.4 **Error Handling**
-
--   Use POSIX-compliant error codes for standardization.
--   Always check the return value of system calls and library functions. Example:
-
+- Always check return values of system calls and library functions. Example:
     ```c
     if ((fd = open(filename, O_RDONLY)) < 0)
     {
@@ -675,22 +170,60 @@ Here is a set of **coding standards** derived from the provided information, ali
     }
     ```
 
-    3.5 **Memory Management**
+### Memory Management
 
--   Allocate and free memory explicitly; avoid memory leaks.
--   Use tools like `valgrind` to identify leaks during development.
+- Avoid memory leaks. Always pair memory allocation (`malloc`) with deallocation (`free`).
+- Use tools like `valgrind` for debugging memory issues.
 
-    3.6 **Thread Safety**
+### Performance
 
--   Design code to be thread-safe using POSIX threading primitives (e.g., `pthread_mutex_t`).
+- Optimize for CPU cache efficiency with data structures (e.g., prefer arrays over linked lists for sequential access).
+
+### Thread Safety
+
+- Ensure thread safety using POSIX threading primitives (e.g., `pthread_mutex_t`).
 
 ---
 
-#### **4. Documentation (Aligned with 5S: Standardize)**
+## **4. Style and Formatting**
 
-4.1 **Code Comments**
+### Indentation
 
--   Use block comments for file headers and function documentation:
+- Use spaces (not tabs) for indentation, with an indent size of 4.
+- For Makefiles and Makefile.am files, use tabs for indentation with an indent size of 4.
+
+### Brace Style
+
+- Use the Allman brace style:
+    ```c
+    if (condition)
+    {
+        // Code block
+    }
+    ```
+
+### Quotes
+
+- Prefer double quotes for strings in C and header files.
+
+### Additional Formatting Rules
+
+- Align consecutive assignments and declarations.
+- Allow short functions on a single line (inline only).
+- Break before braces for functions, control statements, namespaces, classes, else, catch, while, structs, enums, and unions.
+- Space before parentheses in control statements.
+- No spaces in container literals.
+- Sort includes and preserve include blocks.
+
+### Line Length
+
+- Limit lines to 80 characters for readability.
+
+---
+
+## **5. Documentation**
+
+- Document all files and functions using block comments:
 
     ```c
     /**
@@ -705,217 +238,537 @@ Here is a set of **coding standards** derived from the provided information, ali
      */
     ```
 
-    4.2 **Standardized Templates**
-
--   Create templates for:
-
-    -   Function definitions
-    -   File headers
-    -   Commit messages
-
-    4.3 **External Documentation**
-
--   Maintain documentation for APIs, data structures, and workflows using Markdown in the `docs/` directory.
+- Use Markdown for external documentation and place it in the `docs/` directory.
 
 ---
 
-#### **5. Testing Standards**
+## **6. Testing**
 
-5.1 **Test-Driven Development (TDD)**
-
--   Write tests for every feature and bug fix.
-
-    5.2 **Unit Testing**
-
--   Use a framework like `Unity` or `CMock` for unit tests.
--   All tests must reside in the `tests/` directory and follow the naming convention `test_<module_name>.c`.
-
-    5.3 **Automated Testing**
-
--   Implement CI/CD pipelines to automate testing and code quality checks.
+- Write unit tests for all functions and features.
+- Follow the naming convention `test_<module_name>.c` for test files.
+- Use a unit testing framework like `Unity` or `CMock`.
 
 ---
 
-#### **6. Performance Optimization (Aligned with DOP)**
+## **7. Tools and Practices**
 
-6.1 **Efficient Data Structures**
-
--   Use data structures optimized for cache efficiency (e.g., arrays over linked lists when sequential access is frequent).
-
-    6.2 **Profiling**
-
--   Profile code regularly using tools like `gprof` or `perf`.
-
----
-
-#### **7. 5S Maintenance and Sustainability**
-
-7.1 **Regular Reviews**
-
--   Conduct code reviews bi-weekly to ensure adherence to standards.
-
-    7.2 **Continuous Training**
-
--   Train team members on 5S, DOP, and coding standards.
-
-    7.3 **Audits**
-
--   Schedule periodic audits to ensure the workspace and codebase remain clean and organized.
+- Use Git for version control, and ensure commit messages follow the format:
+    ```
+    [Type] Short description (e.g., [Fix] Resolve memory leak in data processing)
+    ```
+- Use CI/CD pipelines to automate testing and code quality checks.
+- Regularly review and refactor code for maintainability and performance.
 
 ---
 
-By adhering to these standards, the team will maintain clarity, ensure high performance, and achieve compliance with industry and project-specific requirements.
+## **8. Copilot Usage Guidelines**
 
-# EnvEng WebApp Development
-
-Welcome to the **EnvEng WebApp Development** project! This repository contains the code and documentation for building a web application using **5S methodology** for project management and **Data-Oriented Programming (DOP)** for development.
-
-## Table of Contents
-
-1. [Project Overview](#project-overview)
-2. [Features](#features)
-3. [Methodologies](#methodologies)
-    - [5S Implementation](#5s-implementation)
-    - [Data-Oriented Programming (DOP)](#data-oriented-programming-dop)
-4. [Setup Instructions](#setup-instructions)
-5. [Git Workflow](#git-workflow)
-    - [Branching Strategy](#branching-strategy)
-    - [Commit Guidelines](#commit-guidelines)
-6. [CI/CD Workflow](#cicd-workflow)
-7. [Contributing](#contributing)
-8. [License](#license)
+- When generating code, focus on providing code snippets that can be copied into existing files rather than rewriting entire files.
+- Ensure that the generated snippets adhere to the project's coding standards and practices as outlined in this document.
+- Provide context-specific suggestions that integrate seamlessly with the existing codebase.
 
 ---
 
-## Project Overview
+## **9. Workflow for Using `configure.ac` and Modular Makefiles**
 
-The **EnvEng WebApp** aims to deliver a robust web application tailored for environmental engineering needs. Our goals include:
+### **Considerations for `configure.ac`**
 
--   Building a scalable, maintainable codebase.
--   Ensuring clarity through **Data-Oriented Programming (DOP)** principles.
--   Maintaining a clean and organized development process using **5S methodology**.
+1. **Environment Checks**:
+   - **Purpose**: Ensure the build environment meets all necessary requirements.
+   - **Best Practices**:
+     - Use `AC_INIT` to initialize the package name, version, and bug report address.
+     - Use `AC_PROG_CC` to check for a C compiler.
+     - Use `AC_CHECK_LIB` and `AC_CHECK_HEADER` to check for required libraries and headers.
+     - Use `AC_CONFIG_FILES` to specify the Makefiles to generate.
 
-Key objectives:
+2. **Compiler and Linker Flags**:
+   - **Purpose**: Enforce standards and optimize builds.
+   - **Best Practices**:
+     - Use `CFLAGS` and `LDFLAGS` to set compiler and linker flags.
+     - Ensure flags like `-std=c23`, `-pedantic`, and `-Wall` are included for ISO C compliance.
+     - Use `AC_SUBST` to substitute these flags into the Makefiles.
 
--   Implement user authentication and core features.
--   Optimize data handling and performance.
--   Adhere to best practices for project management and development.
+3. **Conditional Features**:
+   - **Purpose**: Enable or disable features based on the environment.
+   - **Best Practices**:
+     - Use `AC_ARG_ENABLE` and `AC_ARG_WITH` to handle optional features.
+     - Use `AM_CONDITIONAL` to conditionally include Makefile rules.
 
----
+4. **POSIX Compliance**:
+   - **Purpose**: Ensure the build process adheres to POSIX standards.
+   - **Best Practices**:
+     - Use the `.POSIX` special target in Makefiles.
+     - Avoid non-POSIX commands and features.
 
-## Features
+### **Considerations for Modular Makefiles**
 
--   User authentication and authorization.
--   Dashboard for managing environmental data.
--   Integration with third-party APIs for real-time updates.
--   Performance-optimized, clean, and maintainable codebase.
+1. **Modularity**:
+   - **Purpose**: Simplify maintenance and enhance readability.
+   - **Best Practices**:
+     - Split large Makefiles into smaller, more manageable files.
+     - Use `include` directives to incorporate common rules and variables.
 
----
+2. **Dependency Management**:
+   - **Purpose**: Ensure correct build order and avoid redundant builds.
+   - **Best Practices**:
+     - Use `gcc -M` or `makedepend` to generate dependency files.
+     - Include these dependency files in the Makefile to automate dependency tracking.
 
-## Methodologies
+3. **Variable Usage**:
+   - **Purpose**: Simplify updates and reduce errors.
+   - **Best Practices**:
+     - Define variables for common paths, flags, and commands.
+     - Use these variables consistently throughout the Makefiles.
 
-### 5S Implementation
+4. **Phony Targets**:
+   - **Purpose**: Avoid conflicts with actual file names.
+   - **Best Practices**:
+     - Use `.PHONY` to declare phony targets like `clean`, `all`, and `install`.
 
--   **Sort**: Identify and eliminate unnecessary code and resources.
--   **Set in Order**: Organize files and directories for easy access and maintainability.
--   **Shine**: Maintain code quality with regular reviews and automated checks.
--   **Standardize**: Follow coding standards and create reusable templates.
--   **Sustain**: Regular training and audits to ensure long-term adherence.
+5. **Platform-Specific Rules**:
+   - **Purpose**: Ensure compatibility across different operating systems.
+   - **Best Practices**:
+     - Use conditional statements to handle platform-specific rules.
+     - Define platform-specific variables and rules in separate Makefiles if necessary.
 
-### Data-Oriented Programming (DOP)
+### **Sequential Checklist for Using `configure.ac` and Modular Makefiles**
 
--   **Data Separation**: Logical separation of data and application logic.
--   **Efficient Data Handling**: Use optimized data structures for high performance.
--   **Immutability**: Implement immutable data practices to enhance consistency.
+1. **Define Environment Checks in `configure.ac`**:
+   - Check for compilers, libraries, and tools.
+   - Ensure compliance with ISO C and POSIX standards.
 
----
+2. **Generate `configure` Script**:
+   - Use `autoconf` to process `configure.ac`.
 
-## Setup Instructions
+3. **Create Modular Makefiles**:
+   - Split large Makefiles into smaller, modular files.
+   - Use `include` directives to incorporate common rules and variables.
 
-1. Clone the repository:
+4. **Define Build Rules and Dependencies**:
+   - Use `Makefile.am` to define build rules and dependencies.
+   - Ensure all dependencies are clearly defined to avoid incorrect build orders.
 
+5. **Generate `Makefile.in`**:
+   - Use `automake` to process `Makefile.am`.
+
+6. **Run `configure` Script**:
+   - Generate the final `Makefile` tailored to the environment.
+
+7. **Build the Project**:
+   - Use `make` to compile and link the project.
+
+### **Combined Workflow for Your Project**
+
+### **1. Development and Source Preparation**
+
+Tools used during the early stages to write, structure, and analyze the source code:
+
+- **`bison` + `flex`**: Generate parsers (`.c` files) and lexers (`.l` files).
+  - **Example**: Converts `parser.y` → `parser.c` and `lexer.l` → `parser.c`.
+- **`gnu-complexity`**: Analyze maintainability by calculating metrics like cyclomatic complexity.
+  - **Example**: Ensure `src/*.c` has manageable complexity.
+- **`gawk`**: Process source files, metadata, or logs for automation.
+  - **Example**: Generate dynamic Makefile content or filter analysis output.
+- **`autoindent`**: Automatically format C code to adhere to style guidelines.
+  - **Example**: Format `src/*.c` for readability and consistency.
+  - **Command**: `autoindent -gnu src/*.c`
+- **`cppcheck`**: Perform static code analysis to identify potential issues.
+  - **Command**: `cppcheck src/*.c`
+- **`clang-format`**: Automatically format C code according to style guidelines.
+  - **Command**: `clang-format -i src/*.c`
+- **`clang-tidy`**: Perform static analysis and linting on C code.
+  - **Command**: `clang-tidy src/*.c --`
+
+### **2. Build System Initialization**
+
+Tools that create and configure the build system, defining the project structure:
+
+- **`autoconf` + `automake` + `libtool` + `m4`**:
+  - **`autoconf`**: Generates the `configure` script.
+  - **`automake`**: Creates `Makefile.in` from `Makefile.am`.
+  - **`libtool`**: Ensures portability of libraries and static linking.
+  - **`m4`**: Processes macros for `configure.ac`.
+  - **Command**: `autoreconf -i`
+
+### **3. Dependency and Build Configuration**
+
+Tools that resolve dependencies and system requirements before building:
+
+- **`pkgconf`**: Checks and resolves library dependencies.
+  - **Command**: `pkgconf --cflags --libs glib-2.0`
+- **`clibs`**: Downloads and manages external C libraries.
+  - **Command**: `clib install kgabis/parson`
+- **`ccache`**: Caches intermediate build artifacts to reduce build times.
+  - **Command**: `ccache gcc -o myprogram myprogram.c`
+
+### **4. Compilation and Linking**
+
+Core tools that transform source code into executables and libraries:
+
+- **`gcc` + `binutils` + `glibc` + `mold`**:
+  - **`gcc`**: Compiles source into object files.
+  - **`binutils`**: Links object files into binaries/libraries.
+  - **`glibc`**: Provides runtime support for compiled binaries.
+  - **`mold`**: A high-speed linker.
+  - **Command**: `gcc -o build/myprogram src/*.c -fuse-ld=mold -static -L/path/to/glibc -I/path/to/glibc/include`
+- **`coreutils`**: Provides essential utilities (`rm`, `mkdir`, etc.) during build and install.
+  - **Commands**:
     ```bash
-    git clone https://github.com/your-org/enveng-webapp.git
-    cd enveng-webapp
+    rm -rf build/
+    mkdir build
+    cp src/*.c build/
+    mv build/myprogram bin/
     ```
 
-2. Install dependencies:
+### **5. Testing and Profiling**
 
+Tools for debugging, testing, and optimizing binaries:
+
+- **`gdb` + `ddd`**: Debug binaries to diagnose issues.
+  - **Commands**:
     ```bash
-    npm install
+    gdb bin/myprogram
+    ```
+- **`valgrind`**: Detect memory leaks and inefficiencies.
+  - **Command**: `valgrind --leak-check=full --show-leak-kinds=all bin/web-app`
+- **`gnu-perf`**: Measure performance metrics like CPU usage and cache bottlenecks.
+  - **Command**: `perf stat bin/web-app`
+
+### **6. Code Navigation and Analysis**
+
+Enhance understanding and navigation of the codebase:
+
+- **`global`**: Navigate the source code using tags.
+  - **Commands**:
+    ```bash
+    global -u
+    global -x main
+    ```
+- **`cflow`**: Visualize function dependencies using call graphs.
+  - **Command**: `cflow src/main.c`
+- **`cscope`**: Generate an index for navigating and searching through the C source code.
+  - **Command**: `cscope -b -R -s src`
+- **`splint`**: Perform static code analysis to identify potential issues in the C source code.
+  - **Command**: `splint src/*.c`
+
+### **7. Documentation**
+
+- **`texinfo`**: Generate documentation in formats like HTML, PDF, and Info.
+  - **Commands**:
+    ```bash
+    makeinfo --html --no-split -o docs/manual.html docs/manual.texi
+    makeinfo --pdf -o docs/manual.pdf docs/manual.texi
+    ```
+- **`gtk-doc`**: Generate API documentation.
+  - **Commands**:
+    ```bash
+    gtkdocize
+    make -C docs
     ```
 
-3. Run the development server:
+### **8. Packaging and Distribution**
 
-    ```bash
-    npm start
-    ```
+Create a portable, self-contained release of the project:
 
-4. Build the project for production:
+- **`xz`**: Compress the final distribution archive into `.tar.xz`.
+  - **Command**: `tar -cJf dist/myproject-1.0.tar.xz myproject-1.0/`
+- **`recutils`**: Store and manage metadata (e.g., dependency records).
+  - **Command**: `recfix -r metadata.rec`
+- **`stow`**: Manage installation with symlinks for clean organization.
+  - **Command**: `stow -t /usr/local -d stow_dir myproject`
+
+### **9. Profiling and Coverage Analysis**
+
+#### Profiling with gprof
+
+1. Compile the project with profiling enabled:
     ```bash
-    npm run build
+    make clean
+    ./configure CFLAGS="-pg" LDFLAGS="-pg"
+    make
     ```
+2. Run the application to generate profiling data:
+    ```bash
+    bin/web-app
+    ```
+3. Generate the profiling report:
+    ```bash
+    gprof bin/web-app gmon.out > gprof.out
+    ```
+4. View the profiling report in `gprof.out`.
+
+#### Coverage Analysis with gcov
+
+1. Compile the project with coverage enabled:
+    ```bash
+    make clean
+    ./configure CFLAGS="-fprofile-arcs -ftest-coverage" LDFLAGS="-lgcov"
+    make
+    ```
+2. Run the application to generate coverage data:
+    ```bash
+    bin/web-app
+    ```
+3. Generate the coverage report:
+    ```bash
+    make coverage
+    ```
+4. View the coverage report in the generated `.gcov` files.
+
+### **10. Build and Configuration Artifacts Management**
+
+- **Build Artifacts**: All build and configuration along with their artifacts take place in the `build/` directory.
+- **Dependency Files**: `.d` files for dependencies are managed in the `deps/` directory.
+- **Object Files**: `.o` files for objects are managed in the `objects/` directory.
+- **Binary Files**: Binary files are stored in the `bin/` directory.
+- **Distribution Archives**: The final `.tar.xz` file is placed in the `dist/` directory.
+- **Documentation**: All documentation is stored in the `docs/` directory.
+- **Logging**: All logging is managed in the `logs/` directory.
+- **M4 Files**: M4 files are handled in the `m4/` directory.
+- **Configuration Files**: All configuration files are stored in the `etc/` directory.
+- **Libraries**: Any libraries, including `.a` static files, go in the `lib/` directory.
+- **Source Files**: Source files (`.c`) are located in the `src/` directory.
+- **Header Files**: Header files (`.h`) are located in the `include/` directory.
+- **PO Directory**: The use of the `po/` directory is ignored.
+- **Temporary and Caching Artifacts**: All temporary and caching artifacts to assist any folder and tool of the building stage can use the `tmp/` directory.
+
+- **Final Executable**: The final executable is completely static and self-contained.
+
+### **Final Full Process Order**
+
+1. **Development Tools**: `bison`, `flex`, `gnu-complexity`, `gawk`, `autoindent`, `cppcheck`, `clang-format`, `clang-tidy`.
+2. **Build System Setup**: `autoconf`, `automake`, `libtool`, `m4`.
+3. **Dependency Configuration**: `pkgconf`, `clibs`, `ccache`.
+4. **Compilation**: `gcc`, `binutils`, `glibc`, `mold`, `coreutils`.
+5. **Testing and Debugging**: `gdb`, `ddd`, `valgrind`, `gnu-perf`.
+6. **Navigation**: `global`, `cflow`, `cscope`, `splint`.
+7. **Documentation**: `texinfo`, `gtk-doc`.
+8. **Packaging**: `xz`, `recutils`, `stow`.
+9. **Profiling and Coverage Analysis**: `gprof`, `gcov`.
+
+### **Directory Structure**
+
+- **Build Artifacts**: `build/`
+- **Dependencies**: `deps/`
+- **Object Files**: `objects/`
+- **Binary Files**: `bin/`
+- **Distribution Archives**: `dist/`
+- **Documentation**: `docs/`
+- **Logging**: `logs/`
+- **M4 Files**: `m4/`
+- **Configuration Files**: `etc/`
+- **Libraries**: `lib/`
+- **Source Files**: `src/`
+- **Header Files**: `include/`
+- **Temporary and Caching Artifacts**: `tmp/`
+
+This setup ensures that all build and configuration artifacts are organized as specified, with a completely static and self-contained final executable.
+
 
 ---
 
-## Git Workflow
+### Steps to Build:
+1. **Initialize Build Environment**:
+```bash
+gtags
+libtoolize
+aclocal
+autoheader
+autoconf
+automake --add-missing
+autoreconf -i
+```
 
-### Branching Strategy
+2. **Run Configuration Script**:
+```bash
+./configure
+```
 
--   **Main**: Stable, production-ready code.
--   **Develop**: Integration branch for new features and fixes.
--   **Feature Branches**: `feature/feature-name`
--   **Bugfix Branches**: `bugfix/bug-description`
+3. Generate dependencies:
+```bash
+./deps/generate_deps.sh
+```
 
-### Commit Guidelines
+4. **Compile**:
+```bash
+make
+```
 
--   Write atomic commits focusing on one change.
--   Use descriptive commit messages.
--   Example:
-    ```bash
-    git commit -m "Add user authentication endpoint"
-    ```
+5. **Run Tests**:
+```bash
+make check
+```
 
----
+6. **Package**:
+```bash
+make dist
+```
 
-## CI/CD Workflow
+7. **Install**:
+```bash
+make install
+```
 
-### Continuous Integration (CI)
-
--   Automated builds and tests for every push to `develop`.
--   Static code analysis to ensure quality.
-
-### Continuous Delivery (CD)
-
--   Deploy to staging for integration tests.
--   Require manual approval for production deployment.
-
-### Pipeline Example
-
-Refer to the `.github/workflows/ci-cd.yml` file for our complete CI/CD pipeline.
-
----
-
-## Contributing
-
-We welcome contributions to improve the EnvEng WebApp. Please follow these steps:
-
-1. Fork the repository and clone it locally.
-2. Create a new feature or bugfix branch.
-3. Make your changes and commit them with a descriptive message.
-4. Submit a pull request to the `develop` branch.
-
-Refer to the [CONTRIBUTING.md](CONTRIBUTING.md) file for more details.
+8. **Clean**:
+```bash
+make clean
+```
 
 ---
 
-## License
+If you encounter any issues, they might stem from missing dependencies or toolchain mismatches, which can be resolved by checking the logs or ensuring all required tools are installed (`bison`, `flex`, `autotools`, `gcc`, etc.).
 
-This project is licensed under the [AGPLv3](LICENSE). See the `LICENSE` file for details.
+---
 
-## Build Instructions
+# Compile source files
+gcc -c src/main.c -o objects/main.o
+gcc -c src/config_loader.c -o objects/config_loader.o
+gcc -c src/env_loader.c -o objects/env_loader.o
+gcc -c src/error_handler.c -o objects/error_handler.o
+gcc -c src/garbage_collector.c -o objects/garbage_collector.o
+gcc -c src/hello.c -o objects/hello.o
+gcc -c src/logger.c -o objects/logger.o
+gcc -c src/validator.c -o objects/validator.o
 
-To configure the project with `mold` as the linker, run the following command:
+# Link object files
+gcc objects/main.o objects/config_loader.o objects/env_loader.o objects/error_handler.o objects/garbage_collector.o objects/hello.o objects/logger.o objects/validator.o -o bin/web-app
 
-```sh
-./configure --disable-gettext --disable-dependency-tracking LDFLAGS="-fuse-ld=mold"
+# Compile test files
+gcc -c tests/test_main.c -o objects/test_main.o
+gcc -c tests/test_config_loader.c -o objects/test_config_loader.o
+gcc -c tests/test_env_loader.c -o objects/test_env_loader.o
+gcc -c tests/test_error_handler.c -o objects/test_error_handler.o
+gcc -c tests/test_garbage_collector.c -o objects/test_garbage_collector.o
+gcc -c tests/test_hello.c -o objects/test_hello.o
+gcc -c tests/test_logger.c -o objects/test_logger.o
+gcc -c tests/test_validator.c -o objects/test_validator.o
+
+# Link test object files
+gcc objects/test_main.o objects/test_config_loader.o objects/test_env_loader.o objects/test_error_handler.o objects/test_garbage_collector.o objects/test_hello.o objects/test_logger.o objects/test_validator.o -o bin/test-web-app
+
+# Run tests
+bin/test-web-app
+
+# Clean up
+rm objects/*.o
+
+---
+
+```bash
+# Development and Source Preparation
+
+# Generate Parsers and Lexers
+bison -d [parser.y](http://_vscodecontentref_/0) -o src/parser.c
+flex -o src/lexer.c [lexer.l](http://_vscodecontentref_/1)
+
+# Analyze Maintainability
+gnu-complexity src/*.c
+
+# Process Source Files
+gawk -f [process_files.gawk](http://_vscodecontentref_/2) src/*.c
+
+# Format C Code
+autoindent -gnu src/*.c
+clang-format -i src/*.c
+
+# Static Code Analysis
+cppcheck src/*.c
+clang-tidy src/*.c --
+
+# Build System Initialization
+
+# Generate Configuration Files
+# Manually create config.h and other necessary configuration files.
+
+# Dependency and Build Configuration
+
+# Check and Resolve Library Dependencies
+pkgconf --cflags --libs glib-2.0
+clib install kgabis/parson
+
+# Cache Intermediate Build Artifacts
+ccache gcc -o myprogram myprogram.c
+
+# Compilation and Linking
+
+# Compile Source Files
+gcc -c [main.c](http://_vscodecontentref_/3) -o objects/main.o
+gcc -c [config_loader.c](http://_vscodecontentref_/4) -o objects/config_loader.o
+gcc -c [env_loader.c](http://_vscodecontentref_/5) -o objects/env_loader.o
+gcc -c [error_handler.c](http://_vscodecontentref_/6) -o objects/error_handler.o
+gcc -c [garbage_collector.c](http://_vscodecontentref_/7) -o objects/garbage_collector.o
+gcc -c [hello.c](http://_vscodecontentref_/8) -o objects/hello.o
+gcc -c [logger.c](http://_vscodecontentref_/9) -o objects/logger.o
+gcc -c [validator.c](http://_vscodecontentref_/10) -o objects/validator.o
+gcc -c src/parser.c -o objects/parser.o
+gcc -c src/lexer.c -o objects/lexer.o
+
+# Link Object Files
+gcc objects/main.o objects/config_loader.o objects/env_loader.o objects/error_handler.o objects/garbage_collector.o objects/hello.o objects/logger.o objects/validator.o objects/parser.o objects/lexer.o -o bin/web-app -fuse-ld=mold -static -L/path/to/glibc -I/path/to/glibc/include
+
+# Testing and Profiling
+
+# Debug Binaries
+gdb bin/web-app
+
+# Detect Memory Leaks
+valgrind --leak-check=full --show-leak-kinds=all bin/web-app
+
+# Measure Performance Metrics
+perf stat bin/web-app
+
+# Code Navigation and Analysis
+
+# Navigate Source Code
+global -u
+global -x main
+
+# Visualize Function Dependencies
+cflow [main.c](http://_vscodecontentref_/11)
+
+# Generate Index for Navigation
+cscope -b -R -s src
+
+# Static Code Analysis
+splint src/*.c
+
+# Documentation
+
+# Generate Documentation
+makeinfo --html --no-split -o docs/manual.html docs/manual.texi
+makeinfo --pdf -o docs/manual.pdf docs/manual.texi
+gtkdocize
+make -C docs
+
+# Packaging and Distribution
+
+# Compress Final Distribution Archive
+tar -cJf dist/myproject-1.0.tar.xz myproject-1.0/
+
+# Manage Metadata
+recfix -r metadata.rec
+
+# Manage Installation with Symlinks
+stow -t /usr/local -d stow_dir myproject
+
+# Profiling and Coverage Analysis
+
+# Profiling with gprof
+gcc -pg -o bin/web-app src/*.c
+bin/web-app
+gprof bin/web-app gmon.out > gprof.out
+
+# Coverage Analysis with gcov
+gcc -fprofile-arcs -ftest-coverage -o bin/web-app src/*.c
+bin/web-app
+gcov src/*.c
+
+# Build and Configuration Artifacts Management
+
+# Clean Up
+rm -rf build/
+mkdir build
+cp src/*.c build/
+mv build/myprogram bin/
+rm objects/*.o
+```

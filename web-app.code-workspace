@@ -217,7 +217,7 @@
             "*.copilotmd": "vscode.markdown.preview.editor"
         },
         "workbench.preferredHighContrastColorTheme": "Default Dark Modern",
-        "workbench.colorTheme": "Default Dark+",
+        "workbench.colorTheme": "GitHub Dark Default",
         "diffEditor.ignoreTrimWhitespace": false,
         "search.exclude": {
             "**/node_modules": true,
@@ -387,7 +387,7 @@
         "markdown.extension.orderedList.marker": "one",
         "markdown.extension.italic.indicator": "*",
         "markdown.extension.list.indentationSize": "inherit",
-        "markdown.extension.print.onFileSave": true,
+        "markdown.extension.print.onFileSave": false,
         "markdownlint.config": {
             "default": true,
             "MD013": false, // Disable line length rule for Markdown
@@ -419,7 +419,24 @@
 
         "linthtml.enable": true,
         "linthtml.configFile": ".linthtmlrc",
-        "linthtml.packageManager": "npm"
+        "linthtml.packageManager": "npm",
+        "githubPullRequests.assignCreated": "${user}",
+        "githubPullRequests.defaultCreateOption": "createAutoMerge",
+        "githubPullRequests.defaultMergeMethod": "squash",
+        "githubPullRequests.experimental.chat": true,
+        "githubPullRequests.experimental.notificationsView": true,
+        "githubPullRequests.experimental.useQuickChat": true,
+        "githubPullRequests.notifications": "pullRequests",
+        "githubPullRequests.pullBranch": "always",
+        "githubPullRequests.pullPullRequestBranchBeforeCheckout": "pullAndUpdateBase",
+        "githubPullRequests.pullRequestDescription": "Copilot",
+        "githubPullRequests.pushBranch": "always",
+        "githubPullRequests.quickDiff": true,
+        "githubPullRequests.showPullRequestNumberInTree": true,
+        "githubPullRequests.terminalLinksHandler": "vscode",
+        "remoteHub.commitDirectlyWarning": "off",
+        "remoteHub.gitProtocol": "ssh",
+        "remoteHub.richNavigation.enabled": true,
     },
     "extensions": {
         "recommendations": [

@@ -162,7 +162,7 @@
     "--enable=all"      // Enable all checks
   ],
   "markdown.extension.list.indentationSize": "inherit",
-  "markdown.extension.print.onFileSave": true,
+  "markdown.extension.print.onFileSave": false,
   "markdownlint.config": {
     "default": true,
     "MD013": false, // Disable line length rule for Markdown
@@ -173,5 +173,5 @@
   },
   "prettier.configPath": ".prettierrc",
   "linthtml.packageManager": "npm",
-  "C_Cpp.default.compilerPath": "/opt/homebrew/Cellar/gcc/14.2.0_1/bin/gcc-14"
+  "C_Cpp.default.compilerPath": "/opt/homebrew/Cellar/gcc/14.2.0_1/bin/gcc-14",
 }
