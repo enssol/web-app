@@ -1,8 +1,0 @@
-tests/test_validator.c
-tests/test_logger.c
-tests/test_hello.c
-tests/test_garbage_collector.c
-tests/test_error_handler.c
-tests/test_env_loader.c
-tests/test_config_loader.c
-tests/test_main.c

@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
 
-#include "../include/config.h"
 #include "../include/garbage_collector.h"
 
-void init_garbage_collector() {
+// garbage_collector.c
+void init_garbage_collector(void) {
     // Initialize garbage collector
 }
 
-void cleanup_garbage_collector() {
+void cleanup_garbage_collector(void) {
     // Cleanup garbage collector
 }

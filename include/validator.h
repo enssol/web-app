@@ -8,6 +8,11 @@
 
 #include "config_loader.h" // Include the header where config_t is defined
 
+typedef struct {
+    char *key;
+    char *value;
+} config_entry_t; // Renamed to avoid conflict with config_t
+
 int validate_config(config_t *config, const char *value);
 int validate_integer(const char *value);
 int validate_double(const char *value);

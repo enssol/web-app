@@ -256,7 +256,7 @@
                 }
             ]
         },
-        "terminal.integrated.defaultProfile.osx": "bash",
+        "terminal.integrated.defaultProfile.osx": "yash",
         "github.gitProtocol": "ssh",
         "extensions.ignoreRecommendations": true,
         "github.copilot.chat.inlineChatCompletionTrigger.enabled": true,
@@ -319,7 +319,7 @@
         },
         "extensions.closeExtensionDetailsOnViewChange": true,
         "terminal.integrated.cursorBlinking": true,
-        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.defaultProfile.linux": "yash",
         "terminal.integrated.detectLocale": "on",
         "terminal.integrated.enableMultiLinePasteWarning": "never",
         "terminal.integrated.environmentChangesIndicator": "off",
@@ -369,7 +369,7 @@
                 "binaryPath": "./build/release/app"
             }
         ],
-        "makefile.makePath": "gmake",
+        "makefile.makePath": "make",
         "makefile.makefilePath": "./Makefile",
         "makefile.buildLog": "./logs/build.log",
         "shellcheck.enable": true,
@@ -445,7 +445,20 @@
           "timonwong.shellcheck",
           "davidanson.vscode-markdownlint",
           "yzhang.markdown-all-in-one",
-          "kamikillerto.vscode-linthtml"
+        "github.vscode-pull-request-github",
+        "github.vscode-github-actions",
+        "your-publisher-name.recfile-syntax",
+        "qiumingge.cpp-check-lint",
+        "cs128.cs128-clang-tidy",
+        "editorconfig.editorconfig",
+        "github.copilot",
+        "github.copilot-chat",
+        "github.remotehub",
+        "github.github-vscode-theme",
+        "ymotongpoo.licenser",
+        "esbenp.prettier-vscode",
+        "ms-vscode.remote-repositories",
+        "snyk-security.snyk-vulnerability-scanner"
         ]
     }
 }

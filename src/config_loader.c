@@ -1,9 +1,8 @@
 /**
  * Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
- * SPDX-License-Identifier: 	AGPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-#include "../include/config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,7 +22,7 @@ int load_ini_config(const char *filename) {
         char *key = strtok(line, "=");
         char *value = strtok(NULL, "\n");
         if (key && value) {
-            if (validate_config(key, value) != 0) {
+            if (validate_string(value) != 0) {
                 handle_error("Invalid INI config value");
                 fclose(file);
                 return -1;
@@ -47,7 +46,7 @@ int load_conf_config(const char *filename) {
         char *key = strtok(line, "=");
         char *value = strtok(NULL, "\n");
         if (key && value) {
-            if (validate_config(key, value) != 0) {
+            if (validate_string(value) != 0) {
                 handle_error("Invalid CONF config value");
                 fclose(file);
                 return -1;

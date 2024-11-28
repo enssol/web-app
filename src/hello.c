@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
 
-#include "../include/config.h"
 #include <stdio.h>
 #include "../include/hello.h"
 
-void print_hello() {
+// hello.c
+void print_hello(void) {
     printf("Hello, World!\n");
 }

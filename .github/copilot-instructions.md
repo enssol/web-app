@@ -3,7 +3,7 @@
 These instructions help align Copilot's suggestions with our project's requirements.
 
 ## General Guidelines
-- Adhere to ISO/IEC 9899:2018 (C Standard), POSIX.1-2024, and X/Open 800 compliance in all code suggestions.
+- Adhere to ISO/IEC 9899:2024 (C Standard), POSIX.1-2024, and X/Open 800 compliance in all code suggestions.
 - Ensure all code is portable, cross-platform, and cross-architecture. Avoid platform-specific features unless encapsulated for easy replacement.
 
 ## Code Structure
@@ -49,12 +49,11 @@ These instructions help align Copilot's suggestions with our project's requireme
 
 ## Documentation
 - Document all files and functions using block comments.
-- Use Markdown for external documentation and place it in the `docs/` directory.
+- Use Markdown for external documentation.
 
 ## Testing
 - Write unit tests for all functions and features.
 - Follow the naming convention `test_<module_name>.c` for test files.
-- Use a unit testing framework like `Unity` or `CMock`.
 
 ## Tools and Practices
 - Use Git for version control, and ensure commit messages follow the format: `[Type] Short description`.
@@ -72,92 +71,12 @@ These instructions help align Copilot's suggestions with our project's requireme
 
 ```
 .
-├── ABOUT-NLS
-├── AUTHORS
-├── COPYING
-├── ChangeLog
-├── INSTALL
-├── LICENSE
-├── Makefile.am
-├── NEWS
-├── README.html
-├── README.md
-├── bin
-│   └── Makefile.am
-├── build
-│   ├── Makefile.am
-├── clib.json
-├── common-rules.am
-├── configure.ac
-├── deps
-│   ├── Makefile.am
-│   └── generate_deps.sh
-├── dist
-│   └── Makefile.am
-├── docs
-│   └── Makefile.am
-├── etc
-│   ├── Makefile.am
-│   ├── config.conf
-│   ├── config.ini
-│   ├── gcc.spec
-│   ├── header_sources.txt
-│   ├── process_files.gawk
-│   ├── scan_list.txt
-│   ├── sources.txt
-│   └── test_sources.txt
-├── gtk-doc.make
-├── include
-│   ├── Makefile.am
-│   ├── config.h
-│   ├── config_loader.h
-│   ├── env_loader.h
-│   ├── error_handler.h
-│   ├── garbage_collector.h
-│   ├── hello.h
-│   ├── logger.h
-│   └── validator.h
-├── lib
-│   ├── Makefile.am
-│   └── unity.h
-├── logs
-│   └── Makefile.am
-├── m4
-│   └── Makefile.am
-├── objects
-│   └── Makefile.am
-├── package-lock.json
-├── package.json
-├── po
-│   ├── ChangeLog
-│   ├── LINGUAS
-│   ├── Makefile.am
-│   └── POTFILES.in
-├── src
-│   ├── Makefile.am
-│   ├── config_loader.c
-│   ├── env_loader.c
-│   ├── error_handler.c
-│   ├── garbage_collector.c
-│   ├── hello.c
-│   ├── lexer.l
-│   ├── logger.c
-│   ├── main.c
-│   ├── parser.y
-│   └── validator.c
-├── tests
-│   ├── Makefile.am
-│   ├── test_config_loader.c
-│   ├── test_env_loader.c
-│   ├── test_error_handler.c
-│   ├── test_garbage_collector.c
-│   ├── test_hello.c
-│   ├── test_logger.c
-│   ├── test_main.c
-│   └── test_validator.c
-├── tmp
-│   └── Makefile.am
-├── web-app.code-workspace
-└── xml
-    └── gtkdocentities.ent
+├── build/          # Build artifacts and temporary files.
+├── bin/            # Compiled binary executables.
+├── include/        # Header files.
+├── lib/            # Static libraries.
+├── src/            # Source files.
+├── tests/          # Unit tests.
+├── docs/           # Documentation (e.g., man pages).
+└── tmp/            # Temporary files.
 ```

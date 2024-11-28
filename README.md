@@ -1,145 +1,8 @@
-# EnvEng-WebApp-Development
-
-`gtags`
-`autoreconf -vfi`
-
-```bash
-./configure --disable-gettext --disable-dependency-tracking \
-  CFLAGS="-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" \
-  LDFLAGS="-B/opt/homebrew/bin"
-```
-
-`make`
-
-TODO: sort out GETTEXT and use autopoint for internalization
-
-# **Copilot Instructions for EnvEng Web Application Development**
-
-This document outlines coding standards and practices for the EnvEng Web Application development project. These instructions help align Copilot's suggestions with our project's requirements.
-
----
-
-## **1. General Guidelines**
+## General Guidelines**
 
 - Adhere to **ISO/IEC 9899:2024** (C Standard), **POSIX.1-2024**, and **X/Open 800** compliance in all code suggestions.
 - Ensure all code is portable, cross-platform, and cross-architecture. Avoid platform-specific features unless encapsulated for easy replacement.
 
----
-
-## **2. Code Structure**
-
-### File Organization
-
-- Maintain the following directory structure:
-
-```
-.
-├── ABOUT-NLS
-├── AUTHORS
-├── COPYING
-├── ChangeLog
-├── INSTALL
-├── LICENSE
-├── Makefile
-├── Makefile.am
-├── Makefile.in
-├── NEWS
-├── README.html
-├── README.md
-├── bin
-│   └── Makefile.am
-├── build
-│   ├── Makefile.am
-│   ├── build_script.sh
-│   ├── configurationCache.log
-│   ├── dryrun.log
-│   └── targets.log
-├── clib.json
-├── common-rules.am
-├── configure.ac
-├── configure~
-├── deps
-│   ├── Makefile.am
-│   └── generate_deps.sh
-├── dist
-│   └── Makefile.am
-├── docs
-│   ├── Makefile
-│   └── Makefile.am
-├── etc
-│   ├── Makefile
-│   ├── Makefile.am
-│   ├── config.conf
-│   ├── config.ini
-│   ├── gcc.spec
-│   ├── header_sources.txt
-│   ├── process_files.gawk
-│   ├── scan_list.txt
-│   ├── sources.txt
-│   └── test_sources.txt
-├── gtk-doc.make
-├── include
-│   ├── Makefile
-│   ├── Makefile.am
-│   ├── config.h
-│   ├── config_loader.h
-│   ├── env_loader.h
-│   ├── error_handler.h
-│   ├── garbage_collector.h
-│   ├── hello.h
-│   ├── logger.h
-│   └── validator.h
-├── intltool-extract.in
-├── intltool-merge.in
-├── intltool-update.in
-├── lib
-│   ├── Makefile.am
-│   └── unity.h
-├── libtool
-├── logs
-│   └── Makefile.am
-├── m4
-│   └── Makefile.am
-├── objects
-│   └── Makefile.am
-├── package-lock.json
-├── package.json
-├── po
-│   ├── ChangeLog
-│   ├── LINGUAS
-│   ├── Makefile.am
-│   └── POTFILES.in
-├── src
-│   ├── Makefile
-│   ├── Makefile.am
-│   ├── Makefile.in
-│   ├── config_loader.c
-│   ├── env_loader.c
-│   ├── error_handler.c
-│   ├── garbage_collector.c
-│   ├── hello.c
-│   ├── lexer.l
-│   ├── logger.c
-│   ├── main.c
-│   ├── parser.y
-│   └── validator.c
-├── stamp-h1
-├── tests
-│   ├── Makefile.am
-│   ├── test_config_loader.c
-│   ├── test_env_loader.c
-│   ├── test_error_handler.c
-│   ├── test_garbage_collector.c
-│   ├── test_hello.c
-│   ├── test_logger.c
-│   ├── test_main.c
-│   └── test_validator.c
-├── tmp
-│   └── Makefile.am
-├── web-app.code-workspace
-└── xml
-    └── gtkdocentities.ent
-```
 
 - Use **snake_case** for file names, e.g., `data_manager.c`, `user_auth.h`.
 
@@ -245,532 +108,258 @@ This document outlines coding standards and practices for the EnvEng Web Applica
 
 - Write unit tests for all functions and features.
 - Follow the naming convention `test_<module_name>.c` for test files.
-- Use a unit testing framework like `Unity` or `CMock`.
+
+
+To ensure **POSIX compliance** while integrating the **musl C library** and statically linking everything into your program, follow these instructions. musl is a lightweight, fast, and POSIX-compliant C standard library that can replace glibc for static linking.
 
 ---
 
-## **7. Tools and Practices**
+## **1. Prerequisites**
 
-- Use Git for version control, and ensure commit messages follow the format:
-    ```
-    [Type] Short description (e.g., [Fix] Resolve memory leak in data processing)
-    ```
-- Use CI/CD pipelines to automate testing and code quality checks.
-- Regularly review and refactor code for maintainability and performance.
+Install and ensure the availability of the following **POSIX-compliant tools** and libraries:
+
+- **Compiler**: `clang` (set to use musl as the C library)
+- **Build System**: `make`
+- **Linker**: `ld`
+- **Static Analysis**: `lint` (e.g., `splint`)
+- **Formatting**: `indent`
+- **Debugger**: `gdb`
+- **Profiling**: `gprof`
+- **Memory Debugging**: `valgrind`
+- **Documentation**: `man` or `groff`
+- **Packaging**: `tar`, `gzip`, or `xz`
+- **musl**: The musl C library
 
 ---
 
-## **8. Copilot Usage Guidelines**
+## **2. Installing musl**
 
-- When generating code, focus on providing code snippets that can be copied into existing files rather than rewriting entire files.
-- Ensure that the generated snippets adhere to the project's coding standards and practices as outlined in this document.
-- Provide context-specific suggestions that integrate seamlessly with the existing codebase.
+You will need to install **musl** on your system or download a prebuilt version. To build and use musl with `clang`, follow these steps:
 
----
+### **Install musl**
 
-## **9. Workflow for Using `configure.ac` and Modular Makefiles**
+You can either download a precompiled musl package or build it from source. Here's how to build musl from source:
 
-### **Considerations for `configure.ac`**
-
-1. **Environment Checks**:
-   - **Purpose**: Ensure the build environment meets all necessary requirements.
-   - **Best Practices**:
-     - Use `AC_INIT` to initialize the package name, version, and bug report address.
-     - Use `AC_PROG_CC` to check for a C compiler.
-     - Use `AC_CHECK_LIB` and `AC_CHECK_HEADER` to check for required libraries and headers.
-     - Use `AC_CONFIG_FILES` to specify the Makefiles to generate.
-
-2. **Compiler and Linker Flags**:
-   - **Purpose**: Enforce standards and optimize builds.
-   - **Best Practices**:
-     - Use `CFLAGS` and `LDFLAGS` to set compiler and linker flags.
-     - Ensure flags like `-std=c17`, `-pedantic`, and `-Wall` are included for ISO C compliance.
-     - Use `AC_SUBST` to substitute these flags into the Makefiles.
-
-3. **Conditional Features**:
-   - **Purpose**: Enable or disable features based on the environment.
-   - **Best Practices**:
-     - Use `AC_ARG_ENABLE` and `AC_ARG_WITH` to handle optional features.
-     - Use `AM_CONDITIONAL` to conditionally include Makefile rules.
-
-4. **POSIX Compliance**:
-   - **Purpose**: Ensure the build process adheres to POSIX standards.
-   - **Best Practices**:
-     - Use the `.POSIX` special target in Makefiles.
-     - Avoid non-POSIX commands and features.
-
-### **Considerations for Modular Makefiles**
-
-1. **Modularity**:
-   - **Purpose**: Simplify maintenance and enhance readability.
-   - **Best Practices**:
-     - Split large Makefiles into smaller, more manageable files.
-     - Use `include` directives to incorporate common rules and variables.
-
-2. **Dependency Management**:
-   - **Purpose**: Ensure correct build order and avoid redundant builds.
-   - **Best Practices**:
-     - Use `gcc -M` or `makedepend` to generate dependency files.
-     - Include these dependency files in the Makefile to automate dependency tracking.
-
-3. **Variable Usage**:
-   - **Purpose**: Simplify updates and reduce errors.
-   - **Best Practices**:
-     - Define variables for common paths, flags, and commands.
-     - Use these variables consistently throughout the Makefiles.
-
-4. **Phony Targets**:
-   - **Purpose**: Avoid conflicts with actual file names.
-   - **Best Practices**:
-     - Use `.PHONY` to declare phony targets like `clean`, `all`, and `install`.
-
-5. **Platform-Specific Rules**:
-   - **Purpose**: Ensure compatibility across different operating systems.
-   - **Best Practices**:
-     - Use conditional statements to handle platform-specific rules.
-     - Define platform-specific variables and rules in separate Makefiles if necessary.
-
-### **Sequential Checklist for Using `configure.ac` and Modular Makefiles**
-
-1. **Define Environment Checks in `configure.ac`**:
-   - Check for compilers, libraries, and tools.
-   - Ensure compliance with ISO C and POSIX standards.
-
-2. **Generate `configure` Script**:
-   - Use `autoconf` to process `configure.ac`.
-
-3. **Create Modular Makefiles**:
-   - Split large Makefiles into smaller, modular files.
-   - Use `include` directives to incorporate common rules and variables.
-
-4. **Define Build Rules and Dependencies**:
-   - Use `Makefile.am` to define build rules and dependencies.
-   - Ensure all dependencies are clearly defined to avoid incorrect build orders.
-
-5. **Generate `Makefile.in`**:
-   - Use `automake` to process `Makefile.am`.
-
-6. **Run `configure` Script**:
-   - Generate the final `Makefile` tailored to the environment.
-
-7. **Build the Project**:
-   - Use `make` to compile and link the project.
-
-### **Combined Workflow for Your Project**
-
-### **1. Development and Source Preparation**
-
-Tools used during the early stages to write, structure, and analyze the source code:
-
-- **`bison` + `flex`**: Generate parsers (`.c` files) and lexers (`.l` files).
-  - **Example**: Converts `parser.y` → `parser.c` and `lexer.l` → `parser.c`.
-- **`gnu-complexity`**: Analyze maintainability by calculating metrics like cyclomatic complexity.
-  - **Example**: Ensure `src/*.c` has manageable complexity.
-- **`gawk`**: Process source files, metadata, or logs for automation.
-  - **Example**: Generate dynamic Makefile content or filter analysis output.
-- **`autoindent`**: Automatically format C code to adhere to style guidelines.
-  - **Example**: Format `src/*.c` for readability and consistency.
-  - **Command**: `autoindent -gnu src/*.c`
-- **`cppcheck`**: Perform static code analysis to identify potential issues.
-  - **Command**: `cppcheck src/*.c`
-- **`clang-format`**: Automatically format C code according to style guidelines.
-  - **Command**: `clang-format -i src/*.c`
-- **`clang-tidy`**: Perform static analysis and linting on C code.
-  - **Command**: `clang-tidy src/*.c --`
-
-### **2. Build System Initialization**
-
-Tools that create and configure the build system, defining the project structure:
-
-- **`autoconf` + `automake` + `libtool` + `m4`**:
-  - **`autoconf`**: Generates the `configure` script.
-  - **`automake`**: Creates `Makefile.in` from `Makefile.am`.
-  - **`libtool`**: Ensures portability of libraries and static linking.
-  - **`m4`**: Processes macros for `configure.ac`.
-  - **Command**: `autoreconf -i`
-
-### **3. Dependency and Build Configuration**
-
-Tools that resolve dependencies and system requirements before building:
-
-- **`pkgconf`**: Checks and resolves library dependencies.
-  - **Command**: `pkgconf --cflags --libs glib-2.0`
-- **`clibs`**: Downloads and manages external C libraries.
-  - **Command**: `clib install kgabis/parson`
-- **`ccache`**: Caches intermediate build artifacts to reduce build times.
-  - **Command**: `ccache gcc -o myprogram myprogram.c`
-
-### **4. Compilation and Linking**
-
-Core tools that transform source code into executables and libraries:
-
-- **`gcc` + `binutils` + `glibc` + `mold`**:
-  - **`gcc`**: Compiles source into object files.
-  - **`binutils`**: Links object files into binaries/libraries.
-  - **`glibc`**: Provides runtime support for compiled binaries.
-  - **`mold`**: A high-speed linker.
-  - **Command**: `gcc -o build/myprogram src/*.c -fuse-ld=mold -static -L/path/to/glibc -I/path/to/glibc/include`
-- **`coreutils`**: Provides essential utilities (`rm`, `mkdir`, etc.) during build and install.
-  - **Commands**:
-    ```bash
-    rm -rf build/
-    mkdir build
-    cp src/*.c build/
-    mv build/myprogram bin/
+1. **Download musl source code**:
+    ```sh
+    wget https://musl.libc.org/releases/musl-1.2.3.tar.gz
+    tar -xzf musl-1.2.3.tar.gz
+    cd musl-1.2.3
     ```
 
-### **5. Testing and Profiling**
-
-Tools for debugging, testing, and optimizing binaries:
-
-- **`gdb` + `ddd`**: Debug binaries to diagnose issues.
-  - **Commands**:
-    ```bash
-    gdb bin/myprogram
-    ```
-- **`valgrind`**: Detect memory leaks and inefficiencies.
-  - **Command**: `valgrind --leak-check=full --show-leak-kinds=all bin/web-app`
-- **`gnu-perf`**: Measure performance metrics like CPU usage and cache bottlenecks.
-  - **Command**: `perf stat bin/web-app`
-
-### **6. Code Navigation and Analysis**
-
-Enhance understanding and navigation of the codebase:
-
-- **`global`**: Navigate the source code using tags.
-  - **Commands**:
-    ```bash
-    global -u
-    global -x main
-    ```
-- **`cflow`**: Visualize function dependencies using call graphs.
-  - **Command**: `cflow src/main.c`
-- **`cscope`**: Generate an index for navigating and searching through the C source code.
-  - **Command**: `cscope -b -R -s src`
-- **`splint`**: Perform static code analysis to identify potential issues in the C source code.
-  - **Command**: `splint src/*.c`
-
-### **7. Documentation**
-
-- **`texinfo`**: Generate documentation in formats like HTML, PDF, and Info.
-  - **Commands**:
-    ```bash
-    makeinfo --html --no-split -o docs/manual.html docs/manual.texi
-    makeinfo --pdf -o docs/manual.pdf docs/manual.texi
-    ```
-- **`gtk-doc`**: Generate API documentation.
-  - **Commands**:
-    ```bash
-    gtkdocize
-    make -C docs
-    ```
-
-### **8. Packaging and Distribution**
-
-Create a portable, self-contained release of the project:
-
-- **`xz`**: Compress the final distribution archive into `.tar.xz`.
-  - **Command**: `tar -cJf dist/myproject-1.0.tar.xz myproject-1.0/`
-- **`recutils`**: Store and manage metadata (e.g., dependency records).
-  - **Command**: `recfix -r metadata.rec`
-- **`stow`**: Manage installation with symlinks for clean organization.
-  - **Command**: `stow -t /usr/local -d stow_dir myproject`
-
-### **9. Profiling and Coverage Analysis**
-
-#### Profiling with gprof
-
-1. Compile the project with profiling enabled:
-    ```bash
-    make clean
-    ./configure CFLAGS="-pg" LDFLAGS="-pg"
+2. **Configure and build musl**:
+    ```sh
+    ./configure --prefix=/usr/local/musl
     make
+    sudo make install
     ```
-2. Run the application to generate profiling data:
-    ```bash
-    bin/web-app
-    ```
-3. Generate the profiling report:
-    ```bash
-    gprof bin/web-app gmon.out > gprof.out
-    ```
-4. View the profiling report in `gprof.out`.
 
-#### Coverage Analysis with gcov
+### **Set Up musl with Clang**
+After musl is installed, configure Clang to use musl as its standard C library by setting the `-target` and `-nostdlib` flags and linking against musl.
 
-1. Compile the project with coverage enabled:
-    ```bash
-    make clean
-    ./configure CFLAGS="-fprofile-arcs -ftest-coverage" LDFLAGS="-lgcov"
-    make
-    ```
-2. Run the application to generate coverage data:
-    ```bash
-    bin/web-app
-    ```
-3. Generate the coverage report:
-    ```bash
-    make coverage
-    ```
-4. View the coverage report in the generated `.gcov` files.
-
-### **10. Build and Configuration Artifacts Management**
-
-- **Build Artifacts**: All build and configuration along with their artifacts take place in the `build/` directory.
-- **Dependency Files**: `.d` files for dependencies are managed in the `deps/` directory.
-- **Object Files**: `.o` files for objects are managed in the `objects/` directory.
-- **Binary Files**: Binary files are stored in the `bin/` directory.
-- **Distribution Archives**: The final `.tar.xz` file is placed in the `dist/` directory.
-- **Documentation**: All documentation is stored in the `docs/` directory.
-- **Logging**: All logging is managed in the `logs/` directory.
-- **M4 Files**: M4 files are handled in the `m4/` directory.
-- **Configuration Files**: All configuration files are stored in the `etc/` directory.
-- **Libraries**: Any libraries, including `.a` static files, go in the `lib/` directory.
-- **Source Files**: Source files (`.c`) are located in the `src/` directory.
-- **Header Files**: Header files (`.h`) are located in the `include/` directory.
-- **PO Directory**: The use of the `po/` directory is ignored.
-- **Temporary and Caching Artifacts**: All temporary and caching artifacts to assist any folder and tool of the building stage can use the `tmp/` directory.
-
-- **Final Executable**: The final executable is completely static and self-contained.
-
-### **Final Full Process Order**
-
-1. **Development Tools**: `bison`, `flex`, `gnu-complexity`, `gawk`, `autoindent`, `cppcheck`, `clang-format`, `clang-tidy`.
-2. **Build System Setup**: `autoconf`, `automake`, `libtool`, `m4`.
-3. **Dependency Configuration**: `pkgconf`, `clibs`, `ccache`.
-4. **Compilation**: `gcc`, `binutils`, `glibc`, `mold`, `coreutils`.
-5. **Testing and Debugging**: `gdb`, `ddd`, `valgrind`, `gnu-perf`.
-6. **Navigation**: `global`, `cflow`, `cscope`, `splint`.
-7. **Documentation**: `texinfo`, `gtk-doc`.
-8. **Packaging**: `xz`, `recutils`, `stow`.
-9. **Profiling and Coverage Analysis**: `gprof`, `gcov`.
-
-### **Directory Structure**
-
-- **Build Artifacts**: `build/`
-- **Dependencies**: `deps/`
-- **Object Files**: `objects/`
-- **Binary Files**: `bin/`
-- **Distribution Archives**: `dist/`
-- **Documentation**: `docs/`
-- **Logging**: `logs/`
-- **M4 Files**: `m4/`
-- **Configuration Files**: `etc/`
-- **Libraries**: `lib/`
-- **Source Files**: `src/`
-- **Header Files**: `include/`
-- **Temporary and Caching Artifacts**: `tmp/`
-
-This setup ensures that all build and configuration artifacts are organized as specified, with a completely static and self-contained final executable.
-
-
----
-
-### Steps to Build:
-1. **Initialize Build Environment**:
-```bash
-gtags
-libtoolize
-aclocal
-autoheader
-autoconf
-automake --add-missing
-autoreconf -i
+For **Clang**, use the following flags:
+```sh
+clang -target x86_64-linux-musl -nostdlib -L/usr/local/musl/lib -I/usr/local/musl/include -static <your_source_files> -o <output_file> -lm
 ```
 
-2. **Run Configuration Script**:
-```bash
-./configure
+### **Verify musl Installation**
+To verify that musl is installed correctly and is being used:
+
+```sh
+/usr/local/musl/bin/musl-gcc --version
 ```
 
-3. Generate dependencies:
-```bash
-./deps/generate_deps.sh
-```
-
-4. **Compile**:
-```bash
-make
-```
-
-5. **Run Tests**:
-```bash
-make check
-```
-
-6. **Package**:
-```bash
-make dist
-```
-
-7. **Install**:
-```bash
-make install
-```
-
-8. **Clean**:
-```bash
-make clean
+You can also check the runtime with the `file` command to ensure that musl is being used:
+```sh
+file ./my_program
 ```
 
 ---
 
-If you encounter any issues, they might stem from missing dependencies or toolchain mismatches, which can be resolved by checking the logs or ensuring all required tools are installed (`bison`, `flex`, `autotools`, `gcc`, etc.).
+## **3. Updated Directory Structure**
+
+```sh
+.
+├── build/          # Build artifacts and temporary files.
+├── bin/            # Compiled binary executables.
+├── include/        # Header files.
+├── lib/            # Static libraries.
+├── src/            # Source files.
+├── tests/          # Unit tests.
+├── docs/           # Documentation (e.g., man pages).
+└── tmp/            # Temporary files.
+```
 
 ---
+
+## **4. Updated Makefile Setup**
+
+The **Makefile** is updated to use musl for static linking, with Clang configured to target musl.
+
+#### **Root `Makefile`**
+
+```makefile
+# POSIX-compliant Makefile for building and testing with musl
+
+CC = clang
+CFLAGS = -std=c17 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -O0 -pedantic
+LDFLAGS = -static -L/usr/local/musl/lib -I/usr/local/musl/include -lm
+SRC_DIR = src
+BUILD_DIR = build
+BIN_DIR = bin
+TEST_DIR = tests
+INCLUDE_DIR = include
+OBJ_FILES = $(BUILD_DIR)/main.o $(BUILD_DIR)/logger.o
+TARGET = $(BIN_DIR)/my_program
+TEST_TARGET = $(BIN_DIR)/test_runner
+
+.PHONY: all clean test doc
+
+all: $(TARGET)
+
+# Build the main executable
+$(TARGET): $(OBJ_FILES)
+	mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 # Compile source files
-gcc -c src/main.c -o objects/main.o
-gcc -c src/config_loader.c -o objects/config_loader.o
-gcc -c src/env_loader.c -o objects/env_loader.o
-gcc -c src/error_handler.c -o objects/error_handler.o
-gcc -c src/garbage_collector.c -o objects/garbage_collector.o
-gcc -c src/hello.c -o objects/hello.o
-gcc -c src/logger.c -o objects/logger.o
-gcc -c src/validator.c -o objects/validator.o
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
-# Link object files
-gcc objects/main.o objects/config_loader.o objects/env_loader.o objects/error_handler.o objects/garbage_collector.o objects/hello.o objects/logger.o objects/validator.o -o bin/web-app
+# Clean up build artifacts
+clean:
+	rm -rf $(BUILD_DIR) $(BIN_DIR)
 
-# Compile test files
-gcc -c tests/test_main.c -o objects/test_main.o
-gcc -c tests/test_config_loader.c -o objects/test_config_loader.o
-gcc -c tests/test_env_loader.c -o objects/test_env_loader.o
-gcc -c tests/test_error_handler.c -o objects/test_error_handler.o
-gcc -c tests/test_garbage_collector.c -o objects/test_garbage_collector.o
-gcc -c tests/test_hello.c -o objects/test_hello.o
-gcc -c tests/test_logger.c -o objects/test_logger.o
-gcc -c tests/test_validator.c -o objects/test_validator.o
+# Build and run tests
+test: $(TEST_TARGET)
+	./$(TEST_TARGET)
 
-# Link test object files
-gcc objects/test_main.o objects/test_config_loader.o objects/test_env_loader.o objects/test_error_handler.o objects/test_garbage_collector.o objects/test_hello.o objects/test_logger.o objects/test_validator.o -o bin/test-web-app
+$(TEST_TARGET): $(TEST_DIR)/test_logger.o $(BUILD_DIR)/logger.o
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
-# Run tests
-bin/test-web-app
+$(TEST_DIR)/%.o: $(TEST_DIR)/%.c
+	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) -c $< -o $@
 
-# Clean up
-rm objects/*.o
+# Generate documentation (man pages)
+doc:
+	groff -man docs/my_program.1 > $(BIN_DIR)/my_program.1.pdf
+```
+
+### **Important Points**:
+- **`-static`**: Ensures the program is statically linked.
+- **`-L/usr/local/musl/lib`** and **`-I/usr/local/musl/include`**: Directs Clang to use the musl library and include paths.
+- **`-target x86_64-linux-musl`**: Specifies the musl target for Clang.
 
 ---
 
-```bash
-# Development and Source Preparation
+---
 
-# Generate Parsers and Lexers
-bison -d [parser.y](http://_vscodecontentref_/0) -o src/parser.c
-flex -o src/lexer.c [lexer.l](http://_vscodecontentref_/1)
+## **6. Building and Running**
 
-# Analyze Maintainability
-gnu-complexity src/*.c
+After configuring the `Makefile` and ensuring musl is correctly set up, you can build and run your program as follows:
 
-# Process Source Files
-gawk -f [process_files.gawk](http://_vscodecontentref_/2) src/*.c
+### **Build Commands**
 
-# Format C Code
-autoindent -gnu src/*.c
-clang-format -i src/*.c
+```sh
+# Build the project
+make
 
-# Static Code Analysis
-cppcheck src/*.c
-clang-tidy src/*.c --
+# Clean the project
+make clean
 
-# Build System Initialization
+# Run tests
+make test
 
-# Generate Configuration Files
-# Manually create config.h and other necessary configuration files.
-
-# Dependency and Build Configuration
-
-# Check and Resolve Library Dependencies
-pkgconf --cflags --libs glib-2.0
-clib install kgabis/parson
-
-# Cache Intermediate Build Artifacts
-ccache gcc -o myprogram myprogram.c
-
-# Compilation and Linking
-
-# Compile Source Files
-gcc -c [main.c](http://_vscodecontentref_/3) -o objects/main.o
-gcc -c [config_loader.c](http://_vscodecontentref_/4) -o objects/config_loader.o
-gcc -c [env_loader.c](http://_vscodecontentref_/5) -o objects/env_loader.o
-gcc -c [error_handler.c](http://_vscodecontentref_/6) -o objects/error_handler.o
-gcc -c [garbage_collector.c](http://_vscodecontentref_/7) -o objects/garbage_collector.o
-gcc -c [hello.c](http://_vscodecontentref_/8) -o objects/hello.o
-gcc -c [logger.c](http://_vscodecontentref_/9) -o objects/logger.o
-gcc -c [validator.c](http://_vscodecontentref_/10) -o objects/validator.o
-gcc -c src/parser.c -o objects/parser.o
-gcc -c src/lexer.c -o objects/lexer.o
-
-# Link Object Files
-gcc objects/main.o objects/config_loader.o objects/env_loader.o objects/error_handler.o objects/garbage_collector.o objects/hello.o objects/logger.o objects/validator.o objects/parser.o objects/lexer.o -o bin/web-app -fuse-ld=mold -static -L/path/to/glibc -I/path/to/glibc/include
-
-# Testing and Profiling
-
-# Debug Binaries
-gdb bin/web-app
-
-# Detect Memory Leaks
-valgrind --leak-check=full --show-leak-kinds=all bin/web-app
-
-# Measure Performance Metrics
-perf stat bin/web-app
-
-# Code Navigation and Analysis
-
-# Navigate Source Code
-global -u
-global -x main
-
-# Visualize Function Dependencies
-cflow [main.c](http://_vscodecontentref_/11)
-
-# Generate Index for Navigation
-cscope -b -R -s src
-
-# Static Code Analysis
-splint src/*.c
-
-# Documentation
-
-# Generate Documentation
-makeinfo --html --no-split -o docs/manual.html docs/manual.texi
-makeinfo --pdf -o docs/manual.pdf docs/manual.texi
-gtkdocize
-make -C docs
-
-# Packaging and Distribution
-
-# Compress Final Distribution Archive
-tar -cJf dist/myproject-1.0.tar.xz myproject-1.0/
-
-# Manage Metadata
-recfix -r metadata.rec
-
-# Manage Installation with Symlinks
-stow -t /usr/local -d stow_dir myproject
-
-# Profiling and Coverage Analysis
-
-# Profiling with gprof
-gcc -pg -o bin/web-app src/*.c
-bin/web-app
-gprof bin/web-app gmon.out > gprof.out
-
-# Coverage Analysis with gcov
-gcc -fprofile-arcs -ftest-coverage -o bin/web-app src/*.c
-bin/web-app
-gcov src/*.c
-
-# Build and Configuration Artifacts Management
-
-# Clean Up
-rm -rf build/
-mkdir build
-cp src/*.c build/
-mv build/myprogram bin/
-rm objects/*.o
+# Generate documentation
+make doc
 ```
+
+---
+
+## **7. Static Analysis and Formatting**
+
+You can use **POSIX-compliant tools** for static analysis and formatting:
+
+#### **POSIX Lint Tool**
+```sh
+splint src/*.c include/*.h
+```
+
+#### **POSIX Formatting Tool**
+```sh
+indent src/*.c include/*.h
+```
+
+---
+
+## **8. Debugging and Profiling**
+
+You can use **gdb** for debugging and **gprof** for profiling, even with musl:
+
+#### **Debugging**
+```sh
+gdb ./bin/my_program
+```
+
+#### **Profiling**
+```sh
+gprof ./bin/my_program gmon.out > profile.txt
+```
+
+#### **Memory Debugging**
+```sh
+valgrind --leak-check=full ./bin/my_program
+```
+
+---
+
+## **9. Documentation**
+
+Generate **man pages** for POSIX compliance.
+
+#### **Man Page Example: `docs/my_program.1`**
+
+```man
+.TH my_program 1 "November 2024" "1.0.0" "My C Project Manual"
+.SH NAME
+my_program \- Example POSIX-compliant program
+.SH SYNOPSIS
+.B my_program
+.SH DESCRIPTION
+An example program that demonstrates POSIX compliance using musl.
+.SH AUTHOR
+Written by Your Name.
+.SH COPYRIGHT
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+```
+
+#### **Generate Man Pages**
+
+```sh
+groff -man docs/my_program.1 > bin/my_program.1.pdf
+```
+
+---
+
+## **10. Packaging for Distribution**
+
+You can package the project with static libraries and all necessary files.
+
+#### **Create Archive**
+
+```sh
+tar -czvf my_project.tar.gz bin include lib src
+```
+
+---
+
+## **Conclusion**
+
+This workflow ensures **POSIX compliance** and integrates **musl** as the C library, enabling static linking and providing a lightweight and efficient alternative to glibc. The build system uses Clang with musl, and all binaries are statically linked, ensuring portability and reducing external dependencies. Let me know if further refinements are needed!
+
+`clang-format` `clang-tidy` `cppcheck` `shellcheck`
 
 Development of the EnvEng web application using 5S methodology for project management and Data-Oriented Programming (DOP) for development.
 

@@ -6,6 +6,19 @@
     "timonwong.shellcheck",
     "davidanson.vscode-markdownlint",
     "yzhang.markdown-all-in-one",
-    "kamikillerto.vscode-linthtml"
+    "github.vscode-pull-request-github",
+    "github.vscode-github-actions",
+    "your-publisher-name.recfile-syntax",
+    "qiumingge.cpp-check-lint",
+    "cs128.cs128-clang-tidy",
+    "editorconfig.editorconfig",
+    "github.copilot",
+    "github.copilot-chat",
+    "github.remotehub",
+    "github.github-vscode-theme",
+    "ymotongpoo.licenser",
+    "esbenp.prettier-vscode",
+    "ms-vscode.remote-repositories",
+    "snyk-security.snyk-vulnerability-scanner"
   ]
 }

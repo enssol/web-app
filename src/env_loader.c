@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
 
-#include "../include/config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,23 +14,29 @@
 int load_env_config(const char *filename) {
     FILE *file = fopen(filename, "r");
     if (!file) {
-        return -1; // Error opening file
+        perror("Failed to open file");
+        return -1;
     }
 
     char line[256];
     while (fgets(line, sizeof(line), file)) {
         char *key = strtok(line, "=");
         char *value = strtok(NULL, "\n");
+
         if (key && value) {
-            if (validate_config(key, value) != 0) {
-                handle_error("Invalid ENV config value");
-                fclose(file);
-                return -1;
-            }
-            log_info("ENV Config: %s = %s", key, value);
+            config_t config;
+            config.key = strdup(key);
+            config.value = strdup(value);
+
+            // Process the config as needed
+            printf("Key: %s, Value: %s\n", config.key, config.value);
+
+            // Free allocated memory
+            free(config.key);
+            free(config.value);
         }
     }
 
     fclose(file);
-    return 0; // Success
+    return 0;
 }
