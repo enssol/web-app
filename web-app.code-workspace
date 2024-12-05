@@ -334,9 +334,8 @@
         "markdown.preview.typographer": true,
         "merge-conflict.autoNavigateNextConflict.enabled": true,
         "C_Cpp.clang_format_fallbackStyle": "Google",
-        "C_Cpp.clang_format_style": "file",
+        "C_Cpp.clang_format_style": "Google",
         "C_Cpp.clang_format_sortIncludes": true,
-        "C_Cpp.clang_format_path": "clang-format",
         "makefile.extensionOutputFolder": "./build",
         "makefile.configurations": [
             {
@@ -362,7 +361,6 @@
         "makefile.makefilePath": "./Makefile",
         "makefile.buildLog": "./logs/build.log",
         "shellcheck.enable": true,
-        "shellcheck.executablePath": "shellcheck",
         "shellcheck.run": "onSave",
         "shellcheck.exclude": [],
         "shellcheck.customArgs": [
@@ -426,7 +424,10 @@
         "remoteHub.commitDirectlyWarning": "off",
         "remoteHub.gitProtocol": "ssh",
         "remoteHub.richNavigation.enabled": true,
-        "editor.semanticHighlighting.enabled": true
+        "editor.semanticHighlighting.enabled": true,
+        "C_Cpp.default.cStandard": "c11",
+        "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
+        "C_Cpp.codeAnalysis.clangTidy.enabled": true
     },
     "extensions": {
         "recommendations": [

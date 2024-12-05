@@ -11,11 +11,8 @@
 #include "../include/logger.h"
 #include "../include/error_handler.h"
 
-enum
-{
-    MAX_LINE_LENGTH = 256,
-    MAX_ERROR_MESSAGE_LENGTH = 512
-};
+#define MAX_LINE_LENGTH           1024
+#define MAX_ERROR_MESSAGE_LENGTH  512
 
 /**
  * @brief Helper function to process configuration file.
@@ -36,7 +33,9 @@ static int processConfigFile(FILE *file, const char *config_type)
         {
             if (validate_string(value) != 0)
             {
-                log_error("Invalid %s config value", config_type);
+                char error_message[MAX_ERROR_MESSAGE_LENGTH];
+                snprintf(error_message, sizeof(error_message), "Invalid %s config value", config_type);
+                logError(error_message);
                 return -1;
             }
         }
@@ -51,12 +50,12 @@ static int processConfigFile(FILE *file, const char *config_type)
  * @param filename Path to the configuration file.
  * @return int 0 on success, -1 on error.
  */
-int load_ini_config(const char *filename)
+int loadIniConfig(const char *filename)
 {
     FILE *file = fopen(filename, "r");
     if (!file)
     {
-        handle_error("Error opening INI config file");
+        logError("Failed to open INI config file: %s", filename);
         return -1;
     }
 
@@ -64,35 +63,14 @@ int load_ini_config(const char *filename)
 
     if (fclose(file) != 0)
     {
-        handle_error("Error closing INI config file");
+        handleError("Error closing INI config file");
         return -1;
     }
 
     return result;
 }
 
-/**
- * @brief Load CONF configuration file.
- *
- * @param filename Path to the configuration file.
- * @return int 0 on success, -1 on error.
- */
-int load_conf_config(const char *filename)
-{
-    FILE *file = fopen(filename, "r");
-    if (!file)
-    {
-        handle_error("Error opening CONF config file");
-        return -1;
-    }
-
-    int result = processConfigFile(file, "CONF");
-
-    if (fclose(file) != 0)
-    {
-        handle_error("Error closing CONF config file");
-        return -1;
-    }
-
-    return result;
+void someFunction() {
+    // Example usage of log_error
+    logError("An error occurred");
 }

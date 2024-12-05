@@ -88,7 +88,9 @@ yarn-error.log*
 
 
 # Ignoring sensitive or system-specific files
-.env*
+.env
+.env.me
+.env.previous
 *.vault
 
 # Exceptions

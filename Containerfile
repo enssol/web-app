@@ -15,8 +15,7 @@ RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/reposit
     gcompat \
     dropbear-dbclient \
     dropbear-scp \
-    dropbear-ssh \
-    npm
+    dropbear-ssh
 
 # Stage 2: Create final image with BusyBox for amd64
 FROM --platform=linux/amd64 docker.io/busybox:musl
@@ -35,7 +34,6 @@ COPY --from=builder /usr/sbin/dropbear /usr/sbin/dropbear
 COPY --from=builder /usr/bin/dropbearkey /usr/bin/dropbearkey
 COPY --from=builder /usr/bin/tree /usr/bin/tree
 COPY --from=builder /usr/bin/node /usr/bin/node
-COPY --from=builder /usr/bin/npm /usr/bin/npm
 COPY --from=builder /usr/bin/gpg-agent /usr/bin/gpg-agent
 COPY --from=builder /usr/bin/gpg2 /usr/bin/gpg2
 COPY --from=builder /usr/bin/dbclient /usr/bin/dbclient

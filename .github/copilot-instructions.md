@@ -18,8 +18,8 @@ These instructions ensure Copilot's suggestions align with our project's technic
 - Follow a structured directory layout:
   - **src/**: Source files (`.c`)
   - **include/**: Header files (`.h`)
-  - **build/**: Build artifacts
-  - **tests/**: Unit test files
+  - **bin/**: Binary artifacts
+  - **etc/**: Config test files
   - **docs/**: Documentation files
 - Use `snake_case` for file names, e.g., `data_manager.c`, `user_auth.h`.
 
@@ -119,7 +119,7 @@ These instructions ensure Copilot's suggestions align with our project's technic
 
 - Maintain the following directory structure:
 
-```
+```plaintext
 .
 ├── ACKNOWLEDGEMENT.md
 ├── AUTHORS
@@ -134,16 +134,12 @@ These instructions ensure Copilot's suggestions align with our project's technic
 ├── LICENSE
 ├── MAINTAINERS
 ├── MONITORING_AND_EVALUATION
-├── Makefile
 ├── NEWS
 ├── README.md
 ├── SECURITY.md
 ├── SUPPORT.md
 ├── TODO.md
 ├── bin
-│   └── app.1.pdf
-├── build
-├── compile_commands.json
 ├── docs
 │   ├── ARCHITECTURE.md
 │   ├── CONTACT.md
@@ -167,45 +163,30 @@ These instructions ensure Copilot's suggestions align with our project's technic
 │   ├── TERMS.md
 │   ├── TROUBLESHOOTING.md
 │   ├── TUTORIAL.md
-│   ├── USAGE.md
-│   └── app.1
+│   └── USAGE.md
 ├── etc
-│   ├── config.conf
-│   ├── config.ini
-│   ├── server
-│   └── ssl
-│       └── enssol.com.au
+│   └── config.ini
 ├── include
 │   ├── config_loader.h
-│   ├── env_loader.h
 │   ├── error_handler.h
 │   ├── garbage_collector.h
-│   ├── hello.h
 │   ├── logger.h
 │   └── validator.h
-├── lib
+├── mk.sh
 ├── package-lock.json
 ├── package.json
 ├── src
 │   ├── config_loader.c
-│   ├── env_loader.c
 │   ├── error_handler.c
 │   ├── garbage_collector.c
-│   ├── hello.c
 │   ├── logger.c
 │   ├── main.c
 │   └── validator.c
-├── tests
-│   └── test_logger.c
 ├── tmp
 │   └── http.pseudo
-├── var
-│   └── www
-│       ├── data
-│       └── html
 └── web-app.code-workspace
 
-17 directories, 67 files
+7 directories, 58 files
 ```
 
 ### POSIX Headers only allowed to use
