@@ -55,6 +55,7 @@ dkms.conf
 # Build artifacts
 build/
 bin/
+#tmp/
 
 # Configuration and build scripts
 config.*
