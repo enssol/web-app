@@ -1,55 +1,38 @@
 /**
- * Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
 #include <stdio.h>
-#include "../include/config_loader.h"
-#include "../include/logger.h"
-#include "../include/garbage_collector.h"
-#include "../include/error_handler.h"
-#include "../include/validator.h"
-
-// Define constants and global variables
-#define APP_NAME "App"
-#define CURRENT_CONFIG_VERSION 2.0
-#define CONFIG_VERSION 2.0
-const int global_var = 0;
-
-const char *app_mode;
-double version;
-
-// Initialize configuration with default values
-typedef struct {
-    const char *app_name;
-    const char *log_level;
-    const char *app_mode;
-    double version;
-} Config;
-
-const Config config = {
-    .app_name = "DefaultApp",
-    .log_level = "INFO",
-    .app_mode = "production",
-    .version = 1.0
-};
+#include <stdlib.h>
+#include "config_loader.h"
+#include "env_loader.h"
+#include "error_handler.h"
+#include "logger.h"
+#include "garbage_collector.h"
+#include "validator.h"
+#include "constants.h"
 
 // Function prototypes
 void initialize(void);
 void hello(void);
 void cleanup(void);
-void upgrade_config(double old_version);
+void upgradeConfig(double old_version);
 
 int main(void)
 {
     // Initialize the application
     initialize();
 
-    // Main loop
-    hello();
+    // Application logic
+    printf("Hello, world!\n");
 
-    // Cleanup
+    // Use SERVER_IP and SERVER_PORT
+    printf("Server IP: %s\n", SERVER_IP);
+    printf("Server Port: %d\n", SERVER_PORT);
+
+    // Cleanup the application
     cleanup();
+
     return 0;
 }
 
@@ -63,16 +46,24 @@ void hello(void)
  */
 void initialize(void)
 {
+    // Initialize garbage collector
+    initGarbageCollector();
+
     // Initialize logger
-    init_logger();
-    // Load configuration
-    if (load_ini_config("../etc/config.ini") != 0)
+    initLogger();
+
+    // Load constants from .env and config.ini files
+    loadEnvConfig(ENV_FILE);
+    loadConstants(CONFIG_FILE);
+
+    // Upgrade configuration if needed
+    if (config.version < CURRENT_CONFIG_VERSION)
     {
-        handleError("Failed to load INI configuration");
+        upgradeConfig(config.version);
     }
 
     // Log application start
-    log_info("Application started: %s v%.1f", config.app_name, config.version);
+    logInfo("Application started: %s v%.1f", config.app_name, config.version);
 }
 
 /**
@@ -80,7 +71,8 @@ void initialize(void)
  */
 void cleanup(void)
 {
-    // Perform cleanup tasks
+    // Cleanup garbage collector
+    cleanupGarbageCollector();
 }
 
 /**
@@ -88,7 +80,7 @@ void cleanup(void)
  * This function applies necessary transformations to upgrade the configuration to the current version.
  * @param old_version The old version of the configuration.
  */
-void upgrade_config(double old_version)
+void upgradeConfig(double old_version)
 {
     if (old_version < 2.0)
     {

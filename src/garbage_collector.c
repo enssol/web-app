@@ -3,15 +3,70 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-#include "../include/garbage_collector.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "garbage_collector.h"
 
-// garbage_collector.c
-void init_garbage_collector(void)
+typedef struct GCNode {
+    void *ptr;
+    struct GCNode *next;
+} GCNode;
+
+static GCNode *gcHead = NULL;
+
+void initGarbageCollector(void)
 {
-    // Initialize garbage collector
+    gcHead = NULL;
 }
 
-void cleanup_garbage_collector(void)
+void cleanupGarbageCollector(void)
 {
-    // Cleanup garbage collector
+    GCNode *current = gcHead;
+    while (current != NULL)
+    {
+        GCNode *next = current->next;
+        free(current->ptr);
+        free(current);
+        current = next;
+    }
+    gcHead = NULL;
+}
+
+void* gcMalloc(size_t size)
+{
+    void *ptr = malloc(size);
+    if (ptr == NULL)
+    {
+        return NULL;
+    }
+
+    GCNode *node = (GCNode *)malloc(sizeof(GCNode));
+    if (node == NULL)
+    {
+        free(ptr);
+        return NULL;
+    }
+
+    node->ptr = ptr;
+    node->next = gcHead;
+    gcHead = node;
+
+    return ptr;
+}
+
+void gcFree(void *ptr)
+{
+    GCNode **current = &gcHead;
+    while (*current != NULL)
+    {
+        if ((*current)->ptr == ptr)
+        {
+            GCNode *node = *current;
+            *current = node->next;
+            free(node->ptr);
+            free(node);
+            return;
+        }
+        current = &(*current)->next;
+    }
 }

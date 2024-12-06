@@ -9,9 +9,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-void logError(const char *format, ...);
-void log_error(const char *message);
-void init_logger(void);
-void log_info(const char *format, ...);
+void initLogger(void);
+void logInfo(const char *format, ...);
+void logError(const char *message, ...);
 
 #endif // LOGGER_H

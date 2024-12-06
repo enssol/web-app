@@ -2,39 +2,61 @@
     "env": {
         "myIncludePath": [
             "${workspaceFolder}/include",
-            "${workspaceFolder}/lib",
-            "/usr/include"
+            "/usr/include/x86_64-linux-musl"
         ],
         "myDefines": [
             "DEBUG",
             "MY_FEATURE=1",
             "_POSIX_C_SOURCE=200809L",
-            "_XOPEN_SOURCE=700",
+            "_XOPEN_SOURCE=800",
             "PLATFORM_LINUX",
-            "TINYCC",
             "MUSL",
             "NDEBUG"
         ]
     },
     "configurations": [
         {
-            "name": "Linux AMD64 (musl)",
-            "compilerPath": "/usr/bin/tcc",
+            "name": "Linux AMD64 (musl-gcc)",
+            "compilerPath": "/usr/bin/musl-gcc",
             "compilerArgs": [
-                "-std=c11",
-                "-D_POSIX_C_SOURCE=200809L",
-                "-D_XOPEN_SOURCE=700",
-                "-I/usr/include",
-                "-I${workspaceFolder}/include",
-                "-L/usr/lib",
-                "-static",
-                "-fno-common",
-                "-Wall",
-                "-Werror",
-                "-g",
-                "-ffunction-sections",
-                "-fdata-sections",
-                "-march=x86-64"
+            "-std=c23",
+            "-D_POSIX_C_SOURCE=200809L",
+            "-D_XOPEN_SOURCE=800",
+            "-O3",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-pedantic",
+            "-I/usr/include/x86_64-linux-musl",
+            "-I${workspaceFolder}/include",
+            "-L/usr/lib/x86_64-linux-musl",
+            "-static",
+            "-fno-common",
+            "-ffunction-sections",
+            "-fdata-sections",
+            "-march=x86-64",
+            "-Wshadow",
+            "-Wconversion",
+            "-Wstrict-prototypes",
+            "-Wmissing-prototypes",
+            "-Wold-style-definition",
+            "-Wmissing-declarations",
+            "-Wredundant-decls",
+            "-Wfloat-equal",
+            "-Wundef",
+            "-Wbad-function-cast",
+            "-Wcast-qual",
+            "-Wwrite-strings",
+            "-Wformat=2",
+            "-Wstrict-aliasing=2",
+            "-Wstrict-overflow=5",
+            "-Wnull-dereference",
+            "-Wdouble-promotion",
+            "-Wvla",
+            "-Wcast-align",
+            "-Wpointer-arith",
+            "-Wswitch-default",
+            "-Wunreachable-code"
             ],
             "intelliSenseMode": "linux-gcc-x64",
             "includePath": [
@@ -43,7 +65,7 @@
             "defines": [
                 "${myDefines}"
             ],
-            "cStandard": "c11",
+            "cStandard": "c23",
             "browse": {
                 "path": [
                     "${myIncludePath}",

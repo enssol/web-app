@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 
-#include "../include/error_handler.h"
-#include "../include/logger.h"
+#include "error_handler.h"
+#include "logger.h"
 
 void handleError(const char *error_message)
 {
-    logError("Error: %s", error_message);
+    logError(error_message);
 }

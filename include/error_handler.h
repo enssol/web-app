@@ -6,6 +6,8 @@
 #ifndef ERROR_HANDLER_H
 #define ERROR_HANDLER_H
 
+#include <stdio.h>
+
 void handleError(const char *error_message);
 
 #endif // ERROR_HANDLER_H

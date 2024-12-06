@@ -5,11 +5,12 @@ These instructions ensure Copilot's suggestions align with our project's technic
 ---
 
 ## **General Guidelines**
-- Adhere to **ISO/IEC 9899:2024 (C Standard)**, **POSIX.1-2008**, and **X/Open 7 (Issue 7)** compliance in all code suggestions.
+- Adhere to **ISO/IEC 9899:2024 (C Standard)**, **POSIX.1-2008**, and **X/Open 8 (Issue 8)** compliance in all code suggestions.
 - Ensure code is **portable**, **cross-platform**, and **cross-architecture**:
-  - Prioritize compatibility with `musl libc` and **Tiny C Compiler (TCC)**.
+  - Prioritize compatibility with `musl libc` and **GCC)**.
   - Avoid features requiring `glibc` or non-portable platform-specific APIs.
-- Write code optimized for lightweight environments (e.g., containers using **BusyBox** and `musl`).
+- Write code optimized for lightweight environments (e.g. `musl`).
+- Data oriented design is preferred over object oriented design.
 
 ---
 
@@ -18,6 +19,7 @@ These instructions ensure Copilot's suggestions align with our project's technic
 - Follow a structured directory layout:
   - **src/**: Source files (`.c`)
   - **include/**: Header files (`.h`)
+  - **obj/**: Object files (`.o`)
   - **bin/**: Binary artifacts
   - **etc/**: Config test files
   - **docs/**: Documentation files
@@ -68,8 +70,8 @@ These instructions ensure Copilot's suggestions align with our project's technic
 
 ## **Environment-Specific Considerations**
 - **Compiler**: Target **Tiny C Compiler (TCC)** with the following capabilities:
-  - Use `-std=c11` for ISO C compliance.
-  - Define `_POSIX_C_SOURCE=200809L` and `_XOPEN_SOURCE=700` for POSIX and X/Open features supported by musl.
+  - Use `-std=c23` for ISO C compliance.
+  - Define `_POSIX_C_SOURCE=200809L` and `_XOPEN_SOURCE=800` for POSIX and X/Open features supported by musl.
   - Avoid advanced GCC-specific extensions unsupported by TCC.
 - **Libraries**:
   - Base code on **musl libc** for portability and minimalism.
@@ -123,23 +125,25 @@ These instructions ensure Copilot's suggestions align with our project's technic
 .
 ├── ACKNOWLEDGEMENT.md
 ├── AUTHORS
+├── build
+│   ├── config_loader.o
+│   ├── configurationCache.log
+│   ├── dryrun.log
+│   ├── env_loader.o
+│   ├── error_handler.o
+│   ├── garbage_collector.o
+│   ├── hello.o
+│   ├── logger.o
+│   ├── main.o
+│   ├── targets.log
+│   └── validator.o
+├── ChangeLog
 ├── CHANGELOG.md
 ├── CODE_OF_CONDUCT.md
+├── compile_commands.json
+├── Containerfile
 ├── CONTRIBUTING.md
 ├── COPYING
-├── ChangeLog
-├── Containerfile
-├── HACKING
-├── INSTALL
-├── LICENSE
-├── MAINTAINERS
-├── MONITORING_AND_EVALUATION
-├── NEWS
-├── README.md
-├── SECURITY.md
-├── SUPPORT.md
-├── TODO.md
-├── bin
 ├── docs
 │   ├── ARCHITECTURE.md
 │   ├── CONTACT.md
@@ -166,15 +170,24 @@ These instructions ensure Copilot's suggestions align with our project's technic
 │   └── USAGE.md
 ├── etc
 │   └── config.ini
+├── HACKING
 ├── include
 │   ├── config_loader.h
 │   ├── error_handler.h
 │   ├── garbage_collector.h
 │   ├── logger.h
 │   └── validator.h
+├── INSTALL
+├── LICENSE
+├── MAINTAINERS
 ├── mk.sh
-├── package-lock.json
+├── MONITORING_AND_EVALUATION
+├── NEWS
+├── obj
 ├── package.json
+├── package-lock.json
+├── README.md
+├── SECURITY.md
 ├── src
 │   ├── config_loader.c
 │   ├── error_handler.c
@@ -182,11 +195,13 @@ These instructions ensure Copilot's suggestions align with our project's technic
 │   ├── logger.c
 │   ├── main.c
 │   └── validator.c
+├── SUPPORT.md
 ├── tmp
 │   └── http.pseudo
+├── TODO.md
 └── web-app.code-workspace
 
-7 directories, 58 files
+7 directories, 70 files
 ```
 
 ### POSIX Headers only allowed to use

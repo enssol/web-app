@@ -263,13 +263,13 @@
         "github.copilot.chat.inlineChatHint.enabled": true,
         "snyk.folderConfigs": [
             {
-                "folderPath": "/home/devuser/web-app",
+                "folderPath": "/home/ubuntu/web-app",
                 "baseBranch": "main",
             }
         ],
         "snyk.scanningMode": "manual",
         "snyk.trustedFolders": [
-            "/home/devuser/web-app"
+            "/home/ubuntu/web-app"
         ],
         "workbench.startupEditor": "readme",
         "diffEditor.maxComputationTime": 0,
@@ -427,7 +427,15 @@
         "editor.semanticHighlighting.enabled": true,
         "C_Cpp.default.cStandard": "c11",
         "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
-        "C_Cpp.codeAnalysis.clangTidy.enabled": true
+        "C_Cpp.codeAnalysis.clangTidy.enabled": true,
+        "c-cpp-flylint.enable": false,
+        "c-cpp-flylint.language": "c",
+        "c-cpp-flylint.clang.enable": false,
+        "c-cpp-flylint.clang.blocks": false,
+        "c-cpp-flylint.cppcheck.platform": "unix64",
+        "c-cpp-flylint.flexelint.enable": false,
+        "c-cpp-flylint.flawfinder.enable": false,
+        "c-cpp-flylint.lizard.enable": false
     },
     "extensions": {
         "recommendations": [
@@ -444,14 +452,13 @@
         "editorconfig.editorconfig",
         "github.copilot",
         "github.copilot-chat",
-        "github.remotehub",
         "github.github-vscode-theme",
         "ymotongpoo.licenser",
         "esbenp.prettier-vscode",
         "ms-vscode.remote-repositories",
-        "snyk-security.snyk-vulnerability-scanner",
         "willumz.generic-pseudocode",
-        "maziac.asm-code-lens"
-        ]
+        "maziac.asm-code-lens",
+        "nathanj.cppcheck-plugin"
+      ]
     }
 }

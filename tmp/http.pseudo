@@ -13,7 +13,7 @@ auth_file = /etc/server/auth.passwd
 // Constants Module (Application constants)
 MODULE constants:
     CONST ENV_FILE = ".env"
-    CONST CONFIG_FILE = "config.ini"
+    CONST CONFIG_FILE = "etc/config.ini"
     CONST SERVER_PORT = SERVER_PORT
     CONST SERVER_IP = SERVER_IP
     CONST DOCUMENT_ROOT = document_root
