@@ -18,7 +18,6 @@
     "willumz.generic-pseudocode",
     "maziac.asm-code-lens",
     "snyk-security.snyk-vulnerability-scanner",
-    "cs128.cs128-clang-tidy",
     "xaver.clang-format",
     "twxs.cmake",
     "ms-vscode.cmake-tools"

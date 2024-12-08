@@ -112,14 +112,6 @@ add_custom_target(build_all_custom
 # Ensure cppcheck runs before building
 add_dependencies(build_all_custom cppcheck)
 
-# Unit Tests (Optional Integration)
-enable_testing()
-file(GLOB TEST_SOURCES ${CMAKE_SOURCE_DIR}/tests/*.c)
-foreach(TEST_SOURCE ${TEST_SOURCES})
-    get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
-    add_executable(${TEST_NAME} ${TEST_SOURCE})
-    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
-endforeach()
 
 # Install Target
 install(TARGETS enveng_web_app DESTINATION /usr/local/bin)

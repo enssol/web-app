@@ -404,7 +404,7 @@
         "githubPullRequests.showPullRequestNumberInTree": true,
         "githubPullRequests.terminalLinksHandler": "vscode",
         "editor.semanticHighlighting.enabled": true,
-        "C_Cpp.default.cStandard": "c90",
+        "C_Cpp.default.cStandard": "c89",
         "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
         "C_Cpp.codeAnalysis.clangTidy.enabled": false,
         "C_Cpp.default.browse.databaseFilename": "/home/ubuntu/web-app/compile_commands.json",
@@ -457,7 +457,6 @@
             "willumz.generic-pseudocode",
             "maziac.asm-code-lens",
             "snyk-security.snyk-vulnerability-scanner",
-            "cs128.cs128-clang-tidy",
             "xaver.clang-format",
             "twxs.cmake",
             "ms-vscode.cmake-tools"
