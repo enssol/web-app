@@ -181,7 +181,7 @@
         "github.copilot.renameSuggestions.triggerAutomatically": true,
         "github.copilot.chat.codeGeneration.useInstructionFiles": true,
         "github.copilot.chat.temporalContext.enabled": true,
-        "licenser.author": "Enveng Group - Simon French-Bluhm and Adrian Gallo",
+        "licenser.author": "Enveng Group - Adrian Gallo",
         "licenser.customTermsAndConditions": "Copyright @YEAR@ @AUTHOR@\n\nThese are the terms and conditions...",
         "licenser.excludeFileExtensions": [
             "txt",
@@ -274,13 +274,11 @@
         "snyk.folderConfigs": [
             {
                 "folderPath": "/home/ubuntu/web-app",
-                "baseBranch": "main",
+                "baseBranch": "main"
             }
         ],
         "snyk.scanningMode": "manual",
-        "snyk.trustedFolders": [
-            "/home/ubuntu/web-app"
-        ],
+        "snyk.trustedFolders": ["/home/ubuntu/web-app"],
         "workbench.startupEditor": "readme",
         "diffEditor.maxComputationTime": 0,
         "licenser.useSPDXLicenseFormat": true,
@@ -351,7 +349,7 @@
         "shellcheck.exclude": [],
         "shellcheck.customArgs": [
             "--severity=style", // Set severity level
-            "--enable=all"      // Enable all checks
+            "--enable=all" // Enable all checks
         ],
         "markdown.extension.toc.levels": "1..6",
         "markdown.extension.toc.updateOnSave": true,
@@ -458,7 +456,6 @@
             "maziac.asm-code-lens",
             "snyk-security.snyk-vulnerability-scanner",
             "xaver.clang-format",
-            "twxs.cmake",
             "ms-vscode.cmake-tools"
         ]
     }
