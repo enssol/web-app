@@ -30,7 +30,6 @@ void
 initGarbageCollector (void)
 {
     gcHead = NULL;
-    printf ("Garbage collector initialized.\n");
 }
 
 /**

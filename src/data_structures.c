@@ -53,12 +53,13 @@ freeDictionary (Dictionary *dict)
  * \brief Adds a header to the dictionary.
  *
  * \param dict Pointer to the dictionary.
- * \param key Key of the header.
- * \param value Value of the header.
+ * \param key The key of the header.
+ * \param value The value of the header.
  */
 void
 addHeader (Dictionary *dict, const char *key, const char *value)
 {
+<<<<<<< Updated upstream
     char **new_keys;
     char **new_values;
 
@@ -75,4 +76,9 @@ addHeader (Dictionary *dict, const char *key, const char *value)
     }
 
     /* Add header logic here */
+=======
+    (void)key;
+    (void)value;
+    (void)dict;
+>>>>>>> Stashed changes
 }
