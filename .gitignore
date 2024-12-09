@@ -110,3 +110,4 @@ yarn-error.log*
 .env*
 etc/letsencrypt/live/yourdomain.com/cert.pem
 etc/letsencrypt/live/yourdomain.com/privkey.pem
+!.vscode/browse.vc.db
