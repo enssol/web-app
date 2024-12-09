@@ -67,6 +67,8 @@ set(SOURCE_FILES
     src/static_file_handler.c
     src/utils.c
     src/validator.c
+    src/authenticate.c
+    src/auth.c
 )
 
 # Add executable target

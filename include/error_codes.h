@@ -15,5 +15,6 @@
 #define ERROR_FILE_OPEN (-3)
 #define ERROR_MEMORY_ALLOC (-4)
 #define ERROR_CONFIG_LOAD (-5)
+#define ERROR_AUTHENTICATION_FAILED (-6)
 
 #endif /* ERROR_CODES_H */

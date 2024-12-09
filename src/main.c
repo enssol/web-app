@@ -47,6 +47,7 @@ int initialize(void);
 void cleanup(void);
 void printLoadedConfig(void);
 void startServer(void);
+void *handleClient(void *client_fd_ptr);
 
 /**
  * \brief Main function.
@@ -171,7 +172,7 @@ void startServer(void)
         }
 
         *client_fd_ptr = client_fd;
-        if (pthread_create(&thread_id, NULL, handle_client, client_fd_ptr) != 0)
+        if (pthread_create(&thread_id, NULL, handleClient, client_fd_ptr) != 0)
         {
             logError("Failed to create thread for client");
             free(client_fd_ptr);

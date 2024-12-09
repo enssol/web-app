@@ -39,5 +39,6 @@ void *gcMalloc(GarbageCollector *gc, size_t size);
 void gcFree(GarbageCollector *gc, void *ptr);
 void *gcRealloc(void *ptr, size_t size);
 char *gcStrdup(const char *str);
+void initializeGarbageCollector(GarbageCollector *gc);
 
 #endif /* GARBAGE_COLLECTOR_H */

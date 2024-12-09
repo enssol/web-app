@@ -47,6 +47,7 @@ typedef struct
 } Config;
 
 int loadConfig(const char *filename, Config *config);
+const char *getConfigValue(const char *key);
 void freeConfig(Config *config);
 void logFinalConfig(const Config *config);
 

@@ -9,7 +9,7 @@
 #ifndef HTTP_PARSER_H
 #define HTTP_PARSER_H
 
-void parse_http_request(const char *request, char *file_path);
-void route_request(int client_fd, const char *file_path);
+void parseHttpRequest(const char *request, char *file_path);
+void routeRequest(int client_fd, const char *file_path);
 
 #endif /* HTTP_PARSER_H */

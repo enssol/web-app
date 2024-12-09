@@ -6,17 +6,17 @@
  */
 
 #include "../include/static_file_handler.h"
-#include "../include/logger.h"
-#include "../include/constants.h"
 #include "../include/config_loader.h"
+#include "../include/constants.h"
+#include "../include/logger.h"
+#include <fcntl.h> /* Include for open and O_RDONLY */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>    /* Include for strcasecmp */
+#include <sys/socket.h> /* Include for send */
 #include <sys/stat.h>
 #include <unistd.h>
-#include <strings.h>  /* Include for strcasecmp */
-#include <sys/socket.h>  /* Include for send */
-#include <fcntl.h>  /* Include for open and O_RDONLY */
 
 /* External config variable */
 extern Config config;
@@ -105,7 +105,7 @@ void serveStaticFile(int client_fd, const char *file_path)
     char buffer[1024];
     ssize_t bytes_read;
 
-    snprintf(full_path, sizeof(full_path), "%s/%s", config.document_root, file_path);
+    snprintf(full_path, sizeof(full_path), "%s/%s", getConfigValue("document_root"), file_path);
 
     if (stat(full_path, &st) == -1)
     {

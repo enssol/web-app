@@ -16,7 +16,7 @@
  *
  * \param gc The garbage collector to initialize.
  */
-void initGarbageCollector(GarbageCollector *gc)
+void initializeGarbageCollector(GarbageCollector *gc)
 {
     if (gc == NULL)
     {

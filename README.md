@@ -1131,3 +1131,11 @@ sudo cp /usr/include/x86_64-linux-gnu/openssl/opensslconf.h /usr/local/include/x
 sudo cp /usr/include/x86_64-linux-gnu/openssl/oconfiguration.h /usr/local/include/x86_64-linux-musl/openssl/
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/letsencrypt/live/yourdomain.com/privkey.pem -out /etc/letsencrypt/live/yourdomain.com/cert.pem
 ```
+
+
+***Hashing Passwords***
+
+```sh
+musl-clang -o hash_password hash_password.c -lssl -lcrypto
+./hash_password "John Doe" "password123"
+```

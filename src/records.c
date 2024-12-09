@@ -207,8 +207,13 @@ loadRecordProjectFromFile (const char *filename, RecordProject *project)
     initRecordProject (project);
 
     Record entry;
-    while (fscanf (file, "%d,%255s", &entry.id, entry.name) == 2)
+    while (fscanf (file, "%d,%254s", &entry.id, entry.name) == 2)
         {
+            if (strlen (entry.name) >= sizeof (entry.name) - 1)
+            {
+                entry.name[sizeof (entry.name) - 2] = '.';
+                entry.name[sizeof (entry.name) - 1] = '\0';
+            }
             if (addEntry (project, &entry, NULL) != SUCCESS)
                 {
                     fclose (file);

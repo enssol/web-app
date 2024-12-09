@@ -7,27 +7,46 @@
 
 #include "../include/http_parser.h"
 #include "../include/static_file_handler.h"
+#include "../include/logger.h"
+#include "../include/auth.h"  /* Ensure this is included */
 #include <stdio.h>
 #include <string.h>
 
-void parse_http_request(const char *request, char *file_path)
+void parseHttpRequest(const char *request, char *file_path)
 {
     sscanf(request, "GET /%255s HTTP/1.1", file_path);
+    if (strlen(file_path) == 0)
+    {
+        strcpy(file_path, "index.html");
+    }
 }
 
-void route_request(int client_fd, const char *file_path)
+void routeRequest(int client_fd, const char *file_path)
 {
     if (file_path == NULL)
     {
-        fprintf(stderr, "Error: file_path is NULL\n");
+        logError("Error: file_path is NULL");
         return;
     }
 
-    printf("Routing request for file: %s\n", file_path);
+    logInfo("Routing request for file: %s", file_path);
 
-    if (strcmp(file_path, "") == 0)
+    if (strcmp(file_path, "login") == 0)
     {
-        file_path = "index.html";
+        file_path = "login.html";
+    }
+    else if (strcmp(file_path, "logout") == 0)
+    {
+        file_path = "logout.html";
+    }
+    else if (strcmp(file_path, "welcome") == 0)
+    {
+        file_path = "welcome.html";
+    }
+    else if (strcmp(file_path, "authenticate") == 0)
+    {
+        handleLogin(client_fd);
+        return;
     }
 
     serveStaticFile(client_fd, file_path);

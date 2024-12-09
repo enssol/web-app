@@ -1,7 +1,8 @@
 /**
  * \file config_loader.c
- * \brief Implementation of configuration loader functions.
+ * \brief Implements configuration loading functions.
  * \author Adrian Gallo
+ * \copyright 2024 Enveng Group
  * \license AGPL-3.0-or-later
  */
 
@@ -17,13 +18,67 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <unistd.h>
 
-#define MAX_CONFIG_LINE_LENGTH 256
-#define MAX_LINE_LENGTH 256
+#define MAX_CONFIG_ENTRIES 100
+#define MAX_LINE_LENGTH    256
+#define MAX_KEY_LENGTH     256
+#define MAX_VALUE_LENGTH   256
 
-static GarbageCollector gc;
+typedef struct
+{
+    char key[MAX_KEY_LENGTH];
+    char value[MAX_VALUE_LENGTH];
+} config_entry_t;
+
+static config_entry_t config_entries[MAX_CONFIG_ENTRIES];
+static int entry_count = 0;
+
+int loadConfig(const char *filename, Config *config)
+{
+    FILE *file;
+    char line[MAX_LINE_LENGTH];
+    char *key;
+    char *value;
+    int i;
+
+    file = fopen(filename, "r");
+    if (file == NULL)
+    {
+        logError("Failed to open config file: %s", filename);
+        return -1;
+    }
+
+    while (fgets(line, sizeof(line), file) != NULL)
+    {
+        key = strtok(line, "=");
+        value = strtok(NULL, "\n");
+        if (key != NULL && value != NULL)
+        {
+            strncpy(config_entries[entry_count].key, key, MAX_KEY_LENGTH);
+            strncpy(config_entries[entry_count].value, value, MAX_VALUE_LENGTH);
+            entry_count++;
+        }
+    }
+
+    fclose(file);
+
+    config->entry_count = entry_count;
+
+    return 0;
+}
+
+const char *getConfigValue(const char *key)
+{
+    int i;
+    for (i = 0; i < entry_count; i++)
+    {
+        if (strcmp(config_entries[i].key, key) == 0)
+        {
+            return config_entries[i].value;
+        }
+    }
+    return NULL;
+}
 
 char *configPath = NULL;
 int logLevel = 0;
@@ -33,9 +88,7 @@ int timeout = 0;
 
 int setConfigValue (Config *config, ConfigEntry entry);
 void logFinalConfig (const Config *config);
-int loadConfig (const char *filename, Config *config);
 void freeConfig (Config *config);
-static int parseConfigLine (char *line, ConfigEntry *entry);
 
 /**
  * \brief Sets a configuration value.
@@ -59,39 +112,6 @@ int setConfigValue(Config *config, ConfigEntry entry)
     config->entries[config->entry_count].value[sizeof(config->entries[config->entry_count].value) - 1] = '\0';
 
     config->entry_count++;
-    return SUCCESS;
-}
-
-/**
- * \brief Loads the configuration from a file.
- *
- * \param filename The name of the configuration file.
- * \param config The configuration structure to populate.
- * \return 0 on success, -1 on failure.
- */
-int loadConfig(const char *filename, Config *config)
-{
-    FILE *file;
-    char line[MAX_LINE_LENGTH];
-
-    file = fopen(filename, "r");
-    if (!file)
-    {
-        perror("Failed to open config file");
-        return ERROR_FILE_OPEN;
-    }
-
-    while (fgets(line, sizeof(line), file))
-    {
-        ConfigEntry entry;
-        if (parseConfigLine(line, &entry) == SUCCESS)
-        {
-            setConfigValue(config, entry);
-            logInfo("Loaded config entry: %s = %s", entry.key, entry.value);
-        }
-    }
-
-    fclose(file);
     return SUCCESS;
 }
 
@@ -124,6 +144,8 @@ void freeConfig(Config *config)
         return;
     }
 
+    GarbageCollector gc;
+    initializeGarbageCollector(&gc);
     cleanupGarbageCollector(&gc);
     config->entry_count = 0;
 }
