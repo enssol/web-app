@@ -50,37 +50,11 @@ link_directories(
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 set(BUILD_SHARED_LIBS OFF)
 
-# Add source files
-set(SOURCE_FILES
-    src/add_custom_uint64.s
-    src/atomic_ops.c
-    src/compat.c
-    src/compat_layer.c
-    src/compatStrtol64_asm.s
-    src/config_loader.c
-    src/constants.c
-    src/csv_utils.c
-    src/data_structures.c
-    src/div_custom_uint64.s
-    src/env_loader.c
-    src/error_handler.c
-    src/garbage_collector.c
-    src/http_parser.c
-    src/http_response.c
-    src/logger.c
-    src/main.c
-    src/records.c
-    src/rec_utils.c
-    src/server.c
-    src/sha256_asm.c
-    src/socket_module.c
-    src/ssl_module.c
-    src/static_file_handler.c
-    src/utils.c
-    src/validator.c
-    src/authenticate.c
-    src/auth.c
-)
+# Add source files recursively
+file(GLOB_RECURSE SOURCE_FILES "src/*.c" "src/*.s")
+
+# Optionally, you can print the list of source files for debugging
+# message(STATUS "Source files: ${SOURCE_FILES}")
 
 # Add executable target
 add_executable(enveng_web_app ${SOURCE_FILES})
@@ -100,19 +74,6 @@ target_link_libraries(enveng_web_app
     /usr/local/lib64/libssl.a
     -ldl
     -static
-)
-
-# Add source files containing the missing functions
-target_sources(enveng_web_app PRIVATE
-    ${CMAKE_SOURCE_DIR}/src/compat.c
-    ${CMAKE_SOURCE_DIR}/src/compat_layer.c
-    ${CMAKE_SOURCE_DIR}/src/data_structures.c
-    ${CMAKE_SOURCE_DIR}/src/http_parser.c
-    ${CMAKE_SOURCE_DIR}/src/records.c
-    ${CMAKE_SOURCE_DIR}/src/static_file_handler.c
-    ${CMAKE_SOURCE_DIR}/src/add_custom_uint64.s
-    ${CMAKE_SOURCE_DIR}/src/div_custom_uint64.s
-    ${CMAKE_SOURCE_DIR}/src/compatStrtol64_asm.s
 )
 
 # Ensure Ninja is used as the generator
