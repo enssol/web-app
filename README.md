@@ -1073,7 +1073,7 @@ This should list the `musl-linker` script being invoked for linking.
 1. Generate Build Files:
 
 ```sh
-cmake -G Ninja -S . -B build
+cmake -DENABLE_DEV_CFLAGS=ON -G Ninja -S . -B build
 ```
 
 2. Build the Project:

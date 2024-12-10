@@ -456,7 +456,8 @@
             "maziac.asm-code-lens",
             "snyk-security.snyk-vulnerability-scanner",
             "xaver.clang-format",
-            "ms-vscode.cmake-tools"
+            "ms-vscode.cmake-tools",
+            "ms-vscode.live-server"
         ]
     }
 }

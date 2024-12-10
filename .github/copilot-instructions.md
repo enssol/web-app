@@ -13,6 +13,17 @@ These instructions ensure Copilot's suggestions align with our project's technic
 - Data oriented design is preferred over object oriented design.
 - Format C Code following GNU Coding Standards.
 - Do not use C++ comments (`//`) in C code.
+- Do not use undeclared identifier.
+- Generate code that does not allow variable declarations in for loop initializers
+- Always define variables at the beginning of the block.
+- Always define functions before they are called.
+- Always define reference variables with the `&` operator.
+- Always define pointers with the `*` operator.
+- Always define arrays with the `[]` operator.
+- Never generate code that has undefined reference behaviour.
+- Never redefine a variable in the same scope.
+- Avoid generating code that are conflicting types for the same variable.
+- Avoid previous declarations of variables.
 
 ---
 

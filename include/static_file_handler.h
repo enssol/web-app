@@ -14,8 +14,6 @@
 #define RESPONSE_BUFFER_SIZE 16384
 
 void serveStaticFile(int client_fd, const char *file_path);
-char *getFileExtension(const char *file_name);
 const char *getMimeType(const char *file_ext);
-char *urlDecode(const char *src);
 
 #endif /* STATIC_FILE_HANDLER_H */

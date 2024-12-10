@@ -15,6 +15,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netinet/in.h>
+#include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -30,44 +31,115 @@ void parseHttpRequest (const char *request, char *file_path);
 void routeRequest (int client_fd, const char *file_path);
 
 /**
- * \brief Creates and binds the server socket.
+ * \brief Handles client requests.
  *
- * \return Server socket file descriptor on success, otherwise -1.
+ * \param arg Pointer to the client socket file descriptor.
+ * \return NULL.
  */
-int
-createAndBindSocket (void)
-
-    /**
-     * \brief Accepts an incoming connection.
-     *
-     * \param server_fd Server socket file descriptor.
-     * \return Client socket file descriptor on success, otherwise -1.
-     */
-    int acceptConnection (int server_fd)
-
-    /**
-     * \brief Handles client requests.
-     *
-     * \param arg Pointer to the client socket file descriptor.
-     * \return NULL.
-     */
-    void *handleClient (void *arg)
+void *
+handleClient (void *arg)
 {
     int client_fd = *(int *)arg;
     free (arg);
 
-    char buffer[RESPONSE_BUFFER_SIZE];
+    char buffer[1024];
     ssize_t bytes_read;
-    char file_path[256];
 
-    while ((bytes_read = read (client_fd, buffer, sizeof (buffer))) > 0)
-        {
-            /* Handle client request */
-            logInfo ("Received data from client: %s", buffer);
-            parseHttpRequest (buffer, file_path);
-            routeRequest (client_fd, file_path);
-        }
+    bytes_read = read (client_fd, buffer, sizeof (buffer) - 1);
+    if (bytes_read > 0)
+    {
+        buffer[bytes_read] = '\0';
+        logInfo ("Received request: %s", buffer);
+
+        char file_path[PATH_SIZE];
+        parseHttpRequest (buffer, file_path);
+        routeRequest (client_fd, file_path);
+    }
 
     close (client_fd);
     return NULL;
+}
+
+/**
+ * \brief Initializes the server configuration.
+ *
+ * \param config Pointer to the server configuration structure.
+ */
+void initializeServer(server_config_t *config)
+{
+    int opt = 1;
+
+    config->server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (config->server_fd == -1)
+    {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    if (setsockopt(config->server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
+    {
+        perror("Error setting socket options");
+        close(config->server_fd);
+        exit(EXIT_FAILURE);
+    }
+
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr(getServerIp());
+    server_addr.sin_port = htons(getServerPort());
+
+    if (bind(config->server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
+    {
+        perror("Error binding socket");
+        close(config->server_fd);
+        exit(EXIT_FAILURE);
+    }
+}
+
+/**
+ * \brief Runs the server.
+ *
+ * \param config Pointer to the server configuration structure.
+ * \return 0 on success, -1 on failure.
+ */
+int
+runServer (server_config_t *config)
+{
+    pthread_t thread_id;
+    int       client_fd;
+    int *     client_fd_ptr;
+
+    if (listen (config->server_fd, BACKLOG) < 0)
+    {
+        perror ("Error in listen");
+        return -1;
+    }
+
+    while ((client_fd = accept (config->server_fd, NULL, NULL)) >= 0)
+    {
+        client_fd_ptr = (int *)malloc (sizeof (int));
+        if (client_fd_ptr == NULL)
+        {
+            perror ("Error allocating memory for client_fd_ptr");
+            continue;
+        }
+        *client_fd_ptr = client_fd;
+
+        pthread_create (&thread_id, NULL, handleClient, client_fd_ptr);
+        pthread_detach (thread_id);  // Detach the thread to avoid memory leaks
+    }
+
+    return 0;
+}
+
+/**
+ * \brief Cleans up the server configuration.
+ *
+ * \param config Pointer to the server configuration structure.
+ */
+void
+cleanupServer (server_config_t *config)
+{
+    close(config->server_fd);
 }

@@ -13,7 +13,7 @@ void initLogger(const char *logFile);
 void closeLogger(void);
 void loggerLog(const char *message);
 void logInfo(const char *format, ...);
-void logError(const char *format, ...);
+void logError (const char *format, ...);
 const char *loggerGetLastMessage(void);
 int loggerGetLastError(void);
 

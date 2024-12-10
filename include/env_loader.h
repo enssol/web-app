@@ -2,16 +2,21 @@
  * \file env_loader.h
  * \brief Header file for environment variable loading functions.
  * \author Adrian Gallo
- * \copyright 2024 Enveng Group
  * \license AGPL-3.0-or-later
  */
 
 #ifndef ENV_LOADER_H
 #define ENV_LOADER_H
 
+#define SERVER_IP_SIZE       16
+#define SSL_CERT_FILE_SIZE   256
+#define SSL_KEY_FILE_SIZE    256
 
-#define SERVER_IP
-#define SERVER_PORT
+extern char server_ip[SERVER_IP_SIZE];
+extern int server_port;
+extern char ssl_cert_file[SSL_CERT_FILE_SIZE];
+extern char ssl_key_file[SSL_KEY_FILE_SIZE];
+
 /**
  * \struct env_var_t
  * \brief Structure to hold environment variables.

@@ -8,21 +8,16 @@
 
 #include "../include/config_loader.h"
 #include "../include/error_codes.h"
-#include "../include/logger.h"
-#include "../include/server.h" /* Assuming server_config_t and MAX_CLIENTS are defined here */
 #include "../include/garbage_collector.h"
-#include <arpa/inet.h>
-#include <limits.h>
-#include <netinet/in.h>
-#include <pthread.h>
+#include "../include/logger.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define MAX_CONFIG_ENTRIES 100
-#define MAX_LINE_LENGTH    256
-#define MAX_KEY_LENGTH     256
-#define MAX_VALUE_LENGTH   256
+#define MAX_LINE_LENGTH 256
+#define MAX_KEY_LENGTH 256
+#define MAX_VALUE_LENGTH 256
 
 typedef struct
 {
@@ -33,50 +28,86 @@ typedef struct
 static config_entry_t config_entries[MAX_CONFIG_ENTRIES];
 static int entry_count = 0;
 
-int loadConfig(const char *filename, Config *config)
+char document_root[MAX_PATH_LENGTH];
+
+int
+initializeConfig (Config *config)
+{
+    /* Initialize the config structure */
+    memset (config, 0, sizeof (Config));
+    return SUCCESS;
+}
+
+int
+loadConfig (const char *filename, Config *config)
 {
     FILE *file;
     char line[MAX_LINE_LENGTH];
-    char *key;
-    char *value;
-    int i;
+    char key[MAX_LINE_LENGTH];
+    char value[MAX_LINE_LENGTH];
 
     file = fopen(filename, "r");
     if (file == NULL)
     {
         logError("Failed to open config file: %s", filename);
-        return -1;
+        return ERROR_FILE_OPEN;
     }
 
     while (fgets(line, sizeof(line), file) != NULL)
     {
-        key = strtok(line, "=");
-        value = strtok(NULL, "\n");
-        if (key != NULL && value != NULL)
+        if (sscanf(line, "%255[^=]=%255s", key, value) == 2)
         {
-            strncpy(config_entries[entry_count].key, key, MAX_KEY_LENGTH);
-            strncpy(config_entries[entry_count].value, value, MAX_VALUE_LENGTH);
+            strncpy(config_entries[entry_count].key, key, MAX_KEY_LENGTH - 1);
+            config_entries[entry_count].key[MAX_KEY_LENGTH - 1] = '\0';
+            strncpy(config_entries[entry_count].value, value, MAX_VALUE_LENGTH - 1);
+            config_entries[entry_count].value[MAX_VALUE_LENGTH - 1] = '\0';
             entry_count++;
+            logInfo("Loaded config entry: %s=%s", key, value);
+
+            if (strcmp(key, "server_ip") == 0)
+            {
+                strncpy(config->server_ip, value, sizeof(config->server_ip) - 1);
+                config->server_ip[sizeof(config->server_ip) - 1] = '\0';
+            }
+            else if (strcmp(key, "server_port") == 0)
+            {
+                config->server_port = atoi(value);
+            }
+            else if (strcmp(key, "ssl_cert_file") == 0)
+            {
+                strncpy(config->ssl_cert_file, value, sizeof(config->ssl_cert_file) - 1);
+                config->ssl_cert_file[sizeof(config->ssl_cert_file) - 1] = '\0';
+            }
+            else if (strcmp(key, "ssl_key_file") == 0)
+            {
+                strncpy(config->ssl_key_file, value, sizeof(config->ssl_key_file) - 1);
+                config->ssl_key_file[sizeof(config->ssl_key_file) - 1] = '\0';
+            }
+            else if (strcmp(key, "document_root") == 0)
+            {
+                strncpy(config->document_root, value, sizeof(config->document_root) - 1);
+                config->document_root[sizeof(config->document_root) - 1] = '\0';
+            }
         }
     }
 
     fclose(file);
 
     config->entry_count = entry_count;
-
-    return 0;
+    return SUCCESS;
 }
 
-const char *getConfigValue(const char *key)
+const char *
+getConfigValue (const char *key)
 {
     int i;
     for (i = 0; i < entry_count; i++)
-    {
-        if (strcmp(config_entries[i].key, key) == 0)
         {
-            return config_entries[i].value;
+            if (strcmp (config_entries[i].key, key) == 0)
+                {
+                    return config_entries[i].value;
+                }
         }
-    }
     return NULL;
 }
 
@@ -84,7 +115,6 @@ char *configPath = NULL;
 int logLevel = 0;
 int maxConnections = 0;
 int timeout = 0;
-
 
 int setConfigValue (Config *config, ConfigEntry entry);
 void logFinalConfig (const Config *config);
@@ -97,19 +127,26 @@ void freeConfig (Config *config);
  * \param entry Configuration entry.
  * \return SUCCESS on success, otherwise an error code.
  */
-int setConfigValue(Config *config, ConfigEntry entry)
+int
+setConfigValue (Config *config, ConfigEntry entry)
 {
     if (config->entry_count >= MAX_CONFIG_ENTRIES)
-    {
-        logError("Maximum number of config entries exceeded");
-        return ERROR_CONFIG_LOAD;
-    }
+        {
+            logError ("Maximum number of config entries exceeded");
+            return ERROR_CONFIG_LOAD;
+        }
 
-    strncpy(config->entries[config->entry_count].key, entry.key, sizeof(config->entries[config->entry_count].key) - 1);
-    config->entries[config->entry_count].key[sizeof(config->entries[config->entry_count].key) - 1] = '\0';
+    strncpy (config->entries[config->entry_count].key, entry.key,
+             sizeof (config->entries[config->entry_count].key) - 1);
+    config->entries[config->entry_count]
+        .key[sizeof (config->entries[config->entry_count].key) - 1]
+        = '\0';
 
-    strncpy(config->entries[config->entry_count].value, entry.value, sizeof(config->entries[config->entry_count].value) - 1);
-    config->entries[config->entry_count].value[sizeof(config->entries[config->entry_count].value) - 1] = '\0';
+    strncpy (config->entries[config->entry_count].value, entry.value,
+             sizeof (config->entries[config->entry_count].value) - 1);
+    config->entries[config->entry_count]
+        .value[sizeof (config->entries[config->entry_count].value) - 1]
+        = '\0';
 
     config->entry_count++;
     return SUCCESS;
@@ -123,13 +160,12 @@ int setConfigValue(Config *config, ConfigEntry entry)
 void
 logFinalConfig (const Config *config)
 {
-    int i;
-
     logInfo("Configuration loaded:");
-    for (i = 0; i < config->entry_count; i++)
-    {
-        logInfo("  %s = %s", config->entries[i].key, config->entries[i].value);
-    }
+    logInfo("Server IP: %s", config->server_ip);
+    logInfo("Server Port: %d", config->server_port);
+    logInfo("Document Root: %s", config->document_root);
+    logInfo("SSL Cert File: %s", config->ssl_cert_file);
+    logInfo("SSL Key File: %s", config->ssl_key_file);
 }
 
 /**
@@ -137,16 +173,14 @@ logFinalConfig (const Config *config)
  *
  * \param config Pointer to the configuration structure to free.
  */
-void freeConfig(Config *config)
+void
+freeConfig (Config *config)
 {
     if (config == NULL)
-    {
-        return;
-    }
+        {
+            return;
+        }
 
-    GarbageCollector gc;
-    initializeGarbageCollector(&gc);
-    cleanupGarbageCollector(&gc);
     config->entry_count = 0;
 }
 
@@ -193,6 +227,8 @@ checkAdditionOverflow (int a, int b)
 int
 loadIniConfig (const char *filename)
 {
+    Config config;
+
     if (filename == NULL)
         {
             logError ("Invalid filename");
@@ -201,48 +237,33 @@ loadIniConfig (const char *filename)
 
     logInfo ("Loading configuration from %s", filename);
 
-    /* Load configuration logic here */
+    FILE *file = fopen (filename, "r");
 
-    return 0;
-}
-
-void
-initialize_server (server_config_t *config)
-{
-    (void)config;
-}
-
-int
-run_server (server_config_t *config)
-{
-    pthread_t thread_id;
-    int client_fd;
-    int *client_fd_ptr;
-
-    if (listen (config->server_fd, MAX_CLIENTS) < 0)
+    if (file == NULL)
         {
-            perror ("Error in listen");
+            logError ("Failed to open file: %s", filename);
             return -1;
         }
 
-    while ((client_fd = accept (config->server_fd, NULL, NULL)) >= 0)
-        {
-            client_fd_ptr = (int *)malloc (sizeof (int));
-            if (client_fd_ptr == NULL)
-                {
-                    perror ("Error allocating memory for client_fd_ptr");
-                    continue;
-                }
-            *client_fd_ptr = client_fd;
+    char line[MAX_LINE_LENGTH];
+    ConfigEntry entry;
 
-            pthread_create (&thread_id, NULL, handle_client, client_fd_ptr);
+    while (fgets (line, sizeof (line), file) != NULL)
+        {
+            if (parseConfigLine (line, &entry) == 0)
+                {
+                    if (setConfigValue (&config, entry) != 0)
+                        {
+                            logError ("Failed to set config value");
+                            fclose (file);
+                            return -1;
+                        }
+                }
         }
 
-    return 0;
-}
+    fclose (file);
 
-void
-cleanup_server (server_config_t *config)
-{
-    (void)config;
+    logFinalConfig (&config);
+
+    return 0;
 }

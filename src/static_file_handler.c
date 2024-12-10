@@ -8,6 +8,7 @@
 #include "../include/static_file_handler.h"
 #include "../include/config_loader.h"
 #include "../include/constants.h"
+#include "../include/http_response.h"
 #include "../include/logger.h"
 #include <fcntl.h> /* Include for open and O_RDONLY */
 #include <stdio.h>
@@ -18,6 +19,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#define RESPONSE_BUFFER_SIZE 16384
+#define MAX_PATH_LENGTH 256
+
+extern char document_root[MAX_PATH_LENGTH];
+
 /* External config variable */
 extern Config config;
 
@@ -27,118 +33,99 @@ extern Config config;
  * \param c The hexadecimal character.
  * \return The integer value.
  */
-static int hexValue(char c)
+static int
+hexValue (char c)
 {
     if (c >= '0' && c <= '9')
-    {
-        return c - '0';
-    }
+        {
+            return c - '0';
+        }
     if (c >= 'a' && c <= 'f')
-    {
-        return c - 'a' + 10;
-    }
+        {
+            return c - 'a' + 10;
+        }
     if (c >= 'A' && c <= 'F')
-    {
-        return c - 'A' + 10;
-    }
+        {
+            return c - 'A' + 10;
+        }
     return -1;
 }
 
-const char *getMimeType(const char *file_ext)
+/**
+ * \brief Gets the MIME type based on the file extension.
+ *
+ * \param file_ext The file extension.
+ * \return The MIME type.
+ */
+const char *
+getMimeType (const char *file_ext)
 {
-    if (strcasecmp(file_ext, "html") == 0) return "text/html";
-    if (strcasecmp(file_ext, "txt") == 0) return "text/plain";
-    if (strcasecmp(file_ext, "jpg") == 0 || strcasecmp(file_ext, "jpeg") == 0) return "image/jpeg";
-    if (strcasecmp(file_ext, "png") == 0) return "image/png";
+    if (strcasecmp (file_ext, "html") == 0)
+        return "text/html";
+    if (strcasecmp (file_ext, "txt") == 0)
+        return "text/plain";
+    if (strcasecmp (file_ext, "jpg") == 0
+        || strcasecmp (file_ext, "jpeg") == 0)
+        return "image/jpeg";
+    if (strcasecmp (file_ext, "png") == 0)
+        return "image/png";
     return "application/octet-stream";
 }
 
-char *getFileExtension(const char *file_name)
+void
+serveStaticFile (int client_fd, const char *file_path)
 {
-    char *dot = strrchr(file_name, '.');
-    if (!dot || dot == file_name) return "";
-    return dot + 1;
-}
-
-char *urlDecode(const char *src)
-{
-    char *decoded = malloc(strlen(src) + 1);
-    char *p = decoded;
-
-    if (decoded == NULL)
-    {
-        return NULL;
-    }
-
-    while (*src)
-    {
-        if (*src == '%')
-        {
-            if (src[1] && src[2])
-            {
-                *p++ = (char)((hexValue(src[1]) << 4) | hexValue(src[2]));
-                src += 2;
-            }
-        }
-        else if (*src == '+')
-        {
-            *p++ = ' ';
-        }
-        else
-        {
-            *p++ = *src;
-        }
-        src++;
-    }
-    *p = '\0';
-    return decoded;
-}
-
-void serveStaticFile(int client_fd, const char *file_path)
-{
-    char full_path[4096];  /* Fixed size array */
-    struct stat st;
+    char full_path[PATH_MAX];
     int file_fd;
-    char *file_ext;
+    char *file_extension;
     const char *mime_type;
     char header[256];
-    char buffer[1024];
+    char buffer[RESPONSE_BUFFER_SIZE];
     ssize_t bytes_read;
 
-    snprintf(full_path, sizeof(full_path), "%s/%s", getConfigValue("document_root"), file_path);
+    snprintf (full_path, sizeof (full_path), "%s/%s", document_root,
+              file_path);
+    logInfo ("Full file path: %s", full_path);
 
-    if (stat(full_path, &st) == -1)
-    {
-        const char *not_found_response = "HTTP/1.1 404 Not Found\r\n\r\n";
-        send(client_fd, not_found_response, strlen(not_found_response), 0);
-        return;
-    }
-
-    file_ext = getFileExtension(full_path);
-    mime_type = getMimeType(file_ext);
-    if (strcmp(mime_type, "application/octet-stream") == 0)
-    {
-        const char *unsupported_response = "HTTP/1.1 415 Unsupported Media Type\r\n\r\n";
-        send(client_fd, unsupported_response, strlen(unsupported_response), 0);
-        return;
-    }
-
-    snprintf(header, sizeof(header), "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %ld\r\n\r\n", mime_type, st.st_size);
-    send(client_fd, header, strlen(header), 0);
-
-    /* Send the file content */
-    file_fd = open(full_path, O_RDONLY);
+    file_fd = open (full_path, O_RDONLY);
     if (file_fd == -1)
-    {
-        const char *error_response = "HTTP/1.1 500 Internal Server Error\r\n\r\n";
-        send(client_fd, error_response, strlen(error_response), 0);
-        return;
-    }
+        {
+            const char *not_found_response
+                = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
+            send (client_fd, not_found_response, strlen (not_found_response),
+                  0);
+            logError ("Failed to open file: %s", full_path);
+            return;
+        }
 
-    while ((bytes_read = read(file_fd, buffer, sizeof(buffer))) > 0)
-    {
-        send(client_fd, buffer, bytes_read, 0);
-    }
+    /* Get the file extension and MIME type */
+    file_extension = getFileExtension (file_path);
+    mime_type = getMimeType (file_extension);
+    free (file_extension);
 
-    close(file_fd);
+    if (strcmp (mime_type, "application/octet-stream") == 0)
+        {
+            const char *unsupported_response
+                = "HTTP/1.1 415 Unsupported Media Type\r\nContent-Length: "
+                  "0\r\n\r\n";
+            send (client_fd, unsupported_response,
+                  strlen (unsupported_response), 0);
+            close (file_fd);
+            logError ("Unsupported media type for file: %s", full_path);
+            return;
+        }
+
+    snprintf (header, sizeof (header),
+              "HTTP/1.1 200 OK\r\nContent-Type: %s\r\n\r\n", mime_type);
+    send (client_fd, header, strlen (header), 0);
+    logInfo ("Sending response header: %s", header);
+
+    while ((bytes_read = read (file_fd, buffer, sizeof (buffer))) > 0)
+        {
+            send (client_fd, buffer, bytes_read, 0);
+            logInfo ("Sent %zd bytes of file: %s", bytes_read, full_path);
+        }
+
+    close (file_fd);
+    logInfo ("Finished serving file: %s", full_path);
 }

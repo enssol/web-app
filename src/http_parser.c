@@ -6,48 +6,59 @@
  */
 
 #include "../include/http_parser.h"
+#include "../include/http_response.h"
 #include "../include/static_file_handler.h"
 #include "../include/logger.h"
-#include "../include/auth.h"  /* Ensure this is included */
 #include <stdio.h>
 #include <string.h>
 
-void parseHttpRequest(const char *request, char *file_path)
+#define MAX_PATH_LENGTH 256
+
+typedef struct {
+    const char *route;
+    const char *file_path;
+} RouteMapping;
+
+RouteMapping routeMappings[] = {
+    {"/", "index.html"},
+    {"/login", "login.html"},
+    {"/logout", "logout.html"},
+    {"/welcome", "welcome.html"}
+};
+
+const char *getFilePath(const char *route)
 {
-    sscanf(request, "GET /%255s HTTP/1.1", file_path);
-    if (strlen(file_path) == 0)
+    size_t i;
+    for (i = 0; i < sizeof(routeMappings) / sizeof(RouteMapping); ++i)
     {
-        strcpy(file_path, "index.html");
+        if (strcmp(route, routeMappings[i].route) == 0)
+        {
+            logInfo("Route found: %s -> %s", route, routeMappings[i].file_path);
+            return routeMappings[i].file_path;
+        }
     }
+    logWarning("Route not found: %s", route);
+    return NULL;
 }
 
-void routeRequest(int client_fd, const char *file_path)
+void parseHttpRequest(const char *request, char *route, char *method)
 {
-    if (file_path == NULL)
-    {
-        logError("Error: file_path is NULL");
-        return;
-    }
+    sscanf(request, "%s %255s HTTP/1.1", method, route);
+    logInfo("Parsed HTTP request: Method=%s, Route=%s", method, route);
+}
 
-    logInfo("Routing request for file: %s", file_path);
-
-    if (strcmp(file_path, "login") == 0)
+void routeRequest(int client_fd, const char *route, const char *method)
+{
+    const char *file_path = getFilePath(route);
+    if (file_path)
     {
-        file_path = "login.html";
+        logInfo("Serving file: %s", file_path);
+        serveStaticFile(client_fd, file_path);
     }
-    else if (strcmp(file_path, "logout") == 0)
+    else
     {
-        file_path = "logout.html";
+        const char *not_found_response = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
+        send(client_fd, not_found_response, strlen(not_found_response), 0);
+        logError("File not found for route: %s", route);
     }
-    else if (strcmp(file_path, "welcome") == 0)
-    {
-        file_path = "welcome.html";
-    }
-    else if (strcmp(file_path, "authenticate") == 0)
-    {
-        handleLogin(client_fd);
-        return;
-    }
-
-    serveStaticFile(client_fd, file_path);
 }

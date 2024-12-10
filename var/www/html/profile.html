@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Management</title>
+    <script>
+        function getUsers() {
+            const users = localStorage.getItem('users');
+            return users ? JSON.parse(users) : [];
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
+        function handleProfileCreate(event) {
+            event.preventDefault();
+            const username = document.getElementById('new_username').value;
+            const password = document.getElementById('new_password').value;
+            const users = getUsers();
+            users.push({ username, password });
+            saveUsers(users);
+            window.location.href = 'profile_created.html';
+        }
+
+        function handleProfileUpdate(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const users = getUsers();
+            const user = users.find(user => user.username === username);
+            if (user) {
+                user.password = password;
+                saveUsers(users);
+                window.location.href = 'profile_updated.html';
+            } else {
+                alert('User not found');
+            }
+        }
+
+        function handleProfileDelete(event) {
+            event.preventDefault();
+            const username = document.getElementById('delete_username').value;
+            let users = getUsers();
+            users = users.filter(user => user.username !== username);
+            saveUsers(users);
+            window.location.href = 'profile_deleted.html';
+        }
+
+        function renderUsers() {
+            const users = getUsers();
+            const userTable = document.getElementById('userTable');
+            userTable.innerHTML = '';
+            users.forEach(user => {
+                const row = userTable.insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                cell1.innerHTML = user.username;
+                cell2.innerHTML = user.password;
+            });
+        }
+
+        window.onload = renderUsers;
+    </script>
+</head>
+<body>
+    <h1>Profile Management</h1>
+    <button onclick="window.location.href='welcome.html'">Back to Welcome</button>
+    <button onclick="window.location.href='login.html'">Logout</button>
+    <h2>Create New Profile</h2>
+    <form id="createProfileForm" onsubmit="handleProfileCreate(event)">
+        <label for="new_username">Username:</label>
+        <input type="text" id="new_username" name="new_username" required><br><br>
+        <label for="new_password">Password:</label>
+        <input type="password" id="new_password" name="new_password" required><br><br>
+        <button type="submit">Create Profile</button>
+    </form>
+
+    <h2>Update Profile</h2>
+    <form id="updateProfileForm" onsubmit="handleProfileUpdate(event)">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit">Update Profile</button>
+    </form>
+
+    <h2>Delete Profile</h2>
+    <form id="deleteProfileForm" onsubmit="handleProfileDelete(event)">
+        <label for="delete_username">Username:</label>
+        <input type="text" id="delete_username" name="delete_username" required><br><br>
+        <button type="submit">Delete Profile</button>
+    </form>
+
+    <h2>User List</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Password</th>
+            </tr>
+        </thead>
+        <tbody id="userTable">
+        </tbody>
+    </table>
+</body>
+</html>

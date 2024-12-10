@@ -11,6 +11,8 @@
 #include "../include/error_codes.h"
 #include "../include/garbage_collector.h"
 #include "../include/logger.h"
+#include "../include/project.h"
+#include "../include/config_loader.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -71,6 +73,12 @@ addEntry (RecordProject *project, const Record *entry, GarbageCollector *gc)
             return ERROR_NULL_POINTER;
         }
 
+    new_entries = realloc (project->entries, (project->entry_count + 1) * sizeof (Record));
+    if (new_entries == NULL)
+        {
+            return ERROR_MEMORY_ALLOCATION;
+        }
+
     project->entries = new_entries;
     project->entries[project->entry_count] = *entry;
     project->entry_count++;
@@ -88,21 +96,22 @@ addEntry (RecordProject *project, const Record *entry, GarbageCollector *gc)
 int
 removeEntry (RecordProject *project, size_t index)
 {
+    size_t i;
+
     if (project == NULL || index >= project->entry_count)
         {
             return ERROR_INVALID_VALUE;
         }
 
-    for (size_t i = index; i < project->entry_count - 1; i++)
+    for (i = index; i < project->entry_count - 1; i++)
         {
             project->entries[i] = project->entries[i + 1];
         }
 
-    Record *new_entries = realloc (project->entries, (project->entry_count - 1)
-                                                         * sizeof (Record));
+    Record *new_entries = realloc (project->entries, (project->entry_count - 1) * sizeof (Record));
     if (new_entries == NULL && project->entry_count > 1)
         {
-            return ERROR_MEMORY_ALLOC;
+            return ERROR_MEMORY_ALLOCATION;
         }
 
     project->entries = new_entries;
@@ -121,12 +130,14 @@ removeEntry (RecordProject *project, size_t index)
 Record *
 findEntryById (const RecordProject *project, int id)
 {
+    size_t i;
+
     if (project == NULL)
         {
             return NULL;
         }
 
-    for (size_t i = 0; i < project->entry_count; i++)
+    for (i = 0; i < project->entry_count; i++)
         {
             if (project->entries[i].id == id)
                 {
@@ -148,12 +159,14 @@ findEntryById (const RecordProject *project, int id)
 int
 updateEntryById (RecordProject *project, int id, const Record *new_entry)
 {
+    Record *entry;
+
     if (project == NULL || new_entry == NULL)
         {
             return ERROR_NULL_POINTER;
         }
 
-    Record *entry = findEntryById (project, id);
+    entry = findEntryById (project, id);
     if (entry == NULL)
         {
             return ERROR_INVALID_VALUE;
@@ -171,12 +184,14 @@ updateEntryById (RecordProject *project, int id, const Record *new_entry)
 void
 printRecordProject (const RecordProject *project)
 {
+    size_t i;
+
     if (project == NULL)
         {
             return;
         }
 
-    for (size_t i = 0; i < project->entry_count; i++)
+    for (i = 0; i < project->entry_count; i++)
         {
             printf ("Entry %zu: ID=%d, Name=%s\n", i, project->entries[i].id,
                     project->entries[i].name);
@@ -193,12 +208,15 @@ printRecordProject (const RecordProject *project)
 int
 loadRecordProjectFromFile (const char *filename, RecordProject *project)
 {
+    FILE *file;
+    Record entry;
+
     if (filename == NULL || project == NULL)
         {
             return ERROR_NULL_POINTER;
         }
 
-    FILE *file = fopen (filename, "r");
+    file = fopen (filename, "r");
     if (file == NULL)
         {
             return ERROR_FILE_OPEN;
@@ -206,7 +224,6 @@ loadRecordProjectFromFile (const char *filename, RecordProject *project)
 
     initRecordProject (project);
 
-    Record entry;
     while (fscanf (file, "%d,%254s", &entry.id, entry.name) == 2)
         {
             if (strlen (entry.name) >= sizeof (entry.name) - 1)
@@ -217,7 +234,7 @@ loadRecordProjectFromFile (const char *filename, RecordProject *project)
             if (addEntry (project, &entry, NULL) != SUCCESS)
                 {
                     fclose (file);
-                    return ERROR_MEMORY_ALLOC;
+                    return ERROR_MEMORY_ALLOCATION;
                 }
         }
 

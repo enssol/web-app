@@ -10,9 +10,13 @@
 #define HTTP_RESPONSE_H
 
 #include <stdbool.h>
+#include "../include/http_parser.h"
 
 #define RESPONSE_BUFFER_SIZE 16384
 
-void *handle_client(void *client_fd_ptr);
+void *handleClient(void *client_fd_ptr);
+void sendResponse(int client_fd, const char *file_path);
+char *getFileExtension(const char *file_name);
+char *urlDecode(const char *src);
 
 #endif /* HTTP_RESPONSE_H */

@@ -10,30 +10,19 @@
 #include "../include/utils.h"
 #include "../include/error_codes.h"
 #include "../include/logger.h"
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define MAX_LINE_LENGTH 256
-#define ENV_FILE ".env"
 #define SERVER_IP_SIZE 16
 #define SSL_CERT_FILE_SIZE 256
 #define SSL_KEY_FILE_SIZE 256
 
-extern char server_ip[SERVER_IP_SIZE];
-extern int server_port;
-extern char SSL_CERT_FILE[SSL_CERT_FILE_SIZE];
-extern char SSL_KEY_FILE[SSL_KEY_FILE_SIZE];
-
-/**
- * \enum LINE_SIZE
- * \brief Defines the maximum size of a line in the environment file.
- */
-enum
-{
-    LINE_SIZE = 1024
-};
+char server_ip[SERVER_IP_SIZE];
+int server_port;
+char ssl_cert_file[SSL_CERT_FILE_SIZE];
+char ssl_key_file[SSL_KEY_FILE_SIZE];
 
 /**
  * \brief Loads environment configuration from a file.
@@ -45,6 +34,8 @@ int loadEnvConfig(const char *filename)
 {
     FILE *file;
     char line[MAX_LINE_LENGTH];
+    char key[MAX_LINE_LENGTH];
+    char value[MAX_LINE_LENGTH];
 
     file = fopen(filename, "r");
     if (!file)
@@ -55,7 +46,29 @@ int loadEnvConfig(const char *filename)
 
     while (fgets(line, sizeof(line), file))
     {
-        logInfo("Loaded environment variable: %s", line);
+        if (sscanf(line, "%255[^=]=%255s", key, value) == 2)
+        {
+            if (strcmp(key, "SERVER_IP") == 0)
+            {
+                strncpy(server_ip, value, SERVER_IP_SIZE - 1);
+                server_ip[SERVER_IP_SIZE - 1] = '\0';
+            }
+            else if (strcmp(key, "SERVER_PORT") == 0)
+            {
+                server_port = atoi(value);
+            }
+            else if (strcmp(key, "SSL_CERT_FILE") == 0)
+            {
+                strncpy(ssl_cert_file, value, SSL_CERT_FILE_SIZE - 1);
+                ssl_cert_file[SSL_CERT_FILE_SIZE - 1] = '\0';
+            }
+            else if (strcmp(key, "SSL_KEY_FILE") == 0)
+            {
+                strncpy(ssl_key_file, value, SSL_KEY_FILE_SIZE - 1);
+                ssl_key_file[SSL_KEY_FILE_SIZE - 1] = '\0';
+            }
+            logInfo("Loaded environment variable: %s=%s", key, value);
+        }
     }
 
     fclose(file);

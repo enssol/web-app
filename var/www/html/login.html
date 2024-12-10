@@ -4,10 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <script>
+        function handleLogin(event) {
+            event.preventDefault();
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+            if (username === 'john' && password === 'doe') {
+                window.location.href = 'welcome.html';
+            } else {
+                alert('Invalid username or password');
+            }
+        }
+    </script>
 </head>
 <body>
     <h1>Login</h1>
-    <form id="loginForm" action="authenticate" method="post">
+    <form id="loginForm" onsubmit="handleLogin(event)">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required><br><br>
         <label for="password">Password:</label>

@@ -20,6 +20,9 @@ typedef struct {
     int addrlen;
 } server_config_t;
 
-void *handle_client(void *arg);
+void *handleClient(void *arg);
+void initializeServer(server_config_t *config);
+int runServer(server_config_t *config);
+void cleanupServer(server_config_t *config);
 
 #endif /* SERVER_H */
