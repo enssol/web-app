@@ -8,19 +8,7 @@ set(CMAKE_C_STANDARD 90)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_COMPILER musl-clang)
-
-# Define options for development and production CFLAGS
-option(ENABLE_DEV_CFLAGS "Enable non-restrictive CFLAGS for development" OFF)
-option(ENABLE_PROD_CFLAGS "Enable strict CFLAGS for production" OFF)
-
-# Set CFLAGS based on the options
-if(ENABLE_DEV_CFLAGS)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c90 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -I/usr/local/include -I/usr/local/include/openssl -O0 -g")
-endif()
-
-if(ENABLE_PROD_CFLAGS)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c90 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -I/usr/local/include -I/usr/local/include/openssl -Wall -ansi -Wextra -pedantic -O3 -ffunction-sections -fdata-sections -fno-common -fstack-protector-strong -Wno-long-long -static -p")
-endif()
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c90 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -I/usr/local/include -I/usr/local/include/openssl -Wall -ansi -Wextra -pedantic -O3 -ffunction-sections -fdata-sections -fno-common -fstack-protector-strong -Wno-long-long -static -p
 
 # Disable C++ compiler
 set(CMAKE_CXX_COMPILER "")
