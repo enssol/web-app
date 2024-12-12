@@ -130,77 +130,34 @@ These instructions ensure Copilot's suggestions align with our project's technic
 - Ensure that the generated snippets adhere to the project's coding standards and practices as outlined in this document.
 - Provide context-specific suggestions that integrate seamlessly with the existing codebase.
 
-### File Organization
-
-- Maintain the following directory structure:
+## basic directory structure
 
 ```plaintext
 .
-├── ACKNOWLEDGEMENT.md
-├── AUTHORS
-├── build
-├── CHANGELOG
-├── CMakeLists.txt
-├── CODE_OF_CONDUCT.md
-├── compile_commands.json
-├── CONTRIBUTING.md
-├── COPYING
-├── CPackConfig.cmake
-├── docs
-│   ├── ARCHITECTURE.md
-│   ├── CONTACT.md
-│   ├── CONTRIBUTORS.md
-│   ├── CREDITS.md
-│   ├── DEVELOPERS.md
-│   ├── DISCLAIMER.md
-│   ├── EXAMPLES.md
-│   ├── FAQ.md
-│   ├── GLOSSARY.md
-│   ├── GOVERNANCE.md
-│   ├── HISTORY.md
-│   ├── MIGRATION.md
-│   ├── PRIVACY.md
-│   ├── REFERENCES.md
-│   ├── RELEASE_NOTES.md
-│   ├── REQUIREMENTS.md
-│   ├── ROADMAP.md
-│   ├── STYLEGUIDE.md
-│   ├── TERMS.md
-│   ├── TROUBLESHOOTING.md
-│   ├── TUTORIAL.md
-│   └── USAGE.md
-├── Doxyfile
-├── HACKING
-├── include
-│   ├── auth.h
-│   ├── database.h
-│   ├── server.h
-│   └── utils.h
-├── INSTALL
-├── LICENSE
-├── MAINTAINERS
-├── MONITORING_AND_EVALUATION
-├── package.json
-├── package-lock.json
-├── README.md
-├── SECURITY.md
-├── src
+├── include/           # Header files
+│   ├── auth.h        # Authentication functions
+│   ├── config.h      # Configuration handling
+│   ├── database.h    # Database operations
+│   ├── http.h        # HTTP/HTTPS handling
+│   ├── logger.h      # Logging functionality
+│   ├── server.h      # Server core functionality
+│   └── utils.h       # Utility functions
+├── src/              # Source files
 │   ├── auth.c
+│   ├── config.c
 │   ├── database.c
+│   ├── http.c
+│   ├── logger.c
 │   ├── main.c
-│   └── server.c
-├── ssl
-│   ├── cert.pem
-│   └── privkey.pem
-├── static
+│   ├── server.c
+│   └── utils.c
+├── static/           # Static web content
+│   ├── index.html    # Login page
 │   ├── dashboard.html
-│   ├── index.html
-│   └── records.rec
-├── SUPPORT.md
-├── TODO.md
-└── web-app.code-workspace
-
-7 directories, 57 files
+│   └── profile.html
+├── docs/            # Documentation
+├── tests/           # Unit tests
+└── Makefile
 ```
 
 ### POSIX Headers only allowed to use
