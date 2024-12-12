@@ -1,145 +1,100 @@
 /**
- * \file server.c
- * \brief Implements server-specific functions.
- * \author Adrian Gallo
- * \copyright 2024 Enveng Group
- * \license AGPL-3.0-or-later
+ * Copyright 2024 Enveng Group - Adrian Gallo.
+ * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
+#include "server.h"
 
-#include "../include/server.h"
-#include "../include/config_loader.h"
-#include "../include/http_parser.h"
-#include "../include/http_response.h"
-#include "../include/logger.h"
-#include "../include/socket_module.h"
-#include <arpa/inet.h>
-#include <errno.h>
-#include <netinet/in.h>
-#include <pthread.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+void initializeServer(void) {
+    int server_socket, client_socket;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len;
 
-#define BACKLOG 10
-#define PATH_SIZE 256
-#define MAX_PATH_LENGTH 256
-
-/* Function prototypes */
-const char *getServerIp (void);
-int getServerPort (void);
-void parseHttpRequest (const char *request, char *file_path);
-void routeRequest (int client_fd, const char *file_path);
-
-/**
- * \brief Handles client requests.
- *
- * \param arg Pointer to the client socket file descriptor.
- * \return NULL.
- */
-void *
-handleClient (void *arg)
-{
-    int client_fd = *(int *)arg;
-    free (arg);
-
-    char buffer[1024];
-    ssize_t bytes_read;
-
-    bytes_read = read (client_fd, buffer, sizeof (buffer) - 1);
-    if (bytes_read > 0)
-    {
-        buffer[bytes_read] = '\0';
-        logInfo ("Received request: %s", buffer);
-
-        char file_path[PATH_SIZE];
-        parseHttpRequest (buffer, file_path);
-        routeRequest (client_fd, file_path);
-    }
-
-    close (client_fd);
-    return NULL;
-}
-
-/**
- * \brief Initializes the server configuration.
- *
- * \param config Pointer to the server configuration structure.
- */
-void initializeServer(server_config_t *config)
-{
-    int opt = 1;
-
-    config->server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (config->server_fd == -1)
-    {
-        perror("Error creating socket");
+    // Create socket
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket < 0) {
+        perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
 
-    if (setsockopt(config->server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
-    {
-        perror("Error setting socket options");
-        close(config->server_fd);
-        exit(EXIT_FAILURE);
-    }
-
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(server_addr));
+    // Configure server address
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(getServerIp());
-    server_addr.sin_port = htons(getServerPort());
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(SERVER_PORT);
 
-    if (bind(config->server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-    {
-        perror("Error binding socket");
-        close(config->server_fd);
+    // Bind socket
+    if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Socket bind failed");
+        close(server_socket);
         exit(EXIT_FAILURE);
     }
-}
 
-/**
- * \brief Runs the server.
- *
- * \param config Pointer to the server configuration structure.
- * \return 0 on success, -1 on failure.
- */
-int
-runServer (server_config_t *config)
-{
-    pthread_t thread_id;
-    int       client_fd;
-    int *     client_fd_ptr;
-
-    if (listen (config->server_fd, BACKLOG) < 0)
-    {
-        perror ("Error in listen");
-        return -1;
+    // Listen for connections
+    if (listen(server_socket, 10) < 0) {
+        perror("Socket listen failed");
+        close(server_socket);
+        exit(EXIT_FAILURE);
     }
 
-    while ((client_fd = accept (config->server_fd, NULL, NULL)) >= 0)
-    {
-        client_fd_ptr = (int *)malloc (sizeof (int));
-        if (client_fd_ptr == NULL)
-        {
-            perror ("Error allocating memory for client_fd_ptr");
+    printf("Server running on port %d\n", SERVER_PORT);
+
+    // Handle clients
+    while (1) {
+        addr_len = sizeof(client_addr);
+        client_socket = accept(server_socket, (struct sockaddr *)&client_addr, &addr_len);
+        if (client_socket < 0) {
+            perror("Client connection failed");
             continue;
         }
-        *client_fd_ptr = client_fd;
 
-        pthread_create (&thread_id, NULL, handleClient, client_fd_ptr);
-        pthread_detach (thread_id);  // Detach the thread to avoid memory leaks
+        handleClient(client_socket);
     }
 
-    return 0;
+    close(server_socket);
 }
 
-/**
- * \brief Cleans up the server configuration.
- *
- * \param config Pointer to the server configuration structure.
- */
-void
-cleanupServer (server_config_t *config)
-{
-    close(config->server_fd);
+void handleClient(int client_socket) {
+    char buffer[MAX_BUFFER_SIZE];
+    ssize_t bytes_read;
+
+    bytes_read = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
+    if (bytes_read <= 0) {
+        perror("Failed to receive data");
+        close(client_socket);
+        return;
+    }
+
+    buffer[bytes_read] = '\0';
+
+    if (strncmp(buffer, "GET /login", 10) == 0) {
+        sendStaticPage(client_socket, "static/login.html");
+    } else if (strncmp(buffer, "GET /dashboard", 14) == 0) {
+        sendStaticPage(client_socket, "static/dashboard.html");
+    } else if (strncmp(buffer, "GET /update_profile", 19) == 0) {
+        sendStaticPage(client_socket, "static/update_profile.html");
+    } else {
+        const char *error_page = "HTTP/1.1 404 Not Found\r\n\r\n";
+        send(client_socket, error_page, strlen(error_page), 0);
+    }
+
+    close(client_socket);
+}
+
+void sendStaticPage(int client_socket, const char *filepath) {
+    FILE *file = fopen(filepath, "r");
+    if (!file) {
+        perror("Failed to open file");
+        const char *error_page = "HTTP/1.1 500 Internal Server Error\r\n\r\n";
+        send(client_socket, error_page, strlen(error_page), 0);
+        return;
+    }
+
+    char response[MAX_BUFFER_SIZE];
+    snprintf(response, sizeof(response), "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n");
+    send(client_socket, response, strlen(response), 0);
+
+    while (fgets(response, sizeof(response), file)) {
+        send(client_socket, response, strlen(response), 0);
+    }
+
+    fclose(file);
 }

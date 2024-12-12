@@ -137,14 +137,15 @@ These instructions ensure Copilot's suggestions align with our project's technic
 ```plaintext
 .
 ├── ACKNOWLEDGEMENT.md
-├── app.log
 ├── AUTHORS
+├── build
 ├── CHANGELOG
 ├── CMakeLists.txt
 ├── CODE_OF_CONDUCT.md
 ├── compile_commands.json
 ├── CONTRIBUTING.md
 ├── COPYING
+├── CPackConfig.cmake
 ├── docs
 │   ├── ARCHITECTURE.md
 │   ├── CONTACT.md
@@ -169,48 +170,14 @@ These instructions ensure Copilot's suggestions align with our project's technic
 │   ├── TUTORIAL.md
 │   └── USAGE.md
 ├── Doxyfile
-├── entries[config-
-├── entry_count++]
-├── etc
-│   ├── config.ini
-│   ├── letsencrypt
-│   │   └── live
-│   │       └── yourdomain.com
-│   │           ├── cert.pem
-│   │           └── privkey.pem
-│   └── server
-│       └── auth.passwd
 ├── HACKING
 ├── include
-│   ├── atomic_ops.h
-│   ├── compat.h
-│   ├── compat_layer.h
-│   ├── compat_types.h
-│   ├── config_loader.h
-│   ├── constants.h
-│   ├── csv_utils.h
-│   ├── data_structures.h
-│   ├── env_loader.h
-│   ├── error_codes.h
-│   ├── error_handler.h
-│   ├── external_includes.h
-│   ├── garbage_collector.h
-│   ├── http_parser.h
-│   ├── http_response.h
-│   ├── logger.h
-│   ├── project.h
-│   ├── records.h
-│   ├── rec_utils.h
+│   ├── auth.h
+│   ├── database.h
 │   ├── server.h
-│   ├── socket_module.h
-│   ├── ssl_module.h
-│   ├── static_file_handler.h
-│   ├── test_framework.h
-│   ├── utils.h
-│   └── validator.h
+│   └── utils.h
 ├── INSTALL
 ├── LICENSE
-├── logfile.log
 ├── MAINTAINERS
 ├── MONITORING_AND_EVALUATION
 ├── package.json
@@ -218,43 +185,22 @@ These instructions ensure Copilot's suggestions align with our project's technic
 ├── README.md
 ├── SECURITY.md
 ├── src
-│   ├── add_custom_uint64.s
-│   ├── atomic_ops.c
-│   ├── compat.c
-│   ├── compat_layer.c
-│   ├── compatStrtol64_asm.s
-│   ├── config_loader.c
-│   ├── constants.c
-│   ├── csv_utils.c
-│   ├── data_structures.c
-│   ├── div_custom_uint64.s
-│   ├── env_loader.c
-│   ├── error_handler.c
-│   ├── garbage_collector.c
-│   ├── http_parser.c
-│   ├── http_response.c
-│   ├── logger.c
+│   ├── auth.c
+│   ├── database.c
 │   ├── main.c
-│   ├── records.c
-│   ├── rec_utils.c
-│   ├── server.c
-│   ├── sha256_asm.c
-│   ├── socket_module.c
-│   ├── ssl_module.c
-│   ├── static_file_handler.c
-│   ├── utils.c
-│   └── validator.c
+│   └── server.c
+├── ssl
+│   ├── cert.pem
+│   └── privkey.pem
+├── static
+│   ├── dashboard.html
+│   ├── index.html
+│   └── records.rec
 ├── SUPPORT.md
 ├── TODO.md
-├── var
-│   └── www
-│       ├── data
-│       │   └── records.rec
-│       └── html
-│           └── index.html
 └── web-app.code-workspace
 
-13 directories, 105 files
+7 directories, 57 files
 ```
 
 ### POSIX Headers only allowed to use
