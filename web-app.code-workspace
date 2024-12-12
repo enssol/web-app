@@ -227,7 +227,7 @@
             "*.copilotmd": "vscode.markdown.preview.editor"
         },
         "workbench.preferredHighContrastColorTheme": "Default Dark Modern",
-        "workbench.colorTheme": "Default Dark+",
+        "workbench.colorTheme": "GitHub Dark Default",
         "diffEditor.ignoreTrimWhitespace": false,
         "search.exclude": {
             "**/node_modules": true,
