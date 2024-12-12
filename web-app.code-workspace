@@ -335,7 +335,6 @@
         "notebook.output.wordWrap": true,
         "notebook.variablesView": true,
         "chat.editor.wordWrap": "on",
-        "chat.experimental.detectParticipant.enabled": false,
         "application.experimental.rendererProfiling": true,
         "ipynb.experimental.serialization": true,
         "git.autoStash": true,
@@ -437,7 +436,8 @@
         "cmake.ctestPath": "/usr/bin/ctest",
         "cmake.generator": "/usr/bin/ninja",
         "clang-tidy.lintOnSave": false,
-        "C_Cpp.codeAnalysis.clangTidy.codeAction.formatFixes": false
+        "C_Cpp.codeAnalysis.clangTidy.codeAction.formatFixes": false,
+        "chat.detectParticipant.enabled": false
     },
     "extensions": {
         "recommendations": [
