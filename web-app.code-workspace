@@ -267,18 +267,22 @@
             ]
         },
         "terminal.integrated.defaultProfile.osx": "zsh",
+        "terminal.integrated.defaultProfile.osx": "zsh",
         "github.gitProtocol": "ssh",
         "extensions.ignoreRecommendations": true,
         "github.copilot.chat.inlineChatCompletionTrigger.enabled": true,
         "github.copilot.chat.inlineChatHint.enabled": true,
         "snyk.folderConfigs": [
             {
-                "folderPath": "/home/ubuntu/web-app",
-                "baseBranch": "main"
+                "folderPath": "/devcontainer/web-app",
+                "baseBranch": "main",
+                "localBranches": ["feature/boilerplate", "main"]
             }
         ],
         "snyk.scanningMode": "manual",
-        "snyk.trustedFolders": ["/home/ubuntu/web-app"],
+        "snyk.trustedFolders": [
+            "/devcontainer/web-app",
+        ],
         "workbench.startupEditor": "readme",
         "diffEditor.maxComputationTime": 0,
         "licenser.useSPDXLicenseFormat": true,
@@ -316,6 +320,7 @@
         },
         "extensions.closeExtensionDetailsOnViewChange": true,
         "terminal.integrated.cursorBlinking": true,
+        "terminal.integrated.defaultProfile.linux": "ash",
         "terminal.integrated.defaultProfile.linux": "ash",
         "terminal.integrated.detectLocale": "on",
         "terminal.integrated.enableMultiLinePasteWarning": "never",
