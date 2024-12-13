@@ -7,19 +7,24 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
-#include "../include/session.h"
-#include "../include/audit.h"
 #include "../include/audit_events.h"
+#include "../include/audit.h"
+#include "../include/session.h"
 
-static void logSessionEvent(const char* session_id, uid_t uid,
-                          const char* username, AuditEventType event_type)
+void logSessionEvent(const char* session_id, uid_t uid,
+                    const char* username, enum AuditEventType event_type)
 {
     struct AuditEntry entry;
     char msg[AUDIT_MAX_MSG_LEN];
 
+    if (!session_id || !username) {
+        return;
+    }
+
+    memset(&entry, 0, sizeof(struct AuditEntry));
     entry.timestamp = time(NULL);
     entry.user_id = uid;
-    strncpy(entry.username, username, sizeof(entry.username) - 1);
+    strncpy(entry.username, username, AUDIT_USERNAME_LEN - 1);
     entry.event_type = event_type;
 
     switch(event_type) {
@@ -39,36 +44,6 @@ static void logSessionEvent(const char* session_id, uid_t uid,
             snprintf(msg, sizeof(msg), "Unknown event for session: %s", session_id);
     }
 
-    strncpy(entry.message, msg, sizeof(entry.message) - 1);
+    strncpy(entry.message, msg, AUDIT_MAX_MSG_LEN - 1);
     auditLog(&entry);
-}
-
-char* sessionCreate(uid_t uid, const char* username, int permissions)
-{
-    struct Session* session;
-    static char session_id[SESSION_ID_LEN];
-
-    pthread_mutex_lock(&session_mutex);
-
-    if (store.count >= MAX_SESSIONS) {
-        pthread_mutex_unlock(&session_mutex);
-        return NULL;
-    }
-
-    generateSessionId(session_id);
-    session = &store.sessions[store.count++];
-
-    /* Initialize session */
-    session->uid = uid;
-    session->created = time(NULL);
-    session->last_access = session->created;
-    session->permissions = permissions;
-    strncpy(session->id, session_id, SESSION_ID_LEN);
-
-    pthread_mutex_unlock(&session_mutex);
-
-    /* Log session creation */
-    logSessionEvent(session_id, uid, username, AUDIT_SESSION_CREATED);
-
-    return session_id;
 }

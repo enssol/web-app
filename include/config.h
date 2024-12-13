@@ -6,14 +6,16 @@
 #define CONFIG_H
 
 #include <stddef.h>
+#include <limits.h>  /* For PATH_MAX - POSIX compliant */
 
 #define MAX_ENV_LINE 1024
 #define MAX_ENV_VALUE 256
+#define DEFAULT_AUDIT_PATH "/var/log/webapp/audit.log"
 
 struct Config {
     char log_path[PATH_MAX];
     char db_path[PATH_MAX];
-    char audit_path[PATH_MAX];    /* Add this line */
+    char audit_path[PATH_MAX];
     int server_port;
     char server_host[256];
     char ssl_cert_file[256];
@@ -32,6 +34,9 @@ struct Config {
     int quic_timeout_ms;
     int quic_mtu_size;
 };
+
+/* Add this line for the global config variable */
+extern struct Config *g_config;
 
 int loadConfig(const char *env_file, struct Config *config);
 void printConfig(const struct Config *config);

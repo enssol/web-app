@@ -17,6 +17,7 @@
 #include "../include/quic_module.h"
 #include "../include/logger.h"
 #include "../include/ssl_module.h"
+#include "../include/utils.h"
 
 struct QuicContext* initializeQuicContext(int socket_fd, void *ssl_ctx,
                                         int max_streams, int timeout_ms)
@@ -41,31 +42,50 @@ struct QuicContext* initializeQuicContext(int socket_fd, void *ssl_ctx,
     ctx->ssl_context = ssl_ctx;
     ctx->max_streams = max_streams > 0 ? max_streams : QUIC_MAX_STREAMS;
     ctx->timeout_ms = timeout_ms > 0 ? timeout_ms : QUIC_DEFAULT_TIMEOUT_MS;
+    ctx->buffer_size = QUIC_MAX_DATA_LENGTH;
 
     /* Allocate buffers */
-    ctx->buffer_size = QUIC_MAX_DATA_LENGTH;
     ctx->send_buffer = (unsigned char *)malloc(ctx->buffer_size);
-    ctx->recv_buffer = (unsigned char *)malloc(ctx->buffer_size);
+    if (!ctx->send_buffer) {
+        logError("Failed to allocate send buffer");
+        free(ctx);
+        return NULL;
+    }
 
-    if (!ctx->send_buffer || !ctx->recv_buffer) {
-        logError("Failed to allocate QUIC buffers");
-        cleanupQuicContext(ctx);
+    ctx->recv_buffer = (unsigned char *)malloc(ctx->buffer_size);
+    if (!ctx->recv_buffer) {
+        logError("Failed to allocate receive buffer");
+        free(ctx->send_buffer);
+        free(ctx);
         return NULL;
     }
 
     /* Set socket to non-blocking mode */
     flags = fcntl(socket_fd, F_GETFL, 0);
-    if (flags >= 0) {
-        fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK);
+    if (flags == -1) {
+        logError("Failed to get socket flags");
+        goto cleanup;
+    }
+
+    if (fcntl(socket_fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+        logError("Failed to set socket non-blocking");
+        goto cleanup;
     }
 
     ctx->is_initialized = 1;
-    logInfo("QUIC context initialized successfully");
-
     return ctx;
+
+cleanup:
+    if (ctx) {
+        free(ctx->send_buffer);
+        free(ctx->recv_buffer);
+        free(ctx);
+    }
+    return NULL;
 }
 
-void cleanupQuicContext(struct QuicContext *ctx) {
+void cleanupQuicContext(struct QuicContext *ctx)
+{
     if (!ctx) {
         return;
     }
@@ -78,10 +98,6 @@ void cleanupQuicContext(struct QuicContext *ctx) {
     if (ctx->recv_buffer) {
         secureZeroMemory(ctx->recv_buffer, ctx->buffer_size);
         free(ctx->recv_buffer);
-    }
-
-    if (ctx->socket_fd >= 0) {
-        close(ctx->socket_fd);
     }
 
     secureZeroMemory(ctx, sizeof(struct QuicContext));

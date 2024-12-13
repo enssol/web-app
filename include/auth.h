@@ -10,6 +10,8 @@
 #define MAX_SESSION_ID 64
 #define MAX_USERNAME 32
 #define MAX_GROUPS 16
+#define MAX_SESSIONS 1000      /* Add this */
+#define SESSION_TIMEOUT 3600   /* Add this: 1 hour timeout */
 #define PASSWD_LINE_MAX 512
 #define PASSWD_DELIM ":"
 

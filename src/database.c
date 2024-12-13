@@ -11,9 +11,15 @@
 #include "../include/database.h"
 #include "../include/logger.h"
 #include "../include/data_structures.h"
+#include "../include/http.h" /* Add this include */
 
 #define MAX_LINE_LENGTH 4096
 #define FIELD_SEPARATOR "|"
+
+/* Static function declarations */
+static void parseProjectRecord(const char *line, struct ProjectRecord *record);
+static int performSearch(struct DBHandle *handle, const char *query,
+                        struct ProjectRecord **records, size_t *count);
 
 int dbInit(const char *filename, struct DBHandle *handle)
 {
@@ -238,31 +244,22 @@ int dbListProjects(struct DBHandle *handle, struct ProjectRecord **records, size
     return 0;
 }
 
-int dbSearchProjects(struct DBHandle *handle, const char *query, struct ProjectRecord **records, size_t *count)
-{
-    struct Response *response;
-    int result;
-
-    /* Perform search */
-    result = performSearch(handle, query, records, count);
-    if (result != 0) {
-        response = dsCreateResponse(HTTP_INTERNAL_ERROR);
-        if (response) {
-            dsAddResponseHeader(response, "Content-Type", "application/json");
-            /* Add error details */
-            dsFreeResponse(response);
-        }
-        return -1;
-    }
-
-    return 0;
-}
-
 static void parseProjectRecord(const char *line, struct ProjectRecord *record)
 {
-    char *temp_line = strdup(line);
-    char *token = strtok(temp_line, FIELD_SEPARATOR);
+    char *temp_line;
+    char *token;
 
+    if (!line || !record) {
+        return;
+    }
+
+    temp_line = strdup(line);
+    if (!temp_line) {
+        return;
+    }
+
+    /* Parse fields */
+    token = strtok(temp_line, FIELD_SEPARATOR);
     if (token) strncpy(record->obligation_num, token, sizeof(record->obligation_num) - 1);
 
     token = strtok(NULL, FIELD_SEPARATOR);
@@ -271,7 +268,82 @@ static void parseProjectRecord(const char *line, struct ProjectRecord *record)
     token = strtok(NULL, FIELD_SEPARATOR);
     if (token) strncpy(record->mechanism, token, sizeof(record->mechanism) - 1);
 
-    /* Continue parsing other fields... */
+    /* Add parsing for remaining fields */
 
     free(temp_line);
+}
+
+static int performSearch(struct DBHandle *handle, const char *query,
+                        struct ProjectRecord **records, size_t *count)
+{
+    char line[MAX_LINE_LENGTH];
+    struct ProjectRecord *temp_records;
+    struct ProjectRecord *new_records;
+    size_t capacity;
+    size_t current_count;
+
+    if (!handle || !handle->fp || !query || !records || !count) {
+        logError("Invalid parameters for search");
+        return -1;
+    }
+
+    capacity = 10;
+    current_count = 0;
+
+    temp_records = malloc(capacity * sizeof(struct ProjectRecord));
+    if (!temp_records) {
+        logError("Memory allocation failed");
+        return -1;
+    }
+
+    pthread_mutex_lock(&handle->mutex);
+    rewind(handle->fp);
+
+    while (fgets(line, sizeof(line), handle->fp)) {
+        if (line[0] == '%') {
+            continue;
+        }
+
+        if (strstr(line, query)) {
+            if (current_count >= capacity) {
+                capacity *= 2;
+                new_records = realloc(temp_records,
+                                    capacity * sizeof(struct ProjectRecord));
+                if (!new_records) {
+                    free(temp_records);
+                    pthread_mutex_unlock(&handle->mutex);
+                    return -1;
+                }
+                temp_records = new_records;
+            }
+
+            parseProjectRecord(line, &temp_records[current_count]);
+            current_count++;
+        }
+    }
+
+    pthread_mutex_unlock(&handle->mutex);
+
+    *records = temp_records;
+    *count = current_count;
+    return 0;
+}
+
+int dbSearchProjects(struct DBHandle *handle, const char *query,
+                    struct ProjectRecord **records, size_t *count)
+{
+    int result;
+
+    if (!handle || !query || !records || !count) {
+        logError("Invalid parameters for dbSearchProjects");
+        return -1;
+    }
+
+    result = performSearch(handle, query, records, count);
+    if (result != 0) {
+        logError("Search operation failed");
+        return -1;
+    }
+
+    return 0;
 }

@@ -8,6 +8,9 @@
 #include "../include/config.h"
 #include "../include/logger.h"
 
+/* Define the global variable */
+struct Config *g_config = NULL;  /* Global configuration instance */
+
 static char* trimWhitespace(char *str)
 {
     char *end;

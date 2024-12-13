@@ -24,7 +24,8 @@ enum HttpMethod
     HTTP_GET,
     HTTP_POST,
     HTTP_PUT,
-    HTTP_DELETE
+    HTTP_DELETE,
+    HTTP_OPTIONS  /* Add this line */
 };
 
 /* HTTP Status Codes */
@@ -73,6 +74,12 @@ void httpInit(SSL_CTX *ssl_ctx);
 /* Request handling */
 int httpParseRequest(const char *raw_request, size_t len, struct HttpRequest *request);
 void httpFreeRequest(struct HttpRequest *request);
+
+/* HTTP request handling functions */
+int httpHandleConnection(SSL *ssl);
+struct HttpResponse* httpCreateResponse(int status_code, const char *content_type);
+void httpFreeResponse(struct HttpResponse *response);
+int httpSendResponse(SSL *ssl, const struct HttpResponse *response);
 
 /* Response handling */
 struct HttpResponse *httpCreateResponse(int status, const char *content_type);

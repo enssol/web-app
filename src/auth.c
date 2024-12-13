@@ -13,13 +13,36 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <ctype.h>
+#include <pthread.h>
 #include "../include/auth.h"
 #include "../include/logger.h"
 #include "../include/data_structures.h"
+#include "../include/database.h"
+#include "../include/utils.h"   /* Add this for generateUUID */
 
 static struct UserSession *sessions = NULL;
 static size_t session_count = 0;
 static char passwd_file_path[PATH_MAX];
+static pthread_mutex_t session_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static int initializeSessions(void)
+{
+    pthread_mutex_lock(&session_mutex);
+
+    if (!sessions) {
+        sessions = (struct UserSession *)malloc(MAX_SESSIONS * sizeof(struct UserSession));
+        if (!sessions) {
+            pthread_mutex_unlock(&session_mutex);
+            return -1;
+        }
+        memset(sessions, 0, MAX_SESSIONS * sizeof(struct UserSession));
+        session_count = 0;
+    }
+
+    pthread_mutex_unlock(&session_mutex);
+    return 0;
+}
 
 int authInit(const char *passwd_file)
 {
@@ -111,22 +134,38 @@ int authLoadPasswdEntry(const char *username, struct PasswdEntry *entry)
 
 int authValidateUser(const char *username, const char *password)
 {
+    struct PasswdEntry passwd_entry;
     int result;
-    struct AuditEntry audit;
 
-    result = authVerifyPassword(password, entry.password_hash);
+    /* Input validation */
+    if (!username || !password) {
+        logError("Invalid username or password pointer");
+        return -1;
+    }
 
-    /* Log authentication attempt */
-    memset(&audit, 0, sizeof(audit));
-    audit.timestamp = time(NULL);
-    audit.user_id = getUserId(username);
-    strncpy(audit.username, username, sizeof(audit.username) - 1);
-    audit.event_type = result == 0 ? AUDIT_AUTH_LOGIN : AUDIT_AUTH_LOGOUT;
-    snprintf(audit.details, sizeof(audit.details),
-             "Login attempt %s", result == 0 ? "successful" : "failed");
-    auditLog(&audit);
+    if (strlen(username) >= MAX_USERNAME) {
+        logError("Username too long");
+        return -1;
+    }
 
-    return result;
+    /* Load user entry */
+    result = authLoadPasswdEntry(username, &passwd_entry);
+    if (result != 0) {
+        logError("Failed to load password entry for user %s", username);
+        return -1;
+    }
+
+    /* Verify password */
+    result = authVerifyPassword(password, passwd_entry.password_hash);
+    if (result != 0) {
+        logError("Password verification failed for user %s", username);
+        return -1;
+    }
+
+    /* Clear sensitive data */
+    memset(&passwd_entry, 0, sizeof(struct PasswdEntry));
+
+    return 0;
 }
 
 int authGetUserProfile(const char *username, struct UserProfile *profile)
@@ -154,30 +193,70 @@ int authGetUserProfile(const char *username, struct UserProfile *profile)
 
 int authUpdateUserProfile(const char *username, const struct UserProfile *profile)
 {
-    struct AuditEntry audit;
-    time_t now;
+    struct UserProfile current_profile;
+    int result;
 
-    if (!username || !profile) {
+    /* Input validation */
+    if (!username || !profile)
+    {
+        logError("Invalid username or profile pointer");
         return -1;
     }
 
-    now = time(NULL);
-
-    /* Log profile update */
-    memset(&audit, 0, sizeof(audit));
-    audit.timestamp = now;
-    audit.user_id = getUserId(username);
-    strncpy(audit.username, username, sizeof(audit.username) - 1);
-    audit.event_type = AUDIT_PROFILE_EDIT;
-    snprintf(audit.message, sizeof(audit.message),
-            "Profile updated: email=%s, phone=%s",
-            profile->email, profile->phone);
-
-    if (auditLog(&audit) != 0) {
+    if (strlen(username) >= MAX_USERNAME)
+    {
+        logError("Username too long");
         return -1;
     }
 
-    return authSaveUserProfile(profile);
+    /* Load current profile */
+    result = authGetUserProfile(username, &current_profile);
+    if (result != 0)
+    {
+        logError("Failed to load existing profile for user %s", username);
+        return -1;
+    }
+
+    /* Update profile fields */
+    strncpy(current_profile.email, profile->email, 255);
+    current_profile.email[255] = '\0';
+
+    strncpy(current_profile.title, profile->title, 127);
+    current_profile.title[127] = '\0';
+
+    strncpy(current_profile.phone, profile->phone, 31);
+    current_profile.phone[31] = '\0';
+
+    strncpy(current_profile.pronouns, profile->pronouns, 31);
+    current_profile.pronouns[31] = '\0';
+
+    strncpy(current_profile.responsibility, profile->responsibility, 255);
+    current_profile.responsibility[255] = '\0';
+
+    /* Copy group information */
+    if (profile->group_count > MAX_GROUPS)
+    {
+        logError("Too many groups specified");
+        return -1;
+    }
+
+    current_profile.group_count = profile->group_count;
+    memcpy(current_profile.groups, profile->groups,
+           sizeof(int) * profile->group_count);
+
+    /* Update permissions */
+    current_profile.permissions = profile->permissions;
+    current_profile.last_login = time(NULL);
+
+    /* Save updated profile */
+    result = authSaveUserProfile(&current_profile);
+    if (result != 0)
+    {
+        logError("Failed to save updated profile for user %s", username);
+        return -1;
+    }
+
+    return 0;
 }
 
 int authSaveUserProfile(const struct UserProfile *profile)
@@ -201,13 +280,21 @@ int authSaveUserProfile(const struct UserProfile *profile)
     return authSavePasswdEntry(&entry);
 }
 
+/* First setupAuthUsers function */
 int setupAuthUsers(struct DBHandle *db)
 {
     struct ProjectRecord *records;
     size_t count;
     FILE *passwd_file;
     char *responsibilities[1000];
-    int unique_count = 0;
+    int unique_count;
+    size_t i;
+    int j;
+    char username[32];
+    char *p;
+    int found;
+
+    unique_count = 0;
 
     /* Get all projects */
     if (dbListProjects(db, &records, &count) != 0) {
@@ -215,9 +302,9 @@ int setupAuthUsers(struct DBHandle *db)
     }
 
     /* Extract unique responsibilities */
-    for (size_t i = 0; i < count; i++) {
-        int found = 0;
-        for (int j = 0; j < unique_count; j++) {
+    for (i = 0; i < count; i++) {
+        found = 0;
+        for (j = 0; j < unique_count; j++) {
             if (strcmp(responsibilities[j], records[i].responsibility) == 0) {
                 found = 1;
                 break;
@@ -238,18 +325,194 @@ int setupAuthUsers(struct DBHandle *db)
     fprintf(passwd_file, "admin:$6$xyz123...:1000:1000:Admin User:/home/admin:/bin/false\n");
 
     /* Add entries for each responsibility */
-    for (int i = 0; i < unique_count; i++) {
-        char username[32];
+    for (i = 0; i < (size_t)unique_count; i++) {
         /* Convert responsibility to username format */
         snprintf(username, sizeof(username), "%s", responsibilities[i]);
+
         /* Replace spaces with underscores */
-        for (char *p = username; *p; p++) {
+        p = username;
+        while (*p) {
             if (*p == ' ') *p = '_';
+            p++;
         }
+
         fprintf(passwd_file, "%s:$6$abc456...:100%d:100%d:%s:/home/%s:/bin/false\n",
-                username, i+1, i+1, responsibilities[i], username);
+                username, (int)i+1, (int)i+1, responsibilities[i], username);
     }
 
     fclose(passwd_file);
     return 0;
+}
+
+/* Second setupAuthUsers function - renamed to avoid conflict */
+int setupAuthUsersFromList(const char **users, size_t count)
+{
+    size_t i;
+    size_t j;
+    int unique_count;
+    char *username;
+    char **unique_users;
+    char *p;
+    int is_duplicate;
+
+    /* Allocate memory for unique users array */
+    unique_users = (char **)malloc(count * sizeof(char *));
+    if (!unique_users) {
+        logError("Memory allocation failed for unique users");
+        return -1;
+    }
+
+    unique_count = 0;
+
+    /* Find unique users */
+    for (i = 0; i < count; i++) {
+        is_duplicate = 0;
+        for (j = 0; j < (size_t)unique_count; j++) {
+            if (strcmp(users[i], unique_users[j]) == 0) {
+                is_duplicate = 1;
+                break;
+            }
+        }
+
+        if (!is_duplicate) {
+            username = strdup(users[i]);
+            if (!username) {
+                logError("Memory allocation failed for username");
+                for (j = 0; j < (size_t)unique_count; j++) {
+                    free(unique_users[j]);
+                }
+                free(unique_users);
+                return -1;
+            }
+            unique_users[unique_count++] = username;
+        }
+    }
+
+    /* Validate usernames */
+    for (i = 0; i < (size_t)unique_count; i++) {
+        username = unique_users[i];
+        if (strlen(username) > DS_MAX_USERNAME_LEN) {
+            logError("Username too long: %s", username);
+            p = username;
+            while (*p) {
+                if (!isalnum(*p) && *p != '_' && *p != '-') {
+                    logError("Invalid character in username: %s", username);
+                    break;
+                }
+                p++;
+            }
+        }
+    }
+
+    /* Cleanup */
+    for (i = 0; i < (size_t)unique_count; i++) {
+        free(unique_users[i]);
+    }
+    free(unique_users);
+
+    return 0;
+}
+
+int authCreateSession(const char *username, struct UserSession *session)
+{
+    time_t now;
+    char uuid[37];  /* Match the size from generateUUID */
+    int i;
+
+    if (!username || !session) {
+        return -1;
+    }
+
+    if (!sessions && initializeSessions() != 0) {
+        return -1;
+    }
+
+    pthread_mutex_lock(&session_mutex);
+
+    /* Check if we have room for new session */
+    if (session_count >= MAX_SESSIONS) {
+        pthread_mutex_unlock(&session_mutex);
+        return -1;
+    }
+
+    /* Generate session ID */
+    if (generateUUID() == NULL) {
+        pthread_mutex_unlock(&session_mutex);
+        return -1;
+    }
+    strncpy(uuid, generateUUID(), sizeof(uuid) - 1);
+    now = time(NULL);
+
+    /* Find empty slot */
+    for (i = 0; i < MAX_SESSIONS; i++) {
+        if (sessions[i].creation_time == 0) {
+            strncpy(sessions[i].session_id, uuid, MAX_SESSION_ID - 1);
+            strncpy(sessions[i].username, username, MAX_USERNAME - 1);
+            sessions[i].creation_time = now;
+            sessions[i].last_access = now;
+            sessions[i].permissions = PERM_READ; /* Default permission */
+
+            /* Copy to output parameter */
+            memcpy(session, &sessions[i], sizeof(struct UserSession));
+
+            session_count++;
+            pthread_mutex_unlock(&session_mutex);
+            return 0;
+        }
+    }
+
+    pthread_mutex_unlock(&session_mutex);
+    return -1;
+}
+
+int authValidateSession(const char *session_id)
+{
+    time_t now;
+    int i;
+
+    if (!session_id || !sessions) {
+        return -1;
+    }
+
+    now = time(NULL);
+    pthread_mutex_lock(&session_mutex);
+
+    for (i = 0; i < MAX_SESSIONS; i++) {
+        if (sessions[i].creation_time != 0 &&
+            strcmp(sessions[i].session_id, session_id) == 0) {
+
+            /* Check if session has expired */
+            if (now - sessions[i].last_access > SESSION_TIMEOUT) {
+                /* Remove expired session */
+                memset(&sessions[i], 0, sizeof(struct UserSession));
+                if (session_count > 0) {
+                    session_count--;
+                }
+                pthread_mutex_unlock(&session_mutex);
+                return -1;
+            }
+
+            /* Update last access time */
+            sessions[i].last_access = now;
+            pthread_mutex_unlock(&session_mutex);
+            return 0;
+        }
+    }
+
+    pthread_mutex_unlock(&session_mutex);
+    return -1;
+}
+
+void authCleanup(void)
+{
+    pthread_mutex_lock(&session_mutex);
+
+    if (sessions) {
+        free(sessions);
+        sessions = NULL;
+    }
+    session_count = 0;
+
+    pthread_mutex_unlock(&session_mutex);
+    pthread_mutex_destroy(&session_mutex);
 }

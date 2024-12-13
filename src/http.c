@@ -18,6 +18,7 @@
 #include "../include/session.h"
 #include "../include/auth.h"
 #include "../include/data_structures.h"
+#include "../include/config.h"
 
 static SSL_CTX *ssl_context = NULL;
 
@@ -71,11 +72,16 @@ static int httpAddHeader(struct HttpResponse *response, const char *key, const c
     return -1;
 }
 
-static void httpAddDefaultHeaders(struct HttpResponse *response)
+static void httpAddDefaultHeaders(struct HttpResponse *response, const struct Config *config)
 {
     char date_buf[32];
     time_t now;
     struct tm *tm_info;
+
+    if (!response || !config) {
+        logError("Invalid parameters for httpAddDefaultHeaders");
+        return;
+    }
 
     /* Get current time */
     time(&now);
@@ -87,14 +93,21 @@ static void httpAddDefaultHeaders(struct HttpResponse *response)
     httpAddHeader(response, "Date", date_buf);
 
     /* Add CORS headers from config */
-    httpAddHeader(response, "Access-Control-Allow-Origin", config->allowed_origins);
-    httpAddHeader(response, "Access-Control-Allow-Methods", config->allowed_methods);
-    httpAddHeader(response, "Access-Control-Allow-Headers", config->allowed_headers);
+    if (config->allowed_origins[0]) {
+        httpAddHeader(response, "Access-Control-Allow-Origin", config->allowed_origins);
+    }
+    if (config->allowed_methods[0]) {
+        httpAddHeader(response, "Access-Control-Allow-Methods", config->allowed_methods);
+    }
+    if (config->allowed_headers[0]) {
+        httpAddHeader(response, "Access-Control-Allow-Headers", config->allowed_headers);
+    }
 }
 
 struct HttpResponse *httpCreateResponse(int status, const char *content_type)
 {
     struct HttpResponse *response;
+    extern struct Config *g_config; /* Add this declaration */
 
     response = (struct HttpResponse *)malloc(sizeof(struct HttpResponse));
     if (!response) {
@@ -105,7 +118,7 @@ struct HttpResponse *httpCreateResponse(int status, const char *content_type)
     memset(response, 0, sizeof(struct HttpResponse));
     response->status = status;
 
-    httpAddDefaultHeaders(response);
+    httpAddDefaultHeaders(response, g_config); /* Pass config */
 
     if (content_type) {
         httpAddHeader(response, "Content-Type", content_type);
@@ -124,43 +137,50 @@ void httpFreeResponse(struct HttpResponse *response)
     }
 }
 
-int httpHandleConnection(int client_fd, SSL *ssl)
+int httpHandleConnection(SSL *ssl)
 {
-    struct Request *request;
-    struct Response *response;
+    struct HttpRequest *request;
+    struct HttpResponse *response;
     char buffer[4096];
     int bytes;
 
-    /* Create new request structure */
-    request = dsCreateRequest();
+    if (!ssl) {
+        logError("Invalid SSL connection");
+        return -1;
+    }
+
+    request = (struct HttpRequest *)malloc(sizeof(struct HttpRequest));
     if (!request) {
         logError("Failed to create request structure");
         return -1;
     }
 
-    /* Read and parse request */
+    memset(request, 0, sizeof(struct HttpRequest));
+
     bytes = SSL_read(ssl, buffer, sizeof(buffer) - 1);
     if (bytes <= 0) {
-        dsFreeRequest(request);
+        free(request);
         return -1;
     }
     buffer[bytes] = '\0';
 
     if (httpParseRequest(buffer, bytes, request) != 0) {
-        response = dsCreateResponse(HTTP_BAD_REQUEST);
+        response = httpCreateResponse(HTTP_BAD_REQUEST, "text/plain");
         if (response) {
-            dsAddResponseHeader(response, "Content-Type", "text/plain");
+            httpAddHeader(response, "Content-Type", "text/plain");
             response->body = strdup("Bad Request");
-            response->body_length = strlen(response->body);
+            response->body_len = strlen(response->body);
             httpSendResponse(ssl, response);
-            dsFreeResponse(response);
+            httpFreeResponse(response);
         }
-        dsFreeRequest(request);
+        free(request);
         return -1;
     }
 
-    /* Clean up */
-    dsFreeRequest(request);
+    logDebug("Received %s request for %s",
+            httpMethodToString(request->method), request->url);
+
+    free(request);
     return 0;
 }
 

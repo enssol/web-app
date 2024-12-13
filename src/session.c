@@ -133,6 +133,7 @@ int sessionLogout(const char* session_id, uid_t uid, const char* username)
 {
     int found = 0;
     struct AuditEntry audit;
+    int i, j; /* Declare loop variables */
 
     pthread_mutex_lock(&session_mutex);
 
@@ -212,7 +213,7 @@ int sessionValidateWithResponse(const char *session_id)
 
     result = sessionValidate(session_id);
     if (result != 0) {
-        response = dsCreateResponse(HTTP_UNAUTHORIZED);
+        response = dsCreateResponse(401); /* Use numeric code instead of constant */
         if (response) {
             dsAddResponseHeader(response, "Content-Type", "application/json");
             /* Add session error details */

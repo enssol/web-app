@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include "../include/logger.h"
 
 static FILE *log_file = NULL;

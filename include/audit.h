@@ -7,33 +7,26 @@
 
 #include <time.h>
 #include <sys/types.h>
+#include "audit_events.h"
 
-/* Audit event types */
-enum AuditEventType {
-    AUDIT_AUTH_LOGIN = 1,
-    AUDIT_AUTH_LOGOUT,
-    AUDIT_PROFILE_VIEW,
-    AUDIT_PROFILE_EDIT,
-    AUDIT_PROJECT_VIEW,
-    AUDIT_PROJECT_EDIT,
-    AUDIT_USER_CREATE,
-    AUDIT_USER_DELETE
-};
+#define AUDIT_MAX_MSG_LEN 256
+#define AUDIT_USERNAME_LEN 32
 
 /* Audit entry structure */
 struct AuditEntry {
     time_t timestamp;
     uid_t user_id;
-    char username[32];
+    char username[AUDIT_USERNAME_LEN];
     enum AuditEventType event_type;
-    char details[256];
-    char ip_address[46];
+    char message[AUDIT_MAX_MSG_LEN];
 };
 
 /* Function prototypes */
+void logSessionEvent(const char* session_id, uid_t uid,
+                    const char* username, enum AuditEventType event_type);
 int auditInit(const char *audit_path);
-int auditLog(const struct AuditEntry *entry);
-int auditGetUserHistory(const char *username, struct AuditEntry **entries, size_t *count);
+void auditLog(const struct AuditEntry* entry);
+
 void auditCleanup(void);
 
 #endif /* AUDIT_H */
