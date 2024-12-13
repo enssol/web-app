@@ -86,7 +86,6 @@
             ".dockerignore": "dockerfile",
             ".editorconfig": "editorconfig",
             "webp": "image",
-            ".rec": "recfile",
             ".csv": "csv",
             ".html": "html",
             ".js": "javascript",
@@ -104,7 +103,6 @@
             ".json": "json",
             ".yml": "yaml",
             ".ico": "image",
-            ".conf": "ini",
             ".ini": "ini",
             "containerfile": "dockerfile",
             ".txt": "plaintext",
@@ -115,17 +113,9 @@
             "AUTHORS": "markdown",
             "*.am": "makefile",
             "*.txt": "plaintext",
-            "*.in": "makefile",
-            "*.y": "c",
             "*.ac": "makefile",
-            ".linthtmlrc": "json",
-            "*.l": "lex",
-            ".clang-tidy": "yaml",
-            ".clang-format": "yaml",
-            ".cppcheck": "yaml",
-            ".splintrc": "yaml",
-            ".clang-lint": "yaml",
-            "Doxyfile": "ini"
+            ".conf": "ini",
+            ".rec": "recfile"
         },
         "git.alwaysSignOff": true,
         "git.autofetch": true,
@@ -181,7 +171,7 @@
         "github.copilot.renameSuggestions.triggerAutomatically": true,
         "github.copilot.chat.codeGeneration.useInstructionFiles": true,
         "github.copilot.chat.temporalContext.enabled": true,
-        "licenser.author": "Enveng Group - Adrian Gallo",
+        "licenser.author": "Enveng Group - Simon French-Bluhm and Adrian Gallo",
         "licenser.customTermsAndConditions": "Copyright @YEAR@ @AUTHOR@\n\nThese are the terms and conditions...",
         "licenser.excludeFileExtensions": [
             "txt",
@@ -227,6 +217,7 @@
             "*.copilotmd": "vscode.markdown.preview.editor"
         },
         "workbench.preferredHighContrastColorTheme": "Default Dark Modern",
+        "workbench.colorTheme": "GitHub Dark Default",
         "workbench.colorTheme": "GitHub Dark Default",
         "diffEditor.ignoreTrimWhitespace": false,
         "search.exclude": {
@@ -343,9 +334,33 @@
         "github.copilot.chat.search.semanticTextResults": true,
         "markdown.preview.typographer": true,
         "merge-conflict.autoNavigateNextConflict.enabled": true,
-        "C_Cpp.clang_format_fallbackStyle": "GNU",
-        "C_Cpp.clang_format_style": "file",
+        "C_Cpp.clang_format_fallbackStyle": "Google",
+        "C_Cpp.clang_format_style": "Google",
         "C_Cpp.clang_format_sortIncludes": true,
+        "makefile.extensionOutputFolder": "./build",
+        "makefile.configurations": [
+            {
+                "name": "Debug",
+                "makeArgs": ["DEBUG=1"]
+            },
+            {
+                "name": "Release",
+                "makeArgs": ["RELEASE=1"]
+            }
+        ],
+        "makefile.launchConfigurations": [
+            {
+                "name": "Debug",
+                "binaryPath": "./build/debug/app"
+            },
+            {
+                "name": "Release",
+                "binaryPath": "./build/release/app"
+            }
+        ],
+        "makefile.makePath": "make",
+        "makefile.makefilePath": "./Makefile",
+        "makefile.buildLog": "./logs/build.log",
         "shellcheck.enable": true,
         "shellcheck.run": "onSave",
         "shellcheck.exclude": [],
@@ -370,12 +385,12 @@
             "MD029": { "style": "ordered" }, // Enforce ordered list style
             "configFile": true
         },
-        "clang-tidy.executable": "/usr/bin/clang-tidy",
+        "clang-tidy.executable": "clang-tidy",
         "clang-tidy.checks": [
             "bugprone-*",
             "clang-analyzer-*",
             "cppcoreguidelines-*",
-            "gnu-*",
+            "google-*",
             "modernize-*",
             "performance-*",
             "readability-*",
@@ -389,6 +404,10 @@
             "-modernize-deprecated-headers"
         ],
         "prettier.configPath": ".prettierrc",
+
+        "linthtml.enable": true,
+        "linthtml.configFile": ".linthtmlrc",
+        "linthtml.packageManager": "npm",
         "githubPullRequests.assignCreated": "${user}",
         "githubPullRequests.defaultCreateOption": "createAutoMerge",
         "githubPullRequests.defaultMergeMethod": "squash",
@@ -403,8 +422,11 @@
         "githubPullRequests.quickDiff": true,
         "githubPullRequests.showPullRequestNumberInTree": true,
         "githubPullRequests.terminalLinksHandler": "vscode",
+        "remoteHub.commitDirectlyWarning": "off",
+        "remoteHub.gitProtocol": "ssh",
+        "remoteHub.richNavigation.enabled": true,
         "editor.semanticHighlighting.enabled": true,
-        "C_Cpp.default.cStandard": "c89",
+        "C_Cpp.default.cStandard": "c11",
         "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
         "C_Cpp.codeAnalysis.clangTidy.enabled": false,
         "C_Cpp.default.browse.databaseFilename": "/home/ubuntu/web-app/compile_commands.json",
@@ -448,6 +470,8 @@
             "github.vscode-pull-request-github",
             "github.vscode-github-actions",
             "your-publisher-name.recfile-syntax",
+            "qiumingge.cpp-check-lint",
+            "cs128.cs128-clang-tidy",
             "editorconfig.editorconfig",
             "github.copilot-chat",
             "github.github-vscode-theme",
