@@ -10,6 +10,8 @@
 #include "../include/shell.h"
 #include "../include/process.h"
 #include "../include/scheduler.h"
+#include "../include/mem.h"
+#include "../include/cache.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -52,6 +54,21 @@ main(int argc, char *argv[])
 
     /* Initialize error handling with optional custom log path */
     errorInit(log_path);
+
+    /* Initialize memory management */
+    status = memInit(MEM_POOL_SIZE);
+    if (status != 0) {
+        errorLog(ERROR_CRITICAL, "Memory initialization failed");
+        return EXIT_FAILURE;
+    }
+
+    /* Initialize cache system */
+    status = cacheInit(CACHE_TYPE_LRU, CACHE_MAX_ENTRIES);
+    if (status != 0) {
+        errorLog(ERROR_CRITICAL, "Cache initialization failed");
+        memCleanup();
+        return EXIT_FAILURE;
+    }
 
     /* Initialize system */
     status = initSystem();
@@ -110,6 +127,8 @@ main(int argc, char *argv[])
     }
 
     /* Cleanup */
+    cacheCleanup();
+    memCleanup();
     schedulerStop();
     schedulerCleanup();
     processCleanup();

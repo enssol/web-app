@@ -43,6 +43,8 @@ TEST_MAIN_MODULE_OBJ = $(BUILD_DIR)/test_main_module.o
 TEST_MAIN_OBJ = $(BUILD_DIR)/test_main.o
 TEST_PROCESS_OBJ = $(BUILD_DIR)/test_process.o
 TEST_SCHEDULER_OBJ = $(BUILD_DIR)/test_scheduler.o
+TEST_MEM_OBJ = $(BUILD_DIR)/test_mem.o
+TEST_CACHE_OBJ = $(BUILD_DIR)/test_cache.o
 
 # Targets
 MAIN_TARGET = $(BIN_DIR)/enssol
@@ -67,6 +69,7 @@ $(TEST_TARGET): $(TEST_APP_ERROR_OBJ) $(TEST_CONFIG_OBJ) $(TEST_CONSTANTS_OBJ) \
 				$(TEST_ENV_OBJ) $(TEST_FS_OBJ) $(TEST_INIT_OBJ) \
 				$(TEST_LOGGING_OBJ) $(TEST_SHELL_OBJ) $(TEST_MAIN_MODULE_OBJ) \
 				$(TEST_MAIN_OBJ) $(TEST_PROCESS_OBJ) $(TEST_SCHEDULER_OBJ) \
+				$(TEST_MEM_OBJ) $(TEST_CACHE_OBJ) \
 				$(TEST_LIB_OBJS) | $(BIN_DIR)
 	$(CC) $^ $(TEST_LDFLAGS) -o $@
 
@@ -116,6 +119,12 @@ $(TEST_PROCESS_OBJ): $(TEST_DIR)/test_process.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(TEST_SCHEDULER_OBJ): $(TEST_DIR)/test_scheduler.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(TEST_MEM_OBJ): $(TEST_DIR)/test_mem.c include/mem.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(TEST_CACHE_OBJ): $(TEST_DIR)/test_cache.c include/cache.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 # Test target with setup and run

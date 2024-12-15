@@ -79,6 +79,20 @@ void test_main_signal_handling(void);
 void test_main_cleanup(void);
 void test_main_args_handling(void);
 
+/* Test case declarations for mem */
+void test_mem_init(void);
+void test_mem_alloc(void);
+void test_mem_free(void);
+void test_mem_stress(void);
+
+/* Test case declarations for cache */
+void test_cache_init(void);
+void test_cache_set_get(void);
+void test_cache_delete(void);
+void test_cache_capacity(void);
+void test_cache_lru(void);
+void test_cache_lfu(void);
+
 /* Suite initialization functions */
 int test_app_error(void);
 int test_config(void);
@@ -91,5 +105,22 @@ int test_shell(void);
 int test_main_module(void);
 int test_process(void);
 int test_scheduler(void);
+int test_mem(void);
+int test_cache(void);
+
+/* Test suite initialization functions */
+int test_mem(void);
+int test_cache(void);
+
+/* Add to test_suite.h */
+#define ASSERT_MEM_STATUS(expected) \
+    do { \
+        enum mem_status actual = memGetStatus(); \
+        if (actual != expected) { \
+            printf("Expected status %d, got %d at %s:%d\n", \
+                   expected, actual, __FILE__, __LINE__); \
+            CU_ASSERT_EQUAL(actual, expected); \
+        } \
+    } while (0)
 
 #endif /* TEST_SUITE_H */
