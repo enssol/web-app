@@ -25,7 +25,8 @@ enum process_state {
     PROCESS_READY,
     PROCESS_RUNNING,
     PROCESS_BLOCKED,
-    PROCESS_TERMINATED
+    PROCESS_TERMINATED,
+    PROCESS_COMPLETED
 };
 
 /* Process priority levels */

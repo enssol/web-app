@@ -31,7 +31,9 @@ enum mem_status {
     MEM_NO_MEMORY = -2,
     MEM_INVALID_POOL = -3,
     MEM_INVALID_SIZE = -4,
-    MEM_POOL_FULL = -5
+    MEM_POOL_FULL = -5,
+    MEM_INVALID_PARAM = -6,     /* Added */
+    MEM_OUT_OF_MEMORY = -7      /* Added */
 };
 
 /* Memory pool flags */
@@ -52,7 +54,7 @@ struct mem_stats {
 };
 
 /* Function prototypes */
-int memInit(void);
+int memInit(size_t pool_size);  /* Updated */
 void *memAlloc(size_t size);
 void *memCalloc(size_t nmemb, size_t size);
 void *memRealloc(void *ptr, size_t size);
@@ -60,6 +62,9 @@ void memFree(void *ptr);
 int memCreatePool(size_t size, enum mem_pool_flags flags);
 int memDestroyPool(int pool_id);
 struct mem_stats memGetStats(void);
+size_t memGetUsage(void);       /* Added */
+void memDumpStats(void);        /* Added */
+void memVisualizeBlocks(void);  /* Added */
 void memCleanup(void);
 const char *memStatusToString(enum mem_status status);
 enum mem_status memGetStatus(void);

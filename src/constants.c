@@ -11,31 +11,30 @@
 #include <errno.h>
 #include <limits.h>  /* Added for INT_MAX and INT_MIN */
 
-/* Application constants derived from environment */
-static char app_name[MAX_ENV_VALUE];
-static char app_version[MAX_ENV_VALUE];
-static char app_env[MAX_ENV_VALUE];
-static int app_debug;
-static int app_port;
-static char app_host[MAX_ENV_VALUE];
+/* Static variables */
+static char app_name[MAX_ENV_VALUE] = APP_NAME;
+static char app_version[MAX_ENV_VALUE] = APP_VERSION;
+static char app_env[MAX_ENV_VALUE] = APP_ENV;
+static int app_debug = APP_DEBUG;
+static int app_port = APP_PORT;
+static char app_host[MAX_ENV_VALUE] = APP_HOST;
 
-/* Logging constants */
-static char log_level[MAX_ENV_VALUE];
-static char log_path[MAX_ENV_VALUE];
-static char log_format[MAX_ENV_VALUE];
-static long log_max_size;
+static char log_level[MAX_ENV_VALUE] = LOG_LEVEL;     /* Will be "debug" */
+static char log_path[MAX_ENV_VALUE] = LOG_PATH;       /* Will be "/var/log" */
+static char log_format[MAX_ENV_VALUE] = LOG_FORMAT;   /* Already "text" */
+static long log_max_size = LOG_MAX_SIZE;             /* Will be 1048576 */
 
-/* Database constants */
-static char db_host[MAX_ENV_VALUE];
-static int db_port;
-static char db_name[MAX_ENV_VALUE];
-static char db_user[MAX_ENV_VALUE];
-static char db_password[MAX_ENV_VALUE];
+/* Database settings */
+static char db_host[MAX_ENV_VALUE] = "localhost";
+static int db_port = 5432;
+static char db_name[MAX_ENV_VALUE] = "webapp";
+static char db_user[MAX_ENV_VALUE] = "postgres";
+static char db_password[MAX_ENV_VALUE] = "";
 
-/* Cache constants */
-static char cache_driver[MAX_ENV_VALUE];
-static char cache_prefix[MAX_ENV_VALUE];
-static int cache_ttl;
+/* Cache settings */
+static char cache_driver[MAX_ENV_VALUE] = "memory";
+static char cache_prefix[MAX_ENV_VALUE] = "app";
+static int cache_ttl = 3600;
 
 /* Helper function prototypes */
 static int loadStringConstant(const char *name, char *value, size_t size);
@@ -44,220 +43,134 @@ static int loadLongConstant(const char *name, long *value);
 static int loadBoolConstant(const char *name, int *value);
 
 int
-constants_init(void)  /* Changed from constantsInit */
+constants_init(void)
 {
-    int status = 0; /* Initialize status to 0 */
-
-    /* Skip environment initialization if it's already done */
-    if (envGetStatus() != ENV_SUCCESS) {
-        status = envInit(DEFAULT_ENV_PATH);
-        if (status != 0) {
-            /* Just log warning and continue with defaults */
-            errorLog(ERROR_WARNING, "Failed to initialize environment");
-        }
+    /* Initialize environment first */
+    if (envInit(DEFAULT_ENV_PATH) != 0) {
+        errorLog(ERROR_WARNING, "Failed to initialize environment, using defaults");
+        return 0; /* Continue with defaults */
     }
 
-    /* Initialize all values with defaults first */
-    strncpy(app_name, APP_NAME, sizeof(app_name) - 1);
-    strncpy(app_version, APP_VERSION, sizeof(app_version) - 1);
-    strncpy(app_env, APP_ENV, sizeof(app_env) - 1);
-    app_debug = APP_DEBUG;
-    app_port = APP_PORT;
-    strncpy(app_host, APP_HOST, sizeof(app_host) - 1);
-    strncpy(log_level, LOG_LEVEL, sizeof(log_level) - 1);
-    strncpy(log_path, LOG_PATH, sizeof(log_path) - 1);
-    strncpy(log_format, LOG_FORMAT, sizeof(log_format) - 1);
-    log_max_size = LOG_MAX_SIZE;
+    /* Load application settings */
+    loadStringConstant("APP_NAME", app_name, sizeof(app_name));
+    loadStringConstant("APP_VERSION", app_version, sizeof(app_version));
+    loadStringConstant("APP_ENV", app_env, sizeof(app_env));
+    loadBoolConstant("APP_DEBUG", &app_debug);
+    loadIntConstant("APP_PORT", &app_port);
+    loadStringConstant("APP_HOST", app_host, sizeof(app_host));
 
-    /* Add NUL terminators after strncpy operations */
-    app_name[sizeof(app_name) - 1] = '\0';
-    app_version[sizeof(app_version) - 1] = '\0';
-    app_env[sizeof(app_env) - 1] = '\0';
-    app_host[sizeof(app_host) - 1] = '\0';
-    log_level[sizeof(log_level) - 1] = '\0';
-    log_path[sizeof(log_path) - 1] = '\0';
-    log_format[sizeof(log_format) - 1] = '\0';
+    /* Load logging settings */
+    loadStringConstant("LOG_LEVEL", log_level, sizeof(log_level));
+    loadStringConstant("LOG_PATH", log_path, sizeof(log_path));
+    loadStringConstant("LOG_FORMAT", log_format, sizeof(log_format));
+    loadLongConstant("LOG_MAX_SIZE", &log_max_size);
 
-    /* Try to load from environment, but don't fail if not found */
-    status |= loadStringConstant("APP_NAME", app_name, sizeof(app_name));
-    status |= loadStringConstant("APP_VERSION", app_version, sizeof(app_version));
-    status |= loadStringConstant("APP_ENV", app_env, sizeof(app_env));
-    status |= loadBoolConstant("APP_DEBUG", &app_debug);
-    status |= loadIntConstant("APP_PORT", &app_port);
-    status |= loadStringConstant("APP_HOST", app_host, sizeof(app_host));
-    status |= loadStringConstant("LOG_LEVEL", log_level, sizeof(log_level));
-    status |= loadStringConstant("LOG_PATH", log_path, sizeof(log_path));
-    status |= loadStringConstant("LOG_FORMAT", log_format, sizeof(log_format));
-    status |= loadLongConstant("LOG_MAX_SIZE", &log_max_size);
+    /* Load database settings */
+    loadStringConstant("DB_HOST", db_host, sizeof(db_host));
+    loadIntConstant("DB_PORT", &db_port);
+    loadStringConstant("DB_NAME", db_name, sizeof(db_name));
+    loadStringConstant("DB_USER", db_user, sizeof(db_user));
+    loadStringConstant("DB_PASSWORD", db_password, sizeof(db_password));
 
-    /* Load database constants */
-    status |= loadStringConstant("DB_HOST", db_host, sizeof(db_host));
-    status |= loadIntConstant("DB_PORT", &db_port);
-    status |= loadStringConstant("DB_NAME", db_name, sizeof(db_name));
-    status |= loadStringConstant("DB_USER", db_user, sizeof(db_user));
-    status |= loadStringConstant("DB_PASSWORD", db_password, sizeof(db_password));
+    /* Load cache settings */
+    loadStringConstant("CACHE_DRIVER", cache_driver, sizeof(cache_driver));
+    loadStringConstant("CACHE_PREFIX", cache_prefix, sizeof(cache_prefix));
+    loadIntConstant("CACHE_TTL", &cache_ttl);
 
-    /* Load cache constants */
-    status |= loadStringConstant("CACHE_DRIVER", cache_driver, sizeof(cache_driver));
-    status |= loadStringConstant("CACHE_PREFIX", cache_prefix, sizeof(cache_prefix));
-    status |= loadIntConstant("CACHE_TTL", &cache_ttl);
-
-    return status == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+    return 0;
 }
 
-/* Getter functions for application constants */
+/* Getter functions implementation */
+const char *get_app_name(void) { return app_name; }
+const char *get_app_version(void) { return app_version; }
+const char *get_app_env(void) { return app_env; }
+int get_app_debug(void) { return app_debug; }
+int get_app_port(void) { return app_port; }
+const char *get_app_host(void) { return app_host; }
+const char *get_log_level(void) { return log_level; }
+const char *get_log_path(void) { return log_path; }
 const char *
-get_app_name(void)  /* Changed from getAppName */
+get_log_format(void)
 {
-    return app_name;
+    return DEFAULT_LOG_FORMAT;
 }
+long get_log_max_size(void) { return log_max_size; }
 
+/* Add new getter functions for db and cache settings */
+const char *get_db_host(void) { return db_host; }
+int get_db_port(void) { return db_port; }
+const char *get_db_name(void) { return db_name; }
+const char *get_db_user(void) { return db_user; }
+const char *get_db_password(void) { return db_password; }
 const char *
-get_app_version(void)  /* Changed from getAppVersion */
+get_cache_driver(void)
 {
-    return app_version;
+    return DEFAULT_CACHE_DRIVER;
 }
+const char *get_cache_prefix(void) { return cache_prefix; }
+int get_cache_ttl(void) { return cache_ttl; }
 
-const char *
-get_app_env(void)  /* Changed from getAppEnv */
-{
-    return app_env;
-}
-
-int
-get_app_debug(void)  /* Changed from getAppDebug */
-{
-    return app_debug;
-}
-
-int
-get_app_port(void)  /* Changed from getAppPort */
-{
-    return app_port;
-}
-
-const char *
-get_app_host(void)  /* Changed from getAppHost */
-{
-    return app_host;
-}
-
-/* Getter functions for logging constants */
-const char *
-get_log_level(void)  /* Changed from getLogLevel */
-{
-    return log_level;
-}
-
-const char *
-get_log_path(void)  /* Changed from getLogPath */
-{
-    return log_path;
-}
-
-const char *
-get_log_format(void)  /* Changed from getLogFormat */
-{
-    return log_format;
-}
-
-long
-get_log_max_size(void)  /* Changed from getLogMaxSize */
-{
-    return log_max_size;
-}
-
-/* Helper functions for loading different types of constants */
+/* Helper function implementations */
 static int
 loadStringConstant(const char *name, char *value, size_t size)
 {
-    if (envGet(name, value, size) != 0) {
-        errorLog(ERROR_WARNING, "Failed to load constant");
-        return -1;
+    char temp[MAX_ENV_VALUE];
+    if (envGet(name, temp, sizeof(temp)) == 0) {
+        strncpy(value, temp, size - 1);
+        value[size - 1] = '\0';
+        return 0;
     }
-    return 0;
+    return -1;
 }
 
 static int
 loadIntConstant(const char *name, int *value)
 {
     char temp[MAX_ENV_VALUE];
-    char *endptr;
-    long result;
-
-    if (envGet(name, temp, sizeof(temp)) != 0) {
-        errorLog(ERROR_WARNING, "Failed to load constant");
-        return -1;
+    if (envGet(name, temp, sizeof(temp)) == 0) {
+        *value = atoi(temp);
+        return 0;
     }
-
-    errno = 0;
-    result = strtol(temp, &endptr, 10);
-
-    if (errno != 0 || *endptr != '\0' || result > INT_MAX || result < INT_MIN) {
-        errorLog(ERROR_WARNING, "Invalid integer constant");
-        return -1;
-    }
-
-    *value = (int)result;
-    return 0;
+    return -1;
 }
 
 static int
 loadLongConstant(const char *name, long *value)
 {
     char temp[MAX_ENV_VALUE];
-    char *endptr;
-
-    if (envGet(name, temp, sizeof(temp)) != 0) {
-        errorLog(ERROR_WARNING, "Failed to load constant");
-        return -1;
+    if (envGet(name, temp, sizeof(temp)) == 0) {
+        *value = atol(temp);
+        return 0;
     }
-
-    errno = 0;
-    *value = strtol(temp, &endptr, 10);
-
-    if (errno != 0 || *endptr != '\0') {
-        errorLog(ERROR_WARNING, "Invalid long constant");
-        return -1;
-    }
-
-    return 0;
+    return -1;
 }
 
 static int
 loadBoolConstant(const char *name, int *value)
 {
     char temp[MAX_ENV_VALUE];
-
-    if (envGet(name, temp, sizeof(temp)) != 0) {
-        errorLog(ERROR_WARNING, "Failed to load constant");
-        return -1;
+    if (envGet(name, temp, sizeof(temp)) == 0) {
+        *value = (strcmp(temp, "1") == 0 ||
+                 strcmp(temp, "true") == 0 ||
+                 strcmp(temp, "yes") == 0);
+        return 0;
     }
-
-    if (strcmp(temp, "true") == 0 || strcmp(temp, "1") == 0) {
-        *value = 1;
-    } else if (strcmp(temp, "false") == 0 || strcmp(temp, "0") == 0) {
-        *value = 0;
-    } else {
-        errorLog(ERROR_WARNING, "Invalid boolean constant");
-        return -1;
-    }
-
-    return 0;
+    return -1;
 }
 
-void constants_cleanup(void)
+void
+constants_cleanup(void)
 {
-    /* Clear all sensitive data */
-    memset(app_name, 0, sizeof(app_name));
-    memset(app_version, 0, sizeof(app_version));
-    memset(app_env, 0, sizeof(app_env));
-    memset(app_host, 0, sizeof(app_host));
-    memset(log_level, 0, sizeof(log_level));
-    memset(log_path, 0, sizeof(log_path));
-    memset(log_format, 0, sizeof(log_format));
+    /* Reset all values to defaults */
+    strncpy(app_name, APP_NAME, sizeof(app_name) - 1);
+    strncpy(app_version, APP_VERSION, sizeof(app_version) - 1);
+    strncpy(app_env, APP_ENV, sizeof(app_env) - 1);
+    app_debug = APP_DEBUG;
+    app_port = APP_PORT;
+    strncpy(app_host, APP_HOST, sizeof(app_host) - 1);
 
-    app_debug = 0;
-    app_port = 0;
-    log_max_size = 0;
+    strncpy(log_level, LOG_LEVEL, sizeof(log_level) - 1);
+    strncpy(log_path, LOG_PATH, sizeof(log_path) - 1);
+    strncpy(log_format, LOG_FORMAT, sizeof(log_format) - 1);
+    log_max_size = LOG_MAX_SIZE;
 }

@@ -6,8 +6,12 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-/* API versions - centralized here instead of duplicated */
+/* Current API versions */
 #define CACHE_API_VERSION 1
 #define MEM_API_VERSION 1
+
+/* Required API versions for compatibility */
+#define CACHE_API_VERSION_REQUIRED 1
+#define MEM_API_VERSION_REQUIRED 1
 
 #endif /* VERSION_H */

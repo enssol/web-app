@@ -5,8 +5,9 @@
 #ifndef LOGGING_H
 #define LOGGING_H
 
-/* Dependencies */
+/* Dependencies - move constants.h include after common.h to avoid circular dependency */
 #include "common.h"
+#include "constants.h"
 
 /* Documentation for dependent modules:
  * - Core logging facility
@@ -22,7 +23,7 @@
 #define LOG_DEFAULT_MODE 0644
 
 /* Log rotation thresholds */
-#define LOG_MAX_SIZE MAX_LOG_SIZE  /* Use the one from constants.h */
+/* Remove duplicate LOG_MAX_SIZE definition and use the one from constants.h */
 #define LOG_MAX_AGE (24 * 60 * 60)      /* 24 hours in seconds */
 
 /* Log levels - compatible with syslog levels */

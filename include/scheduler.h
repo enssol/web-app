@@ -6,6 +6,7 @@
 #define SCHEDULER_H
 
 /* Dependencies */
+#include <unistd.h> /* For usleep() */
 #include "common.h"
 #include "process.h"
 #include "app_error.h"
@@ -22,30 +23,31 @@
 #define MAX_TASKS 128
 
 /* Error codes */
-#define SCHEDULER_ALREADY_INIT -2
-#define SCHEDULER_ALREADY_RUNNING -3
-#define SCHEDULER_ALREADY_STOPPED -4
-#define SCHEDULER_INVALID_TASK -5
-#define SCHEDULER_INVALID_INTERVAL -6
-#define SCHEDULER_TASK_NOT_FOUND -7
+#define SCHEDULER_ERROR_ALREADY_INITIALIZED -2
+#define SCHEDULER_ERROR_NOT_INITIALIZED -3
+#define SCHEDULER_ERROR_THREAD_CREATE -4
+#define SCHEDULER_ERROR_INVALID_ARGS -5
+#define SCHEDULER_ERROR_QUEUE_FULL -6
 
 /* Scheduler states */
 enum scheduler_state {
     SCHEDULER_STATE_INIT,
     SCHEDULER_STATE_STOPPED,
+    SCHEDULER_STATE_READY,
     SCHEDULER_STATE_RUNNING,
+    SCHEDULER_STATE_ERROR,
     SCHEDULER_STATE_PAUSED
 };
 
 /* Function prototypes */
-int schedulerInit(void);
-int schedulerStart(void);
-int schedulerStop(void);
-int schedulerPause(void);
-int schedulerResume(void);
-int schedulerAddTask(struct process *proc);
-int schedulerRemoveTask(pid_t pid);
-enum scheduler_state schedulerGetState(void);
-void schedulerCleanup(void);
+int scheduler_init(void);
+int scheduler_add_task(struct process *task);
+int scheduler_shutdown(void);
+int scheduler_cleanup(void);
+int scheduler_start(void);
+int scheduler_stop(void);
+int scheduler_pause(void);
+int scheduler_resume(void);
+enum scheduler_state scheduler_get_state(void);
 
 #endif /* SCHEDULER_H */

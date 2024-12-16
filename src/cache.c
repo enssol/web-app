@@ -13,6 +13,10 @@
 #include <time.h>
 #include <errno.h>
 
+/* Keep only these constants that aren't defined elsewhere */
+#define CACHE_MIN_TTL 1
+#define CACHE_MAX_TTL 86400 /* 24 hours */
+
 struct cache_entry {
     char key[CACHE_MAX_KEY_SIZE];
     void *data;
@@ -44,12 +48,19 @@ static void evictOldest(void);
 int
 cacheInit(enum cache_type type, size_t max_entries)
 {
+    /* Validate cache type */
+    if (type != CACHE_TYPE_LRU && type != CACHE_TYPE_LFU) {
+        last_status = CACHE_INVALID_PARAM;
+        return -1;
+    }
+
     /* Add API version check */
     if (CACHE_API_VERSION != CACHE_API_VERSION_REQUIRED) {
         last_status = CACHE_ERROR;
         return -1;
     }
 
+    /* Validate max entries */
     if (max_entries == 0 || max_entries > CACHE_MAX_ENTRIES) {
         last_status = CACHE_INVALID_PARAM;
         return -1;
@@ -74,17 +85,38 @@ int
 cacheSet(const char *key, const void *value, size_t value_size, int ttl)
 {
     struct cache_entry *entry;
-    struct cache_entry *new_entry = NULL;
-    void *new_data = NULL;
+    struct cache_entry *new_entry;
+    void *new_data;
     time_t now;
-    int status = -1;
+    int status;
 
-    /* Validate input parameters */
-    if (key == NULL || value == NULL || value_size == 0 ||
-        value_size > CACHE_MAX_VALUE_SIZE || strlen(key) >= CACHE_MAX_KEY_SIZE) {
+    /* Validate input parameters more strictly */
+    if (key == NULL || value == NULL) {
         last_status = CACHE_INVALID_PARAM;
         return -1;
     }
+
+    /* Check key length - must be strictly less than max size to allow for null terminator */
+    if (strlen(key) >= CACHE_MAX_KEY_SIZE - 1) {
+        last_status = CACHE_INVALID_PARAM;
+        return -1;
+    }
+
+    /* Check value size - must not exceed max size */
+    if (value_size == 0 || value_size >= CACHE_MAX_VALUE_SIZE) {
+        last_status = CACHE_INVALID_PARAM;
+        return -1;
+    }
+
+    /* Validate TTL range */
+    if (ttl < CACHE_MIN_TTL || ttl > CACHE_MAX_TTL) {
+        last_status = CACHE_INVALID_PARAM;
+        return -1;
+    }
+
+    new_entry = NULL;
+    new_data = NULL;
+    status = -1;
 
     pthread_mutex_lock(&cache.mutex);
 
@@ -96,7 +128,7 @@ cacheSet(const char *key, const void *value, size_t value_size, int ttl)
         new_data = malloc(value_size);
         if (new_data == NULL) {
             pthread_mutex_unlock(&cache.mutex);
-            last_status = CACHE_ERROR;
+            last_status = CACHE_OUT_OF_MEMORY;
             return -1;
         }
 
@@ -131,7 +163,7 @@ cacheSet(const char *key, const void *value, size_t value_size, int ttl)
     new_entry = (struct cache_entry *)malloc(sizeof(struct cache_entry));
     if (new_entry == NULL) {
         pthread_mutex_unlock(&cache.mutex);
-        last_status = CACHE_ERROR;
+        last_status = CACHE_OUT_OF_MEMORY;
         return -1;
     }
 
@@ -140,7 +172,7 @@ cacheSet(const char *key, const void *value, size_t value_size, int ttl)
     if (new_data == NULL) {
         free(new_entry);
         pthread_mutex_unlock(&cache.mutex);
-        last_status = CACHE_ERROR;
+        last_status = CACHE_OUT_OF_MEMORY;
         return -1;
     }
 
@@ -280,6 +312,33 @@ cacheCleanup(void)
 
     pthread_mutex_unlock(&cache.mutex);
     pthread_mutex_destroy(&cache.mutex);
+}
+
+int
+cacheFlush(void)
+{
+    struct cache_entry *entry;
+    struct cache_entry *next;
+
+    pthread_mutex_lock(&cache.mutex);
+
+    /* Free all entries */
+    entry = cache.head;
+    while (entry != NULL) {
+        next = entry->next;
+        free(entry->data);
+        free(entry);
+        entry = next;
+    }
+
+    /* Reset cache state */
+    cache.head = NULL;
+    cache.tail = NULL;
+    cache.current_entries = 0;
+
+    pthread_mutex_unlock(&cache.mutex);
+    last_status = CACHE_SUCCESS;
+    return 0;
 }
 
 size_t

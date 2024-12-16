@@ -44,10 +44,17 @@ int shutdownSystem(void);
 int rebootSystem(void);
 enum system_state getSystemState(void);
 int loadConfiguration(const char *config_path);
+
+/* Timeout management */
 int initSetTimeout(int seconds);
 int initGetTimeout(void);
+
+/* System state management */
 int initIsReady(void);
 const char *initGetStateString(enum system_state state);
-int initRegisterShutdownHandler(void (*handler)(void));
+
+/* Shutdown handler registration */
+typedef void (*shutdown_handler_t)(void);
+int initRegisterShutdownHandler(shutdown_handler_t handler);
 
 #endif /* INIT_H */

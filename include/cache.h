@@ -22,6 +22,7 @@
 #define CACHE_MAX_VALUE_SIZE 4096
 #define CACHE_MIN_TTL 1
 #define CACHE_MAX_TTL 86400 /* 24 hours */
+#define CACHE_MAX_ENTRIES 1024 /* From cache.h */
 
 /* Cache types */
 enum cache_type {

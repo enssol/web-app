@@ -100,6 +100,8 @@ void test_mem_fragmentation(void);  /* Add this */
 void test_mem_multi_pool(void);     /* Add this */
 void test_mem_stress_allocation(void); /* Add stress test declaration */
 void test_mem_corruption_detection(void); /* Add this */
+void test_system_memory_stress(void);  /* System-wide memory stress test */
+void test_memory_stress(void);         /* Unit test for memory subsystem */
 
 /* Test case declarations for cache */
 void test_cache_init(void);
@@ -114,9 +116,17 @@ void test_cache_concurrent_access(void);        /* Add this */
 void test_cache_performance(void);             /* Add this */
 void test_cache_stress(void); /* Add stress test declaration */
 void test_cache_thread_safety(void); /* Add this */
+void test_cache_eviction(void); /* Add this */
 
 /* Test case declarations for fs */
 void test_fs_error_conditions(void); /* Add this */
+
+/* Test case declaration for consistency */
+void test_path_consistency(void);
+void test_buffer_sizes(void);
+void test_version_consistency(void);
+void test_env_consistency(void);
+
 
 /* Integration test declarations */
 void test_system_integration(void);
@@ -130,6 +140,7 @@ void test_scheduler_process_mem_integration(void);
 int test_app_error(void);
 int test_config(void);
 int test_constants(void);
+int test_consistency(void);
 int test_env(void);
 int test_fs(void);
 int test_init(void);
