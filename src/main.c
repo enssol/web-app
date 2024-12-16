@@ -12,6 +12,7 @@
 #include "../include/scheduler.h"
 #include "../include/mem.h"
 #include "../include/cache.h"
+#include "../include/constants.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -32,7 +33,7 @@ main(int argc, char *argv[])
 {
     int status;
     struct sigaction sa;
-    const char *log_path = LOG_PATH;
+    const char *log_path = DEFAULT_LOG_PATH;
 
     /* Use argc/argv if specified */
     if (argc > 1)
@@ -55,10 +56,17 @@ main(int argc, char *argv[])
     /* Initialize error handling with optional custom log path */
     errorInit(log_path);
 
+    /* Initialize logging */
+    status = logInit(DEFAULT_LOG_PATH);
+    if (status != 0) {
+        errorLog(ERROR_CRITICAL, "Logging initialization failed");
+        return EXIT_FAILURE;
+    }
+
     /* Initialize memory management */
     status = memInit(MEM_POOL_SIZE);
     if (status != 0) {
-        errorLog(ERROR_CRITICAL, "Memory initialization failed");
+        errorLog(ERROR_CRITICAL, "Memory initialization failed: incompatible API version");
         return EXIT_FAILURE;
     }
 

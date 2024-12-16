@@ -201,6 +201,148 @@ void test_cache_operations(void)
     cacheCleanup();
 }
 
+void test_system_integration(void)
+{
+    char value[64];
+    size_t size;
+    struct process proc;
+    int status;
+
+    /* Test complete system initialization sequence */
+    CU_ASSERT_EQUAL(initSystem(), INIT_SUCCESS);
+    CU_ASSERT_EQUAL(fsInit("/"), FS_SUCCESS);
+    CU_ASSERT_EQUAL(memInit(MEM_POOL_SIZE), 0);
+    CU_ASSERT_EQUAL(cacheInit(CACHE_TYPE_LRU, 16), 0);
+    CU_ASSERT_EQUAL(processInit(), 0);
+    CU_ASSERT_EQUAL(schedulerInit(), SCHEDULER_SUCCESS);
+
+    /* Test cache with memory integration */
+    CU_ASSERT_EQUAL(cacheSet("test_key", "test_value", 11, 60), 0);
+    size = sizeof(value);
+    CU_ASSERT_EQUAL(cacheGet("test_key", value, &size), 0);
+    CU_ASSERT_STRING_EQUAL(value, "test_value");
+
+    /* Test process and scheduler integration */
+    strncpy(proc.name, "test_proc", MAX_PROCESS_NAME - 1);
+    proc.state = PROCESS_READY;
+    proc.priority = PRIORITY_NORMAL;
+    proc.task = test_task;
+    proc.arg = NULL;
+
+    CU_ASSERT_EQUAL(schedulerAddTask(&proc), SCHEDULER_SUCCESS);
+    CU_ASSERT_EQUAL(schedulerStart(), SCHEDULER_SUCCESS);
+
+    /* Let task execute */
+    sleep(1);
+
+    /* Verify proper cleanup */
+    CU_ASSERT_EQUAL(schedulerStop(), SCHEDULER_SUCCESS);
+    schedulerCleanup();
+    processCleanup();
+    cacheCleanup();
+    memCleanup();
+    shutdownSystem();
+}
+
+void test_logging_error_integration(void)
+{
+    const char *test_msg = "Test error message";
+    char buffer[LOG_MAX_MSG_LEN];
+    struct stat st;
+
+    /* Initialize both systems */
+    CU_ASSERT_EQUAL(logInit(TEST_LOG_PATH), 0);
+    CU_ASSERT_EQUAL(errorInit(TEST_LOG_PATH), 0);
+
+    /* Test error logging to file */
+    errorLog(ERROR_CRITICAL, test_msg);
+
+    /* Verify message was logged */
+    CU_ASSERT_EQUAL(stat(TEST_LOG_PATH, &st), 0);
+    CU_ASSERT(st.st_size > 0);
+
+    /* Cleanup */
+    errorShutdown();
+    logCleanup();
+}
+
+void test_config_env_integration(void)
+{
+    char value[MAX_ENV_VALUE];
+
+    /* Initialize both systems */
+    CU_ASSERT_EQUAL(configInit(TEST_CONFIG_PATH), 0);
+    CU_ASSERT_EQUAL(envInit(TEST_ENV_PATH), 0);
+
+    /* Test config -> env synchronization */
+    CU_ASSERT_EQUAL(configSet("TEST_KEY", "test_value"), 0);
+    CU_ASSERT_EQUAL(envGet("TEST_KEY", value, sizeof(value)), 0);
+    CU_ASSERT_STRING_EQUAL(value, "test_value");
+
+    /* Cleanup */
+    configCleanup();
+    envCleanup();
+}
+
+void test_scheduler_process_mem_integration(void)
+{
+    struct process proc;
+    void *mem_block;
+
+    /* Initialize all systems */
+    CU_ASSERT_EQUAL(memInit(MEM_POOL_SIZE), 0);
+    CU_ASSERT_EQUAL(processInit(), 0);
+    CU_ASSERT_EQUAL(schedulerInit(), SCHEDULER_SUCCESS);
+
+    /* Allocate memory for process */
+    mem_block = memAlloc(1024);
+    CU_ASSERT_PTR_NOT_NULL(mem_block);
+
+    /* Create and schedule process */
+    strncpy(proc.name, "test_proc", MAX_PROCESS_NAME - 1);
+    proc.state = PROCESS_READY;
+    proc.priority = PRIORITY_NORMAL;
+    proc.task = test_task;
+    proc.arg = mem_block;
+
+    CU_ASSERT_EQUAL(schedulerAddTask(&proc), SCHEDULER_SUCCESS);
+
+    /* Run scheduler */
+    CU_ASSERT_EQUAL(schedulerStart(), SCHEDULER_SUCCESS);
+    sleep(1);
+    CU_ASSERT_EQUAL(schedulerStop(), SCHEDULER_SUCCESS);
+
+    /* Cleanup */
+    memFree(mem_block);
+    schedulerCleanup();
+    processCleanup();
+    memCleanup();
+}
+
+void test_fs_cache_integration(void)
+{
+    const char *test_data = "Test data";
+    char buffer[MAX_FILE_SIZE];
+    size_t size;
+
+    /* Initialize both systems */
+    CU_ASSERT_EQUAL(fsInit(TEST_ROOT_PATH), FS_SUCCESS);
+    CU_ASSERT_EQUAL(cacheInit(CACHE_TYPE_LRU, 16), 0);
+
+    /* Write file and verify cached */
+    CU_ASSERT_EQUAL(fsWriteFile(TEST_FILE_PATH, test_data, strlen(test_data)),
+                    strlen(test_data));
+
+    /* Read through cache */
+    size = sizeof(buffer);
+    CU_ASSERT_EQUAL(cacheGet(TEST_FILE_PATH, buffer, &size), 0);
+    CU_ASSERT_STRING_EQUAL(buffer, test_data);
+
+    /* Cleanup */
+    fsDeleteFile(TEST_FILE_PATH);
+    cacheCleanup();
+}
+
 /* Test suite initialization */
 int test_main_module(void)
 {
@@ -211,12 +353,22 @@ int test_main_module(void)
         return -1;
     }
 
+    /* Add existing tests */
     if ((CU_add_test(suite, "Main Startup", test_main_startup) == NULL) ||
         (CU_add_test(suite, "Signal Handling", test_main_signal_handling) == NULL) ||
         (CU_add_test(suite, "Main Cleanup", test_main_cleanup) == NULL) ||
         (CU_add_test(suite, "Arguments Handling", test_main_args_handling) == NULL) ||
         (CU_add_test(suite, "Memory Management", test_memory_management) == NULL) ||
-        (CU_add_test(suite, "Cache Operations", test_cache_operations) == NULL)) {
+        (CU_add_test(suite, "Cache Operations", test_cache_operations) == NULL) ||
+        (CU_add_test(suite, "Cache Stress Test", test_cache_stress) == NULL) ||
+        (CU_add_test(suite, "Memory Stress Allocation", test_mem_stress_allocation) == NULL) ||
+        (CU_add_test(suite, "Scheduler Stress Test", test_scheduler_stress) == NULL) ||
+        (CU_add_test(suite, "System Integration", test_system_integration) == NULL) ||
+        (CU_add_test(suite, "FS Cache Integration", test_fs_cache_integration) == NULL) ||
+        (CU_add_test(suite, "Scheduler Process Integration", test_scheduler_process_integration) == NULL) ||
+        (CU_add_test(suite, "Logging Error Integration", test_logging_error_integration) == NULL) ||
+        (CU_add_test(suite, "Config Env Integration", test_config_env_integration) == NULL) ||
+        (CU_add_test(suite, "Scheduler Process Mem Integration", test_scheduler_process_mem_integration) == NULL)) {
         return -1;
     }
 

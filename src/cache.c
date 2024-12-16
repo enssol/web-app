@@ -44,6 +44,12 @@ static void evictOldest(void);
 int
 cacheInit(enum cache_type type, size_t max_entries)
 {
+    /* Add API version check */
+    if (CACHE_API_VERSION != CACHE_API_VERSION_REQUIRED) {
+        last_status = CACHE_ERROR;
+        return -1;
+    }
+
     if (max_entries == 0 || max_entries > CACHE_MAX_ENTRIES) {
         last_status = CACHE_INVALID_PARAM;
         return -1;
@@ -68,8 +74,12 @@ int
 cacheSet(const char *key, const void *value, size_t value_size, int ttl)
 {
     struct cache_entry *entry;
+    struct cache_entry *new_entry = NULL;
+    void *new_data = NULL;
     time_t now;
+    int status = -1;
 
+    /* Validate input parameters */
     if (key == NULL || value == NULL || value_size == 0 ||
         value_size > CACHE_MAX_VALUE_SIZE || strlen(key) >= CACHE_MAX_KEY_SIZE) {
         last_status = CACHE_INVALID_PARAM;
@@ -78,54 +88,99 @@ cacheSet(const char *key, const void *value, size_t value_size, int ttl)
 
     pthread_mutex_lock(&cache.mutex);
 
+    /* Check if key already exists */
     entry = findEntry(key);
 
-    if (entry == NULL) {
-        if (cache.current_entries >= cache.max_entries) {
-            evictOldest();
-        }
-
-        entry = (struct cache_entry *)malloc(sizeof(struct cache_entry));
-        if (entry == NULL) {
+    /* If entry exists, update it */
+    if (entry != NULL) {
+        new_data = malloc(value_size);
+        if (new_data == NULL) {
             pthread_mutex_unlock(&cache.mutex);
             last_status = CACHE_ERROR;
             return -1;
         }
 
-        strncpy(entry->key, key, CACHE_MAX_KEY_SIZE - 1);
-        entry->key[CACHE_MAX_KEY_SIZE - 1] = '\0';
-        entry->next = NULL;
-        entry->prev = NULL;
-        cache.current_entries++;
-    } else {
+        /* Copy new data */
+        memcpy(new_data, value, value_size);
+
+        /* Free old data and update entry */
         free(entry->data);
+        entry->data = new_data;
+        entry->size = value_size;
+        time(&now);
+        entry->expiry = now + ttl;
+        entry->access_count = 1;
+
+        /* Update cache order */
+        if (cache.type == CACHE_TYPE_LRU) {
+            updateLRU(entry);
+        } else {
+            updateLFU(entry);
+        }
+
+        pthread_mutex_unlock(&cache.mutex);
+        last_status = CACHE_SUCCESS;
+        return 0;
     }
 
-    entry->data = malloc(value_size);
-    if (entry->data == NULL) {
-        if (entry->prev == NULL && entry->next == NULL) {
-            free(entry);
-        }
+    /* Create new entry if doesn't exist */
+    if (cache.current_entries >= cache.max_entries) {
+        evictOldest();
+    }
+
+    new_entry = (struct cache_entry *)malloc(sizeof(struct cache_entry));
+    if (new_entry == NULL) {
         pthread_mutex_unlock(&cache.mutex);
         last_status = CACHE_ERROR;
         return -1;
     }
 
-    memcpy(entry->data, value, value_size);
-    entry->size = value_size;
-    time(&now);
-    entry->expiry = now + ttl;
-    entry->access_count = 1;
+    /* Allocate space for data */
+    new_data = malloc(value_size);
+    if (new_data == NULL) {
+        free(new_entry);
+        pthread_mutex_unlock(&cache.mutex);
+        last_status = CACHE_ERROR;
+        return -1;
+    }
 
-    if (cache.type == CACHE_TYPE_LRU) {
-        updateLRU(entry);
+    /* Initialize new entry */
+    strncpy(new_entry->key, key, CACHE_MAX_KEY_SIZE - 1);
+    new_entry->key[CACHE_MAX_KEY_SIZE - 1] = '\0';
+    memcpy(new_data, value, value_size);
+    new_entry->data = new_data;
+    new_entry->size = value_size;
+    time(&now);
+    new_entry->expiry = now + ttl;
+    new_entry->access_count = 1;
+    new_entry->next = NULL;
+    new_entry->prev = NULL;
+
+    /* Add to cache and update links */
+    if (cache.head == NULL) {
+        /* First entry */
+        cache.head = new_entry;
+        cache.tail = new_entry;
     } else {
-        updateLFU(entry);
+        /* Add to head */
+        new_entry->next = cache.head;
+        cache.head->prev = new_entry;
+        cache.head = new_entry;
+    }
+
+    cache.current_entries++;
+    status = 0;
+
+    /* Update cache order */
+    if (cache.type == CACHE_TYPE_LRU) {
+        updateLRU(new_entry);
+    } else {
+        updateLFU(new_entry);
     }
 
     pthread_mutex_unlock(&cache.mutex);
     last_status = CACHE_SUCCESS;
-    return 0;
+    return status;
 }
 
 int

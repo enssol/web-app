@@ -46,7 +46,7 @@ static int loadBoolConstant(const char *name, int *value);
 int
 constants_init(void)  /* Changed from constantsInit */
 {
-    int status;
+    int status = 0; /* Initialize status to 0 */
 
     /* Skip environment initialization if it's already done */
     if (envGetStatus() != ENV_SUCCESS) {
@@ -69,17 +69,26 @@ constants_init(void)  /* Changed from constantsInit */
     strncpy(log_format, LOG_FORMAT, sizeof(log_format) - 1);
     log_max_size = LOG_MAX_SIZE;
 
+    /* Add NUL terminators after strncpy operations */
+    app_name[sizeof(app_name) - 1] = '\0';
+    app_version[sizeof(app_version) - 1] = '\0';
+    app_env[sizeof(app_env) - 1] = '\0';
+    app_host[sizeof(app_host) - 1] = '\0';
+    log_level[sizeof(log_level) - 1] = '\0';
+    log_path[sizeof(log_path) - 1] = '\0';
+    log_format[sizeof(log_format) - 1] = '\0';
+
     /* Try to load from environment, but don't fail if not found */
-    loadStringConstant("APP_NAME", app_name, sizeof(app_name));
-    loadStringConstant("APP_VERSION", app_version, sizeof(app_version));
-    loadStringConstant("APP_ENV", app_env, sizeof(app_env));
-    loadBoolConstant("APP_DEBUG", &app_debug);
-    loadIntConstant("APP_PORT", &app_port);
-    loadStringConstant("APP_HOST", app_host, sizeof(app_host));
-    loadStringConstant("LOG_LEVEL", log_level, sizeof(log_level));
-    loadStringConstant("LOG_PATH", log_path, sizeof(log_path));
-    loadStringConstant("LOG_FORMAT", log_format, sizeof(log_format));
-    loadLongConstant("LOG_MAX_SIZE", &log_max_size);
+    status |= loadStringConstant("APP_NAME", app_name, sizeof(app_name));
+    status |= loadStringConstant("APP_VERSION", app_version, sizeof(app_version));
+    status |= loadStringConstant("APP_ENV", app_env, sizeof(app_env));
+    status |= loadBoolConstant("APP_DEBUG", &app_debug);
+    status |= loadIntConstant("APP_PORT", &app_port);
+    status |= loadStringConstant("APP_HOST", app_host, sizeof(app_host));
+    status |= loadStringConstant("LOG_LEVEL", log_level, sizeof(log_level));
+    status |= loadStringConstant("LOG_PATH", log_path, sizeof(log_path));
+    status |= loadStringConstant("LOG_FORMAT", log_format, sizeof(log_format));
+    status |= loadLongConstant("LOG_MAX_SIZE", &log_max_size);
 
     /* Load database constants */
     status |= loadStringConstant("DB_HOST", db_host, sizeof(db_host));
@@ -93,7 +102,7 @@ constants_init(void)  /* Changed from constantsInit */
     status |= loadStringConstant("CACHE_PREFIX", cache_prefix, sizeof(cache_prefix));
     status |= loadIntConstant("CACHE_TTL", &cache_ttl);
 
-    return EXIT_SUCCESS;
+    return status == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 /* Getter functions for application constants */

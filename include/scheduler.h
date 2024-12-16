@@ -2,11 +2,19 @@
  * Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
  * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
-/* include/scheduler.h */
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
+/* Dependencies */
+#include "common.h"
 #include "process.h"
+#include "app_error.h"
+
+/* Documentation for dependent modules:
+ * - Core scheduling facility
+ * - Used by init.h for system task management
+ * - Manages process lifecycle and scheduling
+ */
 
 /* Constants */
 #define SCHEDULER_SUCCESS 0

@@ -85,6 +85,46 @@ void test_fs_invalid_operations(void)
     CU_ASSERT_EQUAL(fsGetStatus(), FS_PERMISSION_DENIED);
 }
 
+void test_fs_cache_integration(void)
+{
+    char buffer[MAX_FILE_SIZE];
+    size_t size;
+
+    /* Initialize both systems */
+    CU_ASSERT_EQUAL(fsInit(TEST_ROOT_PATH), FS_SUCCESS);
+    CU_ASSERT_EQUAL(cacheInit(CACHE_TYPE_LRU, 16), 0);
+
+    /* Write file and verify it's cached */
+    CU_ASSERT_EQUAL(fsWriteFile(TEST_FILE_PATH, TEST_DATA, strlen(TEST_DATA)),
+                    strlen(TEST_DATA));
+
+    /* Verify cache has file content */
+    size = sizeof(buffer);
+    CU_ASSERT_EQUAL(cacheGet(TEST_FILE_PATH, buffer, &size), 0);
+    CU_ASSERT_STRING_EQUAL(buffer, TEST_DATA);
+
+    /* Cleanup */
+    cacheCleanup();
+}
+
+void test_fs_error_conditions(void)
+{
+    char buffer[MAX_FILE_SIZE];
+    const char *invalid_path = "/nonexistent/path/file.txt";
+
+    /* Test invalid file operations */
+    CU_ASSERT_EQUAL(fsReadFile(invalid_path, buffer, sizeof(buffer)), FS_ERROR);
+    CU_ASSERT_EQUAL(fsGetStatus(), FS_FILE_NOT_FOUND);
+
+    /* Test path too long */
+    char long_path[MAX_PATH_LEN + 10];
+    memset(long_path, 'A', MAX_PATH_LEN + 5);
+    long_path[MAX_PATH_LEN + 5] = '\0';
+
+    CU_ASSERT_EQUAL(fsCreateFile(long_path), FS_ERROR);
+    CU_ASSERT_EQUAL(fsGetStatus(), FS_PATH_TOO_LONG);
+}
+
 /* Test suite initialization */
 int test_fs(void)
 {
@@ -102,7 +142,9 @@ int test_fs(void)
         (CU_add_test(suite, "FS Delete File", test_fs_delete_file) == NULL) ||
         (CU_add_test(suite, "FS Read File", test_fs_read_file) == NULL) ||
         (CU_add_test(suite, "FS Write File", test_fs_write_file) == NULL) ||
-        (CU_add_test(suite, "FS Invalid Operations", test_fs_invalid_operations) == NULL)
+        (CU_add_test(suite, "FS Invalid Operations", test_fs_invalid_operations) == NULL) ||
+        (CU_add_test(suite, "FS Cache Integration", test_fs_cache_integration) == NULL) ||
+        (CU_add_test(suite, "FS Error Conditions", test_fs_error_conditions) == NULL)
     ) {
         return -1;
     }

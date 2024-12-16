@@ -12,10 +12,9 @@
 #include <errno.h>
 
 #ifdef DEBUG
-#define DEBUG_LOG(fmt, ...) \
-    fprintf(stderr, "[DEBUG][%s:%d] " fmt "\n", __FILE__, __LINE__, ##__VA_ARGS__)
+#define DEBUG_LOG(x) fprintf(stderr, "[DEBUG][%s:%d] %s\n", __FILE__, __LINE__, x)
 #else
-#define DEBUG_LOG(fmt, ...) ((void)0)
+#define DEBUG_LOG(x) ((void)0)
 #endif
 
 struct block_header {
@@ -43,6 +42,12 @@ static pthread_mutex_t mem_mutex = PTHREAD_MUTEX_INITIALIZER;
 int
 memInit(size_t pool_size)
 {
+    /* Add API version check */
+    if (MEM_API_VERSION != MEM_API_VERSION_REQUIRED) {
+        last_status = MEM_ERROR;
+        return -1;
+    }
+
     void *pool_base;
     struct block_header *first_block;
     size_t min_size;
@@ -120,7 +125,7 @@ memAlloc(size_t size)
     size_t block_size;
     size_t remaining_size;
 
-    DEBUG_LOG("Attempting allocation of %zu bytes", size);
+    DEBUG_LOG("Attempting allocation");
 
     if (size == 0) {
         last_status = MEM_INVALID_PARAM;
@@ -261,15 +266,15 @@ void memDumpStats(void)
     struct block_header *block;
 
     for (i = 0; i < pool_count; i++) {
-        printf("Pool %zu:\n", i);
+        printf("Pool %lu:\n", (unsigned long)i);
         printf("  Base: %p\n", pools[i].base);
-        printf("  Size: %zu\n", pools[i].size);
-        printf("  Used: %zu\n", pools[i].used);
+        printf("  Size: %lu\n", (unsigned long)pools[i].size);
+        printf("  Used: %lu\n", (unsigned long)pools[i].used);
 
         block = pools[i].first_block;
         while (block != NULL) {
             printf("  Block %p:\n", (void*)block);
-            printf("    Size: %zu\n", block->size);
+            printf("    Size: %lu\n", (unsigned long)block->size);
             printf("    Free: %d\n", block->free);
             block = block->next;
         }
@@ -282,10 +287,11 @@ void memVisualizeBlocks(void)
     struct block_header *block;
 
     for (i = 0; i < pool_count; i++) {
-        printf("Pool %zu: ", i);
+        printf("Pool %lu: ", (unsigned long)i);
         block = pools[i].first_block;
         while (block != NULL) {
-            printf("[%c|%zu]->", block->free ? 'F' : 'U', block->size);
+            printf("[%c|%lu]->", block->free ? 'F' : 'U',
+                   (unsigned long)block->size);
             block = block->next;
         }
         printf("NULL\n");

@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stddef.h>  /* Add this line */
 
 /* Configuration limits */
 #define CONFIG_MAX_VARS 100
@@ -141,22 +142,24 @@ configGetStatus(void)
 static int
 parseConfigLine(const char *line, char *key, char *value)
 {
-    char *eq_pos;
+    const char *eq_pos;
     size_t key_len;
+    size_t diff;
 
     /* Find equals sign */
     eq_pos = strchr(line, '=');
-    if (eq_pos == NULL)
-    {
+    if (eq_pos == NULL) {
         return -1;
     }
 
-    /* Extract key */
-    key_len = eq_pos - line;
-    if (key_len >= MAX_ENV_NAME)
-    {
+    /* Calculate key length safely */
+    diff = (size_t)(eq_pos - line); /* Cast pointer difference to size_t */
+    if (diff >= MAX_ENV_NAME) {
         return -1;
     }
+    key_len = diff;
+
+    /* Extract key */
     strncpy(key, line, key_len);
     key[key_len] = '\0';
 
@@ -167,8 +170,7 @@ parseConfigLine(const char *line, char *key, char *value)
 
     /* Remove trailing newline if present */
     key_len = strlen(value);
-    if (key_len > 0 && value[key_len - 1] == '\n')
-    {
+    if (key_len > 0 && value[key_len - 1] == '\n') {
         value[key_len - 1] = '\0';
     }
 

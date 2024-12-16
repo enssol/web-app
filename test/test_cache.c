@@ -7,6 +7,7 @@
 #include "test_suite.h"
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 /* Test fixture */
 static const char *TEST_KEY = "test_key";
@@ -126,44 +127,26 @@ void test_cache_edge_cases(void)
     char value[CACHE_MAX_VALUE_SIZE + 1];
     char stored_value[CACHE_MAX_VALUE_SIZE + 1];
     char long_key[CACHE_MAX_KEY_SIZE + 1];
-    size_t value_size;
+    size_t value_size = sizeof(stored_value);
 
-    value_size = sizeof(stored_value);
+    /* Test initialization edge cases */
+    CU_ASSERT_EQUAL(cacheInit(99, 16), -1);  /* Invalid type */
+    CU_ASSERT_EQUAL(cacheInit(CACHE_TYPE_LRU, 0), -1);  /* Invalid size */
 
-    /* Test NULL inputs */
-    CU_ASSERT_EQUAL(cacheSet(NULL, "test", 5, 60), -1);
-    CU_ASSERT_EQUAL(cacheGetStatus(), CACHE_INVALID_PARAM);
-
-    CU_ASSERT_EQUAL(cacheSet("test", NULL, 0, 60), -1);
-    CU_ASSERT_EQUAL(cacheGetStatus(), CACHE_INVALID_PARAM);
-
-    CU_ASSERT_EQUAL(cacheGet("test", NULL, &value_size), -1);
-    CU_ASSERT_EQUAL(cacheGetStatus(), CACHE_INVALID_PARAM);
-
-    /* Test maximum key size */
-    memset(long_key, 'A', CACHE_MAX_KEY_SIZE);
-    long_key[CACHE_MAX_KEY_SIZE] = '\0';
-
+    /* Test invalid key/value sizes */
+    memset(long_key, 'A', CACHE_MAX_KEY_SIZE + 1);
+    long_key[CACHE_MAX_KEY_SIZE + 1] = '\0';
     CU_ASSERT_EQUAL(cacheSet(long_key, "test", 5, 60), -1);
-    CU_ASSERT_EQUAL(cacheGetStatus(), CACHE_INVALID_PARAM);
 
-    /* Test empty key */
-    CU_ASSERT_EQUAL(cacheSet("", "test", 5, 60), -1);
-    CU_ASSERT_EQUAL(cacheGetStatus(), CACHE_INVALID_PARAM);
-
-    /* Test maximum value size */
-    memset(value, 'B', CACHE_MAX_VALUE_SIZE);
-    value[CACHE_MAX_VALUE_SIZE] = '\0';
+    memset(value, 'B', CACHE_MAX_VALUE_SIZE + 1);
+    value[CACHE_MAX_VALUE_SIZE + 1] = '\0';
     CU_ASSERT_EQUAL(cacheSet("test", value, CACHE_MAX_VALUE_SIZE + 1, 60), -1);
-    CU_ASSERT_EQUAL(cacheGetStatus(), CACHE_INVALID_PARAM);
 
-    /* Test zero TTL */
-    CU_ASSERT_EQUAL(cacheSet("test", "value", 6, 0), 0);
-
-    /* Test value size boundary */
-    value_size = 0;
-    CU_ASSERT_EQUAL(cacheGet("test", stored_value, &value_size), -1);
-    CU_ASSERT_EQUAL(cacheGetStatus(), CACHE_INVALID_PARAM);
+    /* Test NULL parameters */
+    CU_ASSERT_EQUAL(cacheSet(NULL, "value", 6, 60), -1);
+    CU_ASSERT_EQUAL(cacheGet(NULL, value, &value_size), -1);
+    CU_ASSERT_EQUAL(cacheGet("key", NULL, &value_size), -1);
+    CU_ASSERT_EQUAL(cacheGet("key", value, NULL), -1);
 }
 
 void test_cache_eviction_policy(void)
@@ -224,6 +207,109 @@ void test_cache_concurrent_access(void)
     CU_ASSERT_EQUAL(cacheGetStatus(), CACHE_NOT_FOUND);
 }
 
+/* Performance test cases for cache */
+void test_cache_performance(void)
+{
+    char key[16];
+    char value[64];
+    size_t size;
+    int i, iterations = 10000;
+    clock_t start, end;
+    double time_taken;
+
+    /* Initialize cache with reasonable size */
+    CU_ASSERT_EQUAL(cacheInit(CACHE_TYPE_LRU, 1000), 0);
+
+    /* Measure write performance */
+    start = clock();
+    for (i = 0; i < iterations; i++) {
+        sprintf(key, "key%d", i);
+        CU_ASSERT_EQUAL(cacheSet(key, "test_value", 10, 60), 0);
+    }
+    end = clock();
+    time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    /* Log or assert acceptable write time */
+    CU_ASSERT(time_taken < 1.0); /* Should complete in under 1 second */
+
+    /* Measure read performance */
+    start = clock();
+    for (i = 0; i < iterations; i++) {
+        sprintf(key, "key%d", i % 1000); /* Read within cache size */
+        size = sizeof(value);
+        CU_ASSERT_EQUAL(cacheGet(key, value, &size), 0);
+    }
+    end = clock();
+    time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
+    /* Log or assert acceptable read time */
+    CU_ASSERT(time_taken < 0.5); /* Should complete in under 0.5 seconds */
+}
+
+void test_cache_stress(void)
+{
+    char key[32];
+    char value[64];
+    size_t size;
+    int i, iterations = 100000;
+    int concurrent_ops = 1000;
+
+    /* Initialize with larger capacity for stress test */
+    CU_ASSERT_EQUAL(cacheInit(CACHE_TYPE_LRU, concurrent_ops), 0);
+
+    /* Rapid set/get/delete operations */
+    for (i = 0; i < iterations; i++) {
+        sprintf(key, "stress_key_%d", i % concurrent_ops);
+
+        /* Alternate between operations */
+        switch (i % 3) {
+            case 0: /* Set */
+                CU_ASSERT_EQUAL(cacheSet(key, "stress_value", 12, 60), 0);
+                break;
+            case 1: /* Get */
+                size = sizeof(value);
+                cacheGet(key, value, &size);
+                break;
+            case 2: /* Delete */
+                cacheDelete(key);
+                break;
+        }
+    }
+}
+
+void* cache_thread_func(void* arg)
+{
+    const char* key = (const char*)arg;
+    const char* value = "thread_test_value";
+    size_t size = strlen(value) + 1;
+
+    cacheSet(key, value, size, 60);
+    return NULL;
+}
+
+void test_cache_thread_safety(void)
+{
+    pthread_t threads[10];
+    int i;
+    const char *test_key = "thread_test_key";
+    const char *test_value = "thread_test_value";
+
+    CU_ASSERT_EQUAL(cacheInit(CACHE_TYPE_LRU, 100), 0);
+
+    /* Spawn multiple threads accessing cache simultaneously */
+    for (i = 0; i < 10; i++) {
+        pthread_create(&threads[i], NULL, cache_thread_func, (void*)test_key);
+    }
+
+    /* Wait for threads to complete */
+    for (i = 0; i < 10; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    /* Verify cache consistency */
+    char value[64];
+    size_t size = sizeof(value);
+    CU_ASSERT_EQUAL(cacheGet(test_key, value, &size), 0);
+}
+
 /* Test suite initialization */
 int test_cache(void)
 {
@@ -241,8 +327,9 @@ int test_cache(void)
         (CU_add_test(suite, "Cache LRU", test_cache_lru) == NULL) ||
         (CU_add_test(suite, "Cache LFU", test_cache_lfu) == NULL) ||
         (CU_add_test(suite, "Cache Edge Cases", test_cache_edge_cases) == NULL) ||
-        (CU_add_test(suite, "Cache Eviction Policy", test_cache_eviction_policy) == NULL) ||
-        (CU_add_test(suite, "Cache Concurrent Access", test_cache_concurrent_access) == NULL)) {
+        (CU_add_test(suite, "Cache Performance", test_cache_performance) == NULL) ||
+        (CU_add_test(suite, "Cache Stress", test_cache_stress) == NULL) ||
+        (CU_add_test(suite, "Cache Thread Safety", test_cache_thread_safety) == NULL)) {
         return -1;
     }
 

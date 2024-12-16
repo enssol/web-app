@@ -2,34 +2,52 @@
  * Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
  * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
-/* include/init.h */
 #ifndef INIT_H
 #define INIT_H
 
-#include <sys/types.h>
-#include <unistd.h>
+/* Dependencies */
+#include "common.h"
+#include "scheduler.h"
+#include "shell.h"
+
+/* Documentation for dependent modules:
+ * - Core initialization system
+ * - Used by main.c for system startup/shutdown
+ * - Controls system state transitions
+ */
 
 /* Constants */
 #define INIT_SUCCESS 0
 #define INIT_ERROR -1
-#define MAX_ENV_VARS 100
-#define MAX_PATH_LEN 4096
-#define MAX_LINE_LEN 1024
+#define INIT_MAX_RETRIES 3
+#define INIT_TIMEOUT 30     /* Seconds */
+
+/* Error codes */
+#define INIT_ERR_CONFIG -2
+#define INIT_ERR_PERMISSION -3
+#define INIT_ERR_TIMEOUT -4
+#define INIT_ERR_ALREADY_RUNNING -5
 
 /* System states */
 enum system_state {
-    STATE_STARTUP,
-    STATE_RUNNING,
-    STATE_SHUTDOWN,
-    STATE_REBOOT,
-    STATE_ERROR
+    STATE_STARTUP,     /* System is starting up */
+    STATE_RUNNING,     /* System is operational */
+    STATE_SHUTDOWN,    /* System is shutting down */
+    STATE_ERROR,       /* System encountered error */
+    STATE_REBOOT,      /* System is rebooting */
+    STATE_MAINTENANCE  /* System in maintenance mode */
 };
 
 /* Function prototypes */
 int initSystem(void);
 int shutdownSystem(void);
 int rebootSystem(void);
-int loadConfiguration(const char *config_path);
 enum system_state getSystemState(void);
+int loadConfiguration(const char *config_path);
+int initSetTimeout(int seconds);
+int initGetTimeout(void);
+int initIsReady(void);
+const char *initGetStateString(enum system_state state);
+int initRegisterShutdownHandler(void (*handler)(void));
 
 #endif /* INIT_H */

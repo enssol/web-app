@@ -3,9 +3,8 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-/* System headers */
-#include <stdio.h>
-#include <stdlib.h>
+/* Dependencies */
+#include "common.h"
 
 /* System paths */
 #define DEFAULT_CONFIG_PATH "/etc/config"
@@ -20,16 +19,13 @@
 #define MAX_LINE_LENGTH (MAX_ENV_KEY + MAX_ENV_VALUE + 2)
 #define MAX_CONFIG_LINE 2048
 #define MAX_LOG_SIZE (10 * 1024 * 1024) /* 10MB */
+#define MAX_CMD_LEN 1024      /* From shell.h */
+#define MAX_PROCESSES 64      /* From process.h */
+#define CACHE_MAX_ENTRIES 1024 /* From cache.h */
 
 /* Exit codes */
 #define EXIT_CONFIG_ERROR 78 /* EX_CONFIG from sysexits.h */
 #define EXIT_ENV_ERROR 71    /* EX_OSERR from sysexits.h */
-
-/* Return codes */
-#define SUCCESS 0
-#define ERROR -1
-#define EXIT_SUCCESS 0
-#define EXIT_FAILURE 1
 
 /* App constants */
 #define APP_NAME "TestApp"
@@ -39,24 +35,19 @@
 #define APP_PORT 8080
 #define APP_HOST "localhost"
 
-/* Log constants */
-#define LOG_LEVEL "debug"
-#define LOG_PATH "/var/log"
-#define LOG_FORMAT "json"
-#define LOG_MAX_SIZE 1048576
+/* Constants missing from current implementation */
+#define LOG_LEVEL "info"         /* Default log level */
+#define LOG_PATH "/var/log/app.log"  /* Default log path */
+#define LOG_FORMAT "text"        /* Default log format */
+
+/* Log configuration */
+#define DEFAULT_LOG_MODE 0644
+#define LOG_MAX_FILES 10
+#define LOG_MAX_SIZE (10 * 1024 * 1024) /* 10MB */
+#define LOG_MAX_AGE (24 * 60 * 60)      /* 24 hours */
 
 /* Function prototypes */
 int constants_init(void);
 void constants_cleanup(void);
-const char *get_app_name(void);
-const char *get_app_version(void);
-const char *get_app_env(void);
-int get_app_debug(void);
-int get_app_port(void);
-const char *get_app_host(void);
-const char *get_log_level(void);
-const char *get_log_path(void);
-const char *get_log_format(void);
-long get_log_max_size(void);
 
 #endif /* CONSTANTS_H */
