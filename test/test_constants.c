@@ -41,13 +41,7 @@ setup(void)
     fprintf(fp, "LOG_PATH=/var/log\n");
     fprintf(fp, "LOG_FORMAT=json\n");
     fprintf(fp, "LOG_MAX_SIZE=1048576\n");
-    fprintf(fp, "DB_HOST=localhost\n");
-    fprintf(fp, "DB_PORT=5432\n");
-    fprintf(fp, "DB_NAME=testdb\n");
-    fprintf(fp, "DB_USER=testuser\n");
-    fprintf(fp, "DB_PASSWORD=testpass\n");
     fprintf(fp, "CACHE_DRIVER=redis\n");
-    fprintf(fp, "CACHE_PREFIX=test\n");
     fprintf(fp, "CACHE_TTL=3600\n");
 
     fclose(fp);
@@ -91,20 +85,9 @@ test_constants_log_values(void)
 }
 
 void
-test_constants_db_values(void)
-{
-    CU_ASSERT_STRING_EQUAL(get_db_host(), "localhost");
-    CU_ASSERT_EQUAL(get_db_port(), 5432);
-    CU_ASSERT_STRING_EQUAL(get_db_name(), "testdb");
-    CU_ASSERT_STRING_EQUAL(get_db_user(), "testuser");
-    CU_ASSERT_STRING_EQUAL(get_db_password(), "testpass");
-}
-
-void
 test_constants_cache_values(void)
 {
     CU_ASSERT_STRING_EQUAL(get_cache_driver(), "memory");
-    CU_ASSERT_STRING_EQUAL(get_cache_prefix(), "test");
     CU_ASSERT_EQUAL(get_cache_ttl(), 3600);
 }
 
@@ -120,7 +103,6 @@ test_constants(void)
     if ((CU_add_test(suite, "Constants Init", test_constants_init) == NULL) ||
         (CU_add_test(suite, "App Values", test_constants_app_values) == NULL) ||
         (CU_add_test(suite, "Log Values", test_constants_log_values) == NULL) ||
-        (CU_add_test(suite, "DB Values", test_constants_db_values) == NULL) ||
         (CU_add_test(suite, "Cache Values", test_constants_cache_values) == NULL)) {
         return -1;
     }

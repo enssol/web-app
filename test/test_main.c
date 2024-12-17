@@ -21,6 +21,8 @@ int test_process(void);
 int test_scheduler(void);
 int test_mem(void);
 int test_cache(void);
+int init_consistency_suite(void);
+int init_path_validation_suite(void);
 
 int
 main(void)
@@ -35,6 +37,8 @@ main(void)
     /* Add test suites */
     if (test_app_error() != 0 ||
         test_config() != 0 ||
+        init_consistency_suite() != 0 ||    /* Changed */
+        init_path_validation_suite() != 0 || /* Changed */
         test_constants() != 0 ||
         test_env() != 0 ||
         test_fs() != 0 ||

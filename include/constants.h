@@ -64,16 +64,8 @@ const char *get_log_path(void);
 const char *get_log_format(void);
 long get_log_max_size(void);
 
-/* Database setting getters */
-const char *get_db_host(void);
-int get_db_port(void);
-const char *get_db_name(void);
-const char *get_db_user(void);
-const char *get_db_password(void);
-
 /* Cache setting getters */
 const char *get_cache_driver(void);
-const char *get_cache_prefix(void);
 int get_cache_ttl(void);
 
 #endif /* CONSTANTS_H */

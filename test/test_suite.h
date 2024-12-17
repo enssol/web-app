@@ -126,12 +126,12 @@ void test_path_consistency(void);
 void test_buffer_sizes(void);
 void test_version_consistency(void);
 void test_env_consistency(void);
-
+void test_path_validation(void);
+void test_path_normalization(void);
 
 /* Integration test declarations */
 void test_system_integration(void);
 void test_fs_cache_integration(void);
-void test_scheduler_process_integration(void);
 void test_logging_error_integration(void);
 void test_config_env_integration(void);
 void test_scheduler_process_mem_integration(void);
@@ -140,7 +140,6 @@ void test_scheduler_process_mem_integration(void);
 int test_app_error(void);
 int test_config(void);
 int test_constants(void);
-int test_consistency(void);
 int test_env(void);
 int test_fs(void);
 int test_init(void);
@@ -151,6 +150,8 @@ int test_process(void);
 int test_scheduler(void);
 int test_mem(void);
 int test_cache(void);
+int init_consistency_suite(void);
+int init_path_validation_suite(void);
 
 /* Test suite initialization functions */
 int test_mem(void);

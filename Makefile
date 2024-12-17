@@ -115,6 +115,7 @@ profile: clean-profile all
 clean-test:
 	rm -rf test_tmp
 	rm -f test/*.log
+	rm -rf test/shell_test/
 
 clean-logs:
 	rm -f var/log/*.log

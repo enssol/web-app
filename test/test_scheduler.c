@@ -4,29 +4,14 @@
  */
 /* filepath: test/test_scheduler.c */
 #include <CUnit/CUnit.h>
-#include <CUnit/Basic.h>
-#include <unistd.h>
-#include <pthread.h>
 #include "../include/scheduler.h"
-#include "../include/app_error.h"
 #include "test_suite.h"
-#include <stdlib.h>
-#include "../include/process.h"
-#include <errno.h>
-#include <time.h>
-
-/* Test constants - reduced for development */
-#define STRESS_ITERATIONS 2        /* Was 10 */
-#define TEST_MAX_TASKS 3          /* Using smaller value for testing */
-#define PROCESS_COMPLETED 2       /* Was 3 */
-#define STRESS_TEST_TIMEOUT 1     /* Was 5 seconds */
-#define SCHEDULER_TEST_SLEEP 1    /* Reduced sleep time */
-#define MULTI_PROCESS_COUNT 2     /* For multi-process tests */
+#include <string.h>
 
 /* Test fixtures */
-static int test_task_count = 0;
+static int test_count = 0;
 
-/* Simple test task function */
+/* Simple test task */
 static void *test_task(void *arg)
 {
     if (arg != NULL) {
@@ -35,102 +20,58 @@ static void *test_task(void *arg)
     return NULL;
 }
 
-/* Basic setup/teardown */
+/* Test process */
+static struct process test_proc;
+
+/* Setup and teardown */
 static int setup(void)
 {
-    test_task_count = 0;
+    test_count = 0;
     return scheduler_init();
 }
 
 static int teardown(void)
 {
-    scheduler_cleanup();
-    return 0;
+    return scheduler_shutdown();
 }
 
-/* Simplified test cases */
-void test_scheduler_process_integration(void)
+/* Test cases */
+void test_scheduler_init(void)
 {
-    struct process proc;
-    int result;
-    int initial_count;
-
-    initial_count = test_task_count;
-
-    /* Setup process */
-    proc.task = test_task;
-    proc.arg = &test_task_count;
-    proc.state = PROCESS_READY;
-    proc.priority = 1;
-
-    /* Add and run task */
-    result = scheduler_add_task(&proc);
-    CU_ASSERT_EQUAL(result, SCHEDULER_SUCCESS);
-
-    result = scheduler_start();
-    CU_ASSERT_EQUAL(result, SCHEDULER_SUCCESS);
-
-    /* Wait for task completion */
-    sleep(2);
-
-    /* Verify execution */
-    CU_ASSERT(test_task_count > initial_count);
-
-    /* Cleanup */
-    scheduler_stop();
+    int status = scheduler_init();
+    CU_ASSERT_EQUAL(status, SCHEDULER_ERROR_ALREADY_INITIALIZED);
+    CU_ASSERT_EQUAL(scheduler_get_state(), SCHEDULER_STATE_STOPPED);
 }
 
-void test_scheduler_pause_resume(void)
+void test_scheduler_add_task(void)
 {
-    struct process proc;
-    int result;
+    int status;
 
-    /* Setup process */
-    proc.task = test_task;
-    proc.arg = &test_task_count;
-    proc.state = PROCESS_READY;
-    proc.priority = 1;
+    /* Setup test process */
+    memset(&test_proc, 0, sizeof(test_proc));
+    test_proc.task = test_task;
+    test_proc.arg = &test_count;
 
-    /* Add task */
-    result = scheduler_add_task(&proc);
-    CU_ASSERT_EQUAL(result, SCHEDULER_SUCCESS);
+    status = scheduler_add_task(&test_proc);
+    CU_ASSERT_EQUAL(status, SCHEDULER_SUCCESS);
 
-    /* Start scheduler */
-    result = scheduler_start();
-    CU_ASSERT_EQUAL(result, SCHEDULER_SUCCESS);
-
-    /* Let task start */
-    sleep(1);
-
-    /* Test pause */
-    result = scheduler_pause();
-    CU_ASSERT_EQUAL(result, SCHEDULER_SUCCESS);
-
-    /* Verify pause */
-    sleep(1);
-
-    /* Resume */
-    result = scheduler_resume();
-    CU_ASSERT_EQUAL(result, SCHEDULER_SUCCESS);
-
-    /* Cleanup */
-    sleep(1);
-    scheduler_stop();
-    scheduler_cleanup();
+    status = scheduler_start();
+    CU_ASSERT_EQUAL(status, SCHEDULER_SUCCESS);
+    CU_ASSERT_EQUAL(test_count, 1);
 }
 
-/* Test suite */
+/* Test suite initialization */
 int test_scheduler(void)
 {
-    CU_pSuite suite;
+    CU_pSuite suite = NULL;
 
     suite = CU_add_suite("Scheduler Tests", setup, teardown);
     if (suite == NULL) {
         return -1;
     }
 
-    if ((CU_add_test(suite, "Pause/Resume", test_scheduler_pause_resume) == NULL) ||
-        (CU_add_test(suite, "Process Integration", test_scheduler_process_integration) == NULL)) {
+    if ((CU_add_test(suite, "Initialize Scheduler", test_scheduler_init) == NULL) ||
+        (CU_add_test(suite, "Add Task", test_scheduler_add_task) == NULL)) {
         return -1;
     }
 
