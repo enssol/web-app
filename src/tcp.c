@@ -24,6 +24,7 @@ tcpInit(void)
 int
 tcpConnect(struct tcp_connection *conn, const char *host, int port)
 {
+    struct socket_info sock;
     uint16_t net_port;
 
     if (conn == NULL || host == NULL || port <= 0 || port > UINT16_MAX) {
@@ -35,40 +36,39 @@ tcpConnect(struct tcp_connection *conn, const char *host, int port)
     net_port = (uint16_t)port;
 
     /* Create socket */
-    if (netCreateSocket(&conn->sock, SOCKET_TCP) != 0) {
+    if (netCreateSocket(&sock, SOCKET_TCP) != 0) {
         return -1;
     }
 
     /* Set up address structure */
-    conn->sock.addr.sin_family = AF_INET;
-    conn->sock.addr.sin_port = htons(net_port);
-    if (inet_pton(AF_INET, host, &conn->sock.addr.sin_addr) != 1) {
-        netClose(&conn->sock);
+    memset(&conn->addr, 0, sizeof(conn->addr));
+    conn->addr.sin_family = AF_INET;
+    conn->addr.sin_port = htons(net_port);
+    if (inet_pton(AF_INET, host, &conn->addr.sin_addr) != 1) {
+        netClose(&sock);
         return -1;
     }
 
     /* Connect */
-    if (connect(conn->sock.fd,
-                (struct sockaddr *)&conn->sock.addr,
-                sizeof(conn->sock.addr)) == -1) {
+    if (connect(sock.fd, (struct sockaddr *)&conn->addr,
+                sizeof(conn->addr)) == -1) {
         if (errno != EINPROGRESS) {
-            netClose(&conn->sock);
+            netClose(&sock);
             return -1;
         }
     }
 
     /* Store connection info */
-    strncpy(conn->remote_addr, host, INET_ADDRSTRLEN - 1);
-    conn->remote_addr[INET_ADDRSTRLEN - 1] = '\0';
-    conn->remote_port = port;
+    conn->sockfd = sock.fd;
     conn->state = TCP_STATE_CONNECTED;
-    time(&conn->last_activity);
+    conn->user_data = NULL;
+    conn->ops = NULL;
 
     return 0;
 }
 
 /* Send data over TCP connection */
-int
+ssize_t
 tcpSend(struct tcp_connection *conn, const void *data, size_t size)
 {
     const unsigned char *ptr;
@@ -81,12 +81,17 @@ tcpSend(struct tcp_connection *conn, const void *data, size_t size)
         return -1;
     }
 
+    /* Use operations if defined */
+    if (conn->ops != NULL && conn->ops->send != NULL) {
+        return conn->ops->send(conn, data, size);
+    }
+
     ptr = (const unsigned char *)data;
     remaining = size;
     total_sent = 0;
 
     while (remaining > 0) {
-        sent = send(conn->sock.fd, ptr, remaining, 0);
+        sent = send(conn->sockfd, ptr, remaining, 0);
         if (sent == -1) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 continue;
@@ -101,29 +106,28 @@ tcpSend(struct tcp_connection *conn, const void *data, size_t size)
                 total_sent += (size_t)sent;
             }
         }
-
-        time(&conn->last_activity);
     }
 
-    if (total_sent > INT_MAX) {
-        errno = EOVERFLOW;
-        return -1;
-    }
-
-    return (int)total_sent;
+    return (ssize_t)total_sent;
 }
 
 /* Receive data from TCP connection */
-int
+ssize_t
 tcpReceive(struct tcp_connection *conn, void *buffer, size_t size)
 {
     ssize_t received;
 
     if (conn == NULL || buffer == NULL || size == 0) {
+        errno = EINVAL;
         return -1;
     }
 
-    received = recv(conn->sock.fd, buffer, size, 0);
+    /* Use operations if defined */
+    if (conn->ops != NULL && conn->ops->receive != NULL) {
+        return conn->ops->receive(conn, buffer, size);
+    }
+
+    received = recv(conn->sockfd, buffer, size, 0);
     if (received == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             return 0;
@@ -133,11 +137,9 @@ tcpReceive(struct tcp_connection *conn, void *buffer, size_t size)
 
     if (received == 0) {
         conn->state = TCP_STATE_CLOSED;
-        return 0;
     }
 
-    time(&conn->last_activity);
-    return (int)received;
+    return received;
 }
 
 /* Close TCP connection */
@@ -148,8 +150,13 @@ tcpClose(struct tcp_connection *conn)
         return;
     }
 
-    netClose(&conn->sock);
+    if (conn->sockfd >= 0) {
+        close(conn->sockfd);
+        conn->sockfd = -1;
+    }
     conn->state = TCP_STATE_CLOSED;
+    conn->ops = NULL;
+    conn->user_data = NULL;
 }
 
 /* Clean up TCP subsystem */

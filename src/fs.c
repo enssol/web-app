@@ -285,3 +285,11 @@ fsGetStatus(void)
 {
     return last_status;
 }
+
+void
+fsCleanup(void)
+{
+    /* Reset variables to initial state */
+    memset(root_directory, 0, sizeof(root_directory));
+    last_status = FS_OK;
+}

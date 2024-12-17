@@ -1333,31 +1333,7 @@ valgrind --tool=memcheck \
 ## **2. Networking Modules**
 Networking modules act as the "I/O system" of your web application.
 
-### **Socket Communication**
-- **Purpose**: Handle low-level socket operations.
-- **Components**:
-  - `net.c`: Create, bind, and listen on sockets.
-  - `tcp.c`: Handle TCP connections (blocking/non-blocking).
-  - `udp.c`: Handle UDP datagrams (if required).
-  - `index.html`: Sample HTML file for testing.
-- **Order of Development**:
-  1. `net.c` for socket setup and teardown.
-  2. `tcp.c` for request/response handling.
-  3. `udp.c` if needed for stateless communication.
-  4. `index.html` for testing static file serving.
 
----
-
-### **2.2. HTTP Protocol**
-- **Purpose**: Parse HTTP requests and construct responses.
-- **Components**:
-  - `http_parser.c`: Parse HTTP requests into structured data.
-  - `http_response.c`: Generate HTTP responses.
-  - `mime.c`: Map file extensions to MIME types.
-- **Order of Development**:
-  1. `http_parser.c` for request parsing.
-  2. `http_response.c` for response generation.
-  3. `mime.c` for content type mapping.
 
 ---
 

@@ -33,23 +33,39 @@ static int copyLogPath(const char *src);
 int
 logInit(const char *log_path, enum log_flags flags)
 {
+    mode_t old_umask;
+
     if (log_path == NULL) {
         return -1;
     }
 
     pthread_mutex_lock(&log_mutex);
 
+    /* Check if already initialized */
     if (log_file != NULL) {
         pthread_mutex_unlock(&log_mutex);
         return -1;
     }
 
-    if (openLogFile(log_path) != 0) {
+    /* Set restrictive permissions for log file */
+    old_umask = umask(077);
+
+    /* Open log file with append mode */
+    log_file = fopen(log_path, "a");
+    if (log_file == NULL) {
+        umask(old_umask);
         pthread_mutex_unlock(&log_mutex);
         return -1;
     }
 
+    /* Store path and flags */
+    strncpy(log_file_path, log_path, LOG_MAX_PATH_LEN - 1);
+    log_file_path[LOG_MAX_PATH_LEN - 1] = '\0';
     current_flags = flags;
+
+    /* Restore original umask */
+    umask(old_umask);
+
     pthread_mutex_unlock(&log_mutex);
     return 0;
 }
@@ -59,18 +75,55 @@ logWrite(enum log_level level, const char *format, ...)
 {
     va_list args;
     char message[LOG_MAX_MSG_LEN];
+    time_t now;
+    struct tm *timeinfo;
+    char timestamp[32];
 
     if (format == NULL || log_file == NULL) {
         return;
     }
 
+    /* Check log level */
+    if (level > current_level) {
+        return;
+    }
+
+    /* Format message */
     va_start(args, format);
     vsnprintf(message, sizeof(message), format, args);
     va_end(args);
 
     pthread_mutex_lock(&log_mutex);
-    rotateLogIfNeeded();
-    writeLogEntry(level, message);
+
+    /* Check if rotation needed */
+    if (rotateLogIfNeeded() != 0) {
+        pthread_mutex_unlock(&log_mutex);
+        return;
+    }
+
+    /* Add timestamp if enabled */
+    if (current_flags & LOG_FLAG_TIMESTAMP) {
+        time(&now);
+        timeinfo = localtime(&now);
+        if (timeinfo != NULL) {
+            strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", timeinfo);
+            fprintf(log_file, "[%s] ", timestamp);
+        }
+    }
+
+    /* Add log level if enabled */
+    if (current_flags & LOG_FLAG_LEVEL) {
+        fprintf(log_file, "[%s] ", logLevelToString(level));
+    }
+
+    /* Write message */
+    fprintf(log_file, "%s\n", message);
+
+    /* Force flush if sync flag is set */
+    if (current_flags & LOG_FLAG_SYNC) {
+        fflush(log_file);
+    }
+
     pthread_mutex_unlock(&log_mutex);
 }
 

@@ -65,11 +65,15 @@ TEST_TARGET = $(BIN_DIR)/test_runner
 
 # Default target
 .PHONY: all clean clean-profile profile clean-profile debug test clean-test clean-logs
-all: $(MAIN_TARGET)
+all: directories $(MAIN_TARGET)
 
 # Directory creation
 $(BUILD_DIR) $(BIN_DIR):
 	mkdir -p $@
+
+# Create required directories
+.PHONY: directories
+directories: $(APP_DIRS)
 
 # Pattern rules for object files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)

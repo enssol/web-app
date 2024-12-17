@@ -13,9 +13,9 @@
 #include "common.h"
 
 /* System paths */
-#define DEFAULT_CONFIG_PATH "test/test.conf"
-#define DEFAULT_LOG_PATH "test/test.log"
-#define DEFAULT_ENV_PATH "test/test.env"
+#define DEFAULT_CONFIG_PATH "etc/system.conf"
+#define DEFAULT_LOG_PATH "var/app.log"
+#define DEFAULT_ENV_PATH "etc/.env"
 #define DEFAULT_LOG_DIR "/var/log"
 
 /* Configuration limits */

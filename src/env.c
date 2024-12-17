@@ -31,6 +31,7 @@ envInit(const char *env_path)
     char line[MAX_CONFIG_LINE];
     char name[MAX_ENV_NAME];
     char value[MAX_ENV_VALUE];
+    mode_t old_umask;
 
     /* Reset environment storage */
     memset(env_vars, 0, sizeof(env_vars));
@@ -42,8 +43,12 @@ envInit(const char *env_path)
         return -1;
     }
 
+    /* Set restrictive permissions when reading env file */
+    old_umask = umask(077);
+
     env_file = fopen(env_path, "r");
     if (env_file == NULL) {
+        umask(old_umask);
         last_status = ENV_ERROR;
         return -1;
     }
@@ -65,6 +70,7 @@ envInit(const char *env_path)
     }
 
     fclose(env_file);
+    umask(old_umask);
     last_status = ENV_SUCCESS;
     return 0;
 }
@@ -74,7 +80,7 @@ envGet(const char *name, char *value, size_t size)
 {
     int index;
 
-    if (name == NULL || value == NULL) {
+    if (name == NULL || value == NULL || size == 0) {
         last_status = ENV_INVALID_PARAM;
         return -1;
     }
@@ -82,6 +88,11 @@ envGet(const char *name, char *value, size_t size)
     index = findEnvVar(name);
     if (index == -1) {
         last_status = ENV_NOT_FOUND;
+        return -1;
+    }
+
+    if (strlen(env_vars[index]) >= size) {
+        last_status = ENV_ERROR;
         return -1;
     }
 
@@ -109,9 +120,11 @@ envSet(const char *name, const char *value)
 
     index = findEnvVar(name);
     if (index != -1) {
+        /* Update existing variable */
         strncpy(env_vars[index], value, MAX_ENV_VALUE - 1);
         env_vars[index][MAX_ENV_VALUE - 1] = '\0';
     } else if (env_count < MAX_ENV_VARS) {
+        /* Add new variable */
         strncpy(env_names[env_count], name, MAX_ENV_NAME - 1);
         env_names[env_count][MAX_ENV_NAME - 1] = '\0';
         strncpy(env_vars[env_count], value, MAX_ENV_VALUE - 1);

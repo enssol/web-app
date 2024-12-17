@@ -29,13 +29,6 @@ static char log_path[MAX_ENV_VALUE] = LOG_PATH;       /* Will be "/var/log" */
 static char log_format[MAX_ENV_VALUE] = LOG_FORMAT;   /* Already "text" */
 static long log_max_size = LOG_MAX_SIZE;             /* Will be 1048576 */
 
-/* Database settings */
-static char db_host[MAX_ENV_VALUE] = "localhost";
-static int db_port = 5432;
-static char db_name[MAX_ENV_VALUE] = "testdb";    /* Set default to match test value */
-static char db_user[MAX_ENV_VALUE] = "testuser";  /* Set default to match test value */
-static char db_password[MAX_ENV_VALUE] = "testpass"; /* Set default to match test value */
-
 /* Cache settings */
 static char cache_driver[MAX_ENV_VALUE] = "memory";
 static char cache_prefix[MAX_ENV_VALUE] = "test";  /* Set default to match test value */
@@ -258,13 +251,6 @@ writeDefaultEnvFile(const char *path) {
     fprintf(fp, "LOG_PATH=%s\n", LOG_PATH);
     fprintf(fp, "LOG_FORMAT=%s\n", LOG_FORMAT);
     fprintf(fp, "LOG_MAX_SIZE=%d\n", (int)LOG_MAX_SIZE);
-
-    fprintf(fp, "\n# Database configuration\n");
-    fprintf(fp, "DB_HOST=%s\n", db_host);
-    fprintf(fp, "DB_PORT=%d\n", db_port);
-    fprintf(fp, "DB_NAME=%s\n", db_name);
-    fprintf(fp, "DB_USER=%s\n", db_user);
-    fprintf(fp, "DB_PASSWORD=%s\n", db_password);
 
     fprintf(fp, "\n# Cache configuration\n");
     fprintf(fp, "CACHE_DRIVER=%s\n", cache_driver);

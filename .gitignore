@@ -99,3 +99,4 @@ etc/config/env
 etc/config/system.conf
 test/shell_test/test.txt
 test.log.*
+!config.c

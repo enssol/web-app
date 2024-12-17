@@ -26,7 +26,6 @@ void test_config_cleanup(void);
 void test_constants_init(void);
 void test_constants_app_values(void);
 void test_constants_log_values(void);
-void test_constants_db_values(void);
 void test_constants_cache_values(void);
 
 /* Test case declarations for env */
@@ -183,5 +182,24 @@ void test_socket_integration(void);
 
 /* Add to suite initialization functions */
 int test_socket(void);
+
+/* Test case declarations for HTTP */
+void test_http_parser_init(void);
+void test_http_parse_request(void);
+void test_http_response_create(void);
+void test_http_response_headers(void);
+void test_mime_type_handling(void);
+void test_http_error_handling(void);
+
+/* HTTP test function declarations */
+void test_http_initialization(void);
+void test_http_request_parsing(void);
+void test_http_response_creation(void);
+void test_http_response_headers(void);
+void test_mime_type_handling(void);
+void test_http_error_handling(void);
+
+/* Add to suite initialization functions */
+int test_http(void);
 
 #endif /* TEST_SUITE_H */

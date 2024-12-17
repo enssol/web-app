@@ -24,6 +24,8 @@ These instructions ensure Copilot's suggestions align with our project's technic
 - Never redefine a variable in the same scope.
 - Avoid generating code that are conflicting types for the same variable.
 - Avoid previous declarations of variables.
+- C90 standard requiring declarations at start of blocks
+- ISO C90 forbids mixed declarations and code
 - Code must compile with gcc using: `-std=c90 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500 -Wall -ansi -Wextra -pedantic -Werror -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -fanalyzer -fstack-protector-strong -fstack-check -fdata-sections -ffunction-sections -fno-common -fstrict-aliasing -Warray-bounds -Wstack-protector -Wformat=2 -Wformat-security -Wformat-overflow=2 -Wformat-truncation=2 -Walloca -Wvla -fno-omit-frame-pointer`
 - Code Safety Requirements:
     - No VLAs (enforced by -Wvla)
@@ -32,6 +34,8 @@ These instructions ensure Copilot's suggestions align with our project's technic
     - No undefined behavior
     - No memory leaks
     - No floating-point issues
+- Do not use 'for' loop initial declarations
+- Do not create implicit declarations of functions
 - Memory Safety:
 
 ```c
@@ -451,8 +455,10 @@ LDFLAGS = -static -pthread -lssl -lcrypto
 struct module_data {
     int id;
     char name[MODULE_MAX_SIZE];
-};
-
+};src/mime.c: In function 'mimeAddType':
+src/mime.c:88:5: error: ISO C90 forbids mixed declarations and code [-Werror=declaration-after-statement]
+   88 |     size_t i;
+      |     ^~~~~~
 /* Function prototypes */
 int moduleFunction(const struct module_data *data);
 
