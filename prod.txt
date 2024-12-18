@@ -1,0 +1,90 @@
+# Host System Specifications Report
+=====================================================================
+
+## Basic Information
+--------------------
+Environment:    Production (Host)
+Hostname:       AGALLO-TRISQUEL
+User Context:   ubuntu (uid=1000, gid=1000)
+Groups:         ubuntu, adm, cdrom, sudo, dip, plugdev, lpadmin, sambashare
+
+## Network Configuration
+-----------------------
+Internal IP:    192.168.30.150
+Interface:      enxc03eba30ea30
+External IP:    203.51.2.82
+DNS Servers:
+- 172.67.193.55
+- 104.21.20.166
+
+## Active Services
+-----------------
+LISTEN ports:
+- 127.0.0.53:53    (DNS)
+- 0.0.0.0:5355     (LLMNR)
+- 127.0.0.1:631    (CUPS)
+- 127.0.0.1:33757  (gvproxy)
+- 127.0.0.1:7777   (gvproxy)
+- ::1:631          (CUPS IPv6)
+- :::8080          (containers)
+- :::5355          (LLMNR IPv6)
+
+## Resource Allocation
+---------------------
+### Memory
+Total:          7.5 GB
+Used:           3.1 GB
+Free:           805 MB
+Buffer/Cache:   3.7 GB
+Available:      4.1 GB
+
+### Swap
+Total:          2.9 GB
+Used:           99 MB
+Free:           2.8 GB
+
+## Filesystem Layout
+-------------------
+Mount Point     Size    Used    Avail   Use%    Device
+/               14G     3.6G    9.4G    28%     /dev/sda3
+/home           217G    11G     196G    5%      /dev/sda5
+/boot/efi       512M    304K    512M    1%      /dev/sda2
+/run            768M    1.7M    766M    1%      tmpfs
+/dev/shm        3.8G    696K    3.8G    1%      tmpfs
+/run/lock       5.0M    0       5.0M    0%      tmpfs
+/run/user/1000  768M    272K    768M    1%      tmpfs
+
+## Container Configuration
+------------------------
+### Podman Machine
+Name:           podman-machine-default
+Status:         Currently running
+VM Type:        qemu
+Age:            6 days
+CPUs:           1
+Memory:         2.147GB
+Disk Size:      10.74GB
+
+### Container Network
+Network Name:   podman
+Network ID:     2f259bab93aa
+Bridge:         cni-podman0
+Subnet:         10.88.0.0/16
+Gateway:        10.88.0.1
+
+## Security Status
+-----------------
+Firewall:       Default ACCEPT policy (all chains)
+Web Security:   Ports 80 and 443 closed
+SSL:            Not configured
+
+## Notes
+--------
+- System requires root permissions for some operations (iptables)
+- No tap0 interface present
+- Web server not currently running
+
+- Ubuntu-based system
+- System RAM: 7.5GB
+- Network: 192.168.30.150 (internal), 203.51.2.82 (external)
+- Port 80/443 available

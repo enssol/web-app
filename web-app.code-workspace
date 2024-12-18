@@ -489,7 +489,6 @@
             "snyk-security.snyk-vulnerability-scanner",
             "xaver.clang-format",
             "ms-vscode.cmake-tools",
-            "ms-vscode.live-server",
             "dotenv.dotenv-vscode"
         ]
     }

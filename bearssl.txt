@@ -1,0 +1,1694 @@
+This section shows an overview of the BearSSL API, to initiate and run SSL clients and servers. The source code contains some sample code in the samples subdirectory; in particular, a basic client is shown in client_basic.c, while a basic server is in server_basic.c.
+
+Context Structures
+BearSSL does not perform any dynamic allocation1; the calling application is supposed to perform necessary allocations.
+
+An SSL client will need three such elements:
+
+A client context of type br_ssl_client_context. This is a relatively ponderous structure (about 3 to 4 kilobytes).
+
+An I/O buffer that is large enough to contain one or two records.
+
+A certificate validation context whose job is to provide the server’s public key, based on the certificate chain sent by the server.
+
+An SSL server will similarly need three elements:
+
+A server context of type br_ssl_server_context.
+
+An I/O buffer.
+
+An optional session cache used to remember secret keys established with clients, to support session resumption.
+
+These elements can be allocated anywhere in (writable) memory, e.g. heap, data segment or stack. They must not be moved while in use (they may contain pointers to each other and to themselves). BearSSL does not access writable memory beyond these contexts (and the stack), so any number of concurrently managed SSL connections can run without impacting each other, even in different threads, as long as they use distinct context structures and buffers.
+
+(It is expected that client certificate support, when implemented, will need an extra context element on both client and server.)
+
+Initialisation
+Profiles
+The simplest way to initialise the context structures is to use a profile. This is an already written function that does everything as appropriate, with decent default settings. Right now, there is only one client profile, called “full”. This works like this:
+
+br_ssl_client_context sc;
+br_x509_minimal_context xc;
+
+br_ssl_client_init_full(&sc, &xc, TAs, TAs_NUM);
+The client context is sc; the X.509 validation engine uses the xc context structure. TAs points to an array of trust anchors (with TAs_NUM elements); each trust anchor is a structure of type br_x509_trust_anchor and contains an anchor name (an encoded Distinguished Name) and a public key (RSA or EC), along with some flags (namely, whether the anchor is a Certification Authority, or simply a directly trusted server key).
+
+If you want to hardcode the trust anchors in your C source code, then the brssl command-line tool can help you produce the arrays:
+
+brssl ta file1.crt file2.pem
+This command will extract certificates from file1.crt and file2.pem, interpret them as trust anchors, and produce the relevant C source code. The file names are unimportant (the extensions like “.crt” have no meaning for brssl); DER and PEM encodings are automatically recognised. When using PEM, several certificates can be stored in the same file; brssl will extract them all (and ignore extra non-certificate objects).
+
+If you prefer your application to be configurable in that respect, and dynamically decode root certificates from files, then BearSSL provides some decoding API (br_pem_decoder_context for PEM, then br_x509_decoder_context for parsing X.509 certificates).
+
+The “full” client profile has the following properties:
+
+Supports all “reasonably secure” cipher suites, in a decent order (3DES and non-forward-secure suites are at the bottom of the list).
+
+Uses minimal X.509 validation for the server’s certificate. This validation engine checks subject/issuer name matchings, basic constraints, key usage, and (of course) cryptographic signatures. It also rejects certificates with unknown critical extensions. RSA and ECDSA signatures are supported. An important caveat is that the minimal X.509 engine does not support revocation checks.
+
+For the server, a typical profile invocation would be:
+
+br_ssl_server_context sc;
+
+br_ssl_server_init_full_rsa(&sc, CHAIN, CHAIN_LEN, &SKEY);
+which uses the “full RSA” profile (server’s key has type RSA). The CHAIN value points to an array of br_x509_certificate structures that encode the certificate chain to send to clients (it contains CHAIN_LEN elements). The SKEY structure is an RSA private key (br_rsa_private_key). The command-line tool (brssl) can help in generating C source code that hardcodes such elements (see brssl chain and brssl skey).
+
+Take care that hardcoding private keys in source code is likely a poor idea, because source code tends to leak to developer systems and version control and backups, and hardcoding a private key often leads to deploying the same private key in thousands of systems, at which point the private key is not really private any more. Alternatively, you could read the private key from a dedicated storage area in your system (say, a “file”), either in a custom format, or using one of the “standard” formats supported by br_skey_decoder_context.
+
+The provided server profile (so far) are:
+
+“full_rsa”: full support of all versions and suites, for a RSA server key.
+
+“full_ec”: full support of all versions and suites, for an EC server key. Since ECDH cipher suites are made distinct depending on the key type of the certification authority that issued the server’s certificate, this information must be provided by the caller.
+
+“minr2g”: minimal support, RSA key exchange, AES/GCM, TLS-1.2.
+
+“mine2g”: minimal support, ECDHE_RSA key exchange, AES/GCM, TLS-1.2.
+
+“minf2g”: minimal support, ECDHE_ECDSA key exchange, AES/GCM, TLS-1.2.
+
+“minu2g”: minimal support, ECDH_RSA key exchange, AES/GCM, TLS-1.2 (server key type is EC, and its certificate was signed with RSA).
+
+“minv2g”: minimal support, ECDH_ECDSA key exchange, AES/GCM, TLS-1.2. (server key type is EC, and its certificate was signed with ECDSA).
+
+“mine2c”: minimal support, ECDHE_RSA key exchange, ChaCha20+Poly1305, TLS-1.2 (starting from BearSSL 0.2).
+
+“minf2c”: minimal support, ECDHE_ECDSA key exchange, ChaCha20+Poly1305, TLS-1.2 (starting from BearSSL 0.2).
+
+A custom profile is any code that does the initialisation of all needed algorithms manually. See the custom_profile.c sample for details.
+
+I/O Buffer
+The client and server contexts both contain an inner structure of type br_ssl_engine_context. That field is the first field, and is called eng. Most of the processing of an SSL connection, beyond initialisation, uses only that substructure, and is common between client and server. Functions that work on the common engine substructure have names in br_ssl_engine_*().
+
+The I/O buffer must be large enough to accommodate one or two full records. BearSSL can be configured in “mono” (half-duplex) or “bidi” (full-duplex) modes.
+
+Half-duplex mode means that the same buffer is used for both incoming and outgoing records. This saves RAM, but it limits support of applicative protocols that are not half-duplex themselves.
+
+An example is HTTP. In HTTP, the client sends requests, to which the server responds, but the client is allowed to send several requests in a row. In an SSL context, this means that an incoming record may contain two or more HTTP requests; if the server processes the first request, it cannot begin to answer it because the I/O buffer still contains unread data (the other HTTP requests). Full HTTP support requires, on the server side, full-duplex management.
+
+Full-duplex mode means that the I/O buffer is split into two parts, one for incoming records, the other for outgoing data.
+
+The maximum size of an SSL/TLS record is 16384 plaintext bytes. With a MAC (at most 48 extra bytes, for HMAC/SHA-384), padding (at most 256 bytes), explicit IV for CBC (16 bytes) and record header (5 bytes), the maximum per-record overhead is 325 bytes. Thus, the buffer for incoming data should ideally have size 16384 + 325 = 16709 bytes. The macro BR_SSL_BUFSIZE_INPUT evaluates to that value.
+
+For output, BearSSL does not use more padding bytes than necessary; but it also enforces the “1/n-1 split” when using TLS-1.0. The resulting overhead is then at most 85 bytes. The buffer for outgoing data should then have size 16384 + 85 = 16469 bytes. The macro BR_SSL_BUFSIZE_OUTPUT evaluates to that value.
+
+There are two functions that can be used to set the I/O buffers. The br_ssl_engine_set_buffers_bidi() function sets the incoming and outgoing buffers separately:
+
+unsigned char iobuf_in[BR_SSL_BUFSIZE_INPUT];
+unsigned char iobuf_out[BR_SSL_BUFSIZE_OUTPUT];
+
+br_ssl_engine_set_buffers_bidi(&sc.eng,
+        iobuf_in, sizeof iobuf_in,
+        iobuf_out, sizeof iobuf_out);
+The other function br_ssl_engine_set_buffer() takes a single buffer, and a flag:
+
+unsigned char iobuf[BR_SSL_BUFSIZE_BIDI];
+
+br_ssl_engine_set_buffer(&sc.eng, iobuf, sizeof iobuf, 1);
+The BR_SSL_BUFSIZE_BIDI macro evaluates to the sum of BR_SSL_BUFSIZE_INPUT and BR_SSL_BUFSIZE_OUTPUT. If the last argument to br_ssl_engine_set_buffer() is non-zero, then the function splits the provided buffer into input and output buffers, for full-duplex processing; if that argument is zero, then half-duplex mode is used. When provided with a single buffer, then the maximum size that BearSSL will use is BR_SSL_BUFSIZE_BIDI (33178 bytes) in full-duplex mode, BR_SSL_BUFSIZE_MONO (16709 bytes) in half-duplex mode.
+
+What if you provide fewer bytes? BearSSL will then adapt. With br_ssl_engine_set_buffer() and full-duplex mode, BearSSL will try to favour the input buffer, so as to be able to support all records sent by the peer. The following rules apply:
+
+Before completion of the first handshake, there is no encryption or MAC, and BearSSL can process incoming records of arbitrary length (even if larger than the input buffer size).
+
+After completion of the first handshake, BearSSL must be able to store a complete incoming record: it needs to verify the MAC before allowing the application to access the data. Records up to the configured buffer size will be accepted, but larger records will trigger an error (BR_ERR_TOO_LARGE).
+
+Outgoing records will never be larger than the outgoing buffer size. Note that SSL/TLS allows for arbitrary fragmentation, so this should not be a problem2.
+
+If the incoming buffer size, as configured (or after split) is less than BR_SSL_BUFSIZE_INPUT (16709 bytes), then BearSSL, as a client, will use the Maximum Fragment Length Negotiation extension to try to make the server agree not to use larger records.
+
+Unfortunately, the extension is asymmetrical, in that it is for the client only; a RAM-constrained server has no standard way to announce that it cannot handle full-sized records. Moreover, while BearSSL, as a server, recognises and honours that extension, not all existing, deployed SSL server implementations do so. Therefore, using smaller buffers in heterogeneous system deployments is a kind of hit-and-miss game. To some extent, an application can force its SSL library to emit short records by making flush calls, but this is fragile.
+
+The minimum size of a buffer is 512 plaintext bytes. Therefore, a fully reduced half-duplex SSL client or server using BearSSL can operate with a buffer as small as 512 + 325 = 837 bytes.
+
+Session Cache
+SSL clients and servers can remember “sessions”, and resume them. A resumed session is an abbreviated handshake in which a previously negotiated shared key is reused. Resuming sessions avoids doing the asymmetric crypto again, and uses fewer and shorter messages, so this is a good thing for performance, but it requires the client and the server to remember the session parameters.
+
+On the client side, a session is reused if the same context is used again (see below for context reuse). The “session parameters” can also be extracted with br_ssl_engine_get_session_parameters(), and injected in another context structure with br_ssl_engine_set_session_parameters(). This allows resuming sessions with another context, and, in case of a client that runs several connections to the same server in parallel, sharing the same session for these connections.
+
+On the server side, a cache is set with the following call:
+
+unsigned char store[5000];
+
+br_ssl_session_cache_lru_init(&sc, store, sizeof store);
+The store array is where remembered session parameters will be stored. Arbitrary store sizes can be used; with the current implementation, each remembered session requires about 100 bytes, so with a 5000-byte cache array, 50 sessions or so will be remembered. The cache is maintained with an LRU (Least Recently Used) eviction policy.
+
+An object-oriented API, called br_ssl_session_cache_class, is defined, allowing an external session cache implementation to be provided and used with a server context. The br_ssl_server_set_cache() function is used to configure use of that implementation in the server context.
+
+Reset and SNI
+Once the context is initialised, an explicit “reset” call MUST be performed. For the client, br_ssl_client_reset() takes three arguments:
+
+a pointer to the client context;
+
+the name of the target server;
+
+a “resume session” flag.
+
+The “resume session” flag, if non-zero, allows the context to try to resume a session, reusing the session parameters remembered from the last connection that used that specific context (see below for context reuse).
+
+The “server name” relates to the two following points:
+
+That name will be sent in the ClientHello message, as the SNI extension (Server Name Indication). This is used by the server to select the appropriate certificate (in co-hosting contexts).
+
+The name will be matched against the names found in the server’s certificate, in the X.509 minimal validation engine. The engine supports basic wildcard usage (only at the start of the name).
+
+If the server_name parameter is NULL or is an empty string, then both functionalities are deactivated: no name sent as SNI, and no matching done with regards to the received certificate (thus, not using an explicit server name here is usually a bad idea).
+
+The reset function for the server side, br_ssl_server_reset(), has no extra parameter beyond the pointer to the server context.
+
+I/O
+Error Status
+At any time, an SSL engine is either functioning, or failed. A failed engine does not do anything until explicitly reset.
+
+The current status can be obtained with:
+
+int err;
+
+err = br_ssl_engine_last_error(&sc.eng);
+If the engine is functioning, then this returns BR_ERR_OK (which has value 0). Otherwise, this returns a non-zero error code.
+
+The bearssl_ssl.h file defines constant for SSL/TLS errors (their names begin with BR_ERR_). Additional error codes are defined in bearssl_x509.h for error codes related to X.509 certificate processing.
+
+All these error codes fall in the 1..255 range. Error codes can also be in the 256..511 range for received fatal alerts (the peer sent an error message that terminated the connection), and 512..767 range for sent fatal alerts.
+
+Simplified I/O
+Simplified I/O is a wrapper around an SSL engine to provide a callback-based API. This – again – uses a caller-allocated context. The client_basic.c and server_basic.c samples use that simplified I/O.
+
+This basically entails:
+
+Defining a “read” callback function, that reads 1 or more bytes. It shall block until at least 1 byte is read, or an error or transport closure happens.
+
+Defining a “write” callback function, that writes 1 or more bytes. It shall block until at least 1 byte is written, or an error or transport closure happens.
+
+Using a br_sslio_context structure initialised with br_sslio_init() over an SSL engine and the two callbacks.
+
+Then the following functions are provided:
+
+br_sslio_read(): read some application data bytes (blocks until at least 1 byte is obtained, or an error/closure occurs).
+
+br_sslio_read_all(): read some application data bytes (blocks until all requested bytes are obtained, or an error/closure occurs).
+
+br_sslio_write(): write some application data bytes (blocks until at least 1 byte is written, or an error/closure occurs).
+
+br_sslio_write_all(): write some application data bytes (blocks until all bytes are written, or an error/closure occurs).
+
+br_sslio_flush(): flush currently buffered data (if any). Writing is inherently buffered; when br_sslio_write() or br_sslio_write_all() returns, the application data bytes have been injected into the engine, but not necessarily wrapped as records. The br_sslio_flush() calls ensures that all these bytes have been encrypted into records and sent to the “write” callback function.
+
+br_sslio_close(): perform the SSL closure protocol. This entails sending a close_notify alert, and receiving a close_notify response.
+
+Note that a number of deployed SSL implementations do not follow the protocol for closure, and may drop the underlying socket abruptly. As such, errors are often reported by br_sslio_close().
+
+Generic I/O
+The generic I/O API presents the engine as a state machine with four possible I/O channels:
+
+sendapp: push some application data (plaintext) into the engine.
+recvapp: obtain some application data (plaintext) from the engine.
+sendrec: get records from the engine, to be conveyed to the peer.
+recvrec: inject records freshly obtained from the peer, into the engine.
+The “send” name qualifies outgoing data (plaintext that goes into the engine, yielding records that are sent to the peer), while the “recv” name is for incoming data. The exchanges of plaintext use the name “app”, while record data is “rec”.
+
+At any time, the engine may be ready to accept and/or provide data along one or several of these channels, unless it is closed (normal closure or failure). Use br_ssl_engine_current_state() to obtain that status as a combination of flags:
+
+BR_SSL_CLOSED: engine is closed. If this flag is set, then this is the only flag in the engine output.
+
+BR_SSL_SENDREC: engine is ready for some “sendrec” activity.
+
+BR_SSL_RECVREC: engine is ready for some “recvrec” activity.
+
+BR_SSL_SENDAPP: engine is ready for some “sendapp” activity.
+
+BR_SSL_RECVAPP: engine is ready for some “recvapp” activity.
+
+For each channel, two functions are defined, buf() and ack(). For instance, for the “sendapp” channel, the two functions are:
+
+unsigned char *br_ssl_engine_sendapp_buf(
+        const br_ssl_engine_context *cc, size_t *len);
+void br_ssl_engine_sendapp_ack(br_ssl_engine_context *cc, size_t len);
+These functions have the following semantics:
+
+The buf() function returns a pointer to the buffer where the I/O activity may take place (for “sendapp” and “recvrec”, the buffer where bytes may be written; for “recvapp” and “sendrec”, the buffer from which bytes may be read), and *len is set to the maximum size for that I/O (number of bytes that could be written or read).
+
+If this channel is not ready, then *len is set to 0 and the function returns NULL.
+
+The ack() function is used to inform the engine that len bytes have been written to or read from the buffer returned by buf().
+
+The len value MUST NOT be 0.
+
+Important rules:
+
+The buf() calls do not modify the context; they do not constitute a promise by the caller that the corresponding I/O is about to take place.
+
+Any ack() call invalidates what the previous buf() calls reported. In particular, if at any point the engine reports that application data can be written (“sendapp”) and records can be injected (“recvrec”), do not ever try to do both at the same time, notably because the two buffers may overlap.
+
+If you have application data to send, write it in the buffer and then call the br_ssl_engine_sendapp_ack() function, then use the buf() calls again to see if the engine can still accept some records. Don’t write to both buffers (for “sendapp” and “recvrec”) then only call the two corresponding ack().
+
+As long as you respect these rules, you can handle I/O for any number of concurrent engines. None of these calls is blocking; they always return as promptly as the CPU allows.
+
+The source code for the command-line tool contains a function that uses the generic API, called run_ssl_engine(). That function forwards application data back and forth, between a connected SSL socket, and the standard input/output file descriptors. All descriptors are set in non-blocking mode, and blocking is done with the poll() function (older Unix-like systems might use select() instead).
+
+The code is organised as a loop, with the following steps:
+
+If the engine is in closed/failed state, exit.
+
+Use br_ssl_engine_current_state() to know which channels are open.
+
+Run poll() to wait for I/O on the descriptors corresponding to the open channels.
+
+If there is possible I/O on one channel, do it, and restart the loop (a continue clause in the source code). This restarting corresponds to the fact that the ack() call may change the internal state, including openness of channels.
+
+The first time the “sendapp” channel opens marks the completion of the initial handshake.
+
+Note that write operations are buffered. When the “sendapp” buffer is full, a record is assembled and encrypted, and scheduled for sending; however, if more plaintext data could fit in the next record, then the engine does not assemble the record. The br_ssl_engine_flush() function forces the record completion.
+
+br_ssl_engine_flush() takes a second parameter: if non-zero, then this forces the assembly of an outgoing record even if there is no buffered application data at that point. This results in sending an empty record (that record has its own header and encryption and padding and MAC, but the plaintext contents have length 0). Empty records are nominally compliant to the SSL/TLS standard, but existing implementations do not all support them. Empty records might be used as a kind of “keep-alive” mechanism, to force some activity on the transport medium without actually exchanging application data bytes.
+
+Extra Operations
+Flags
+Some extra boolean flags can be set to alter the behaviour in some way. The flag-setting functions br_ssl_engine_set_all_flags(), br_ssl_engine_add_flags() and br_ssl_engine_remove_flags() allow changing flag values. By default, no flag is set. Currently defined flags are:
+
+BR_OPT_ENFORCE_SERVER_PREFERENCES: if set, then the server will enforce its own prefered order for cipher suite selection; otherwise, it will follow the client preferences. This flag has no effect on the client.
+
+BR_OPT_NO_RENEGOTIATION: if set, then renegotiations are forbidden, whether asked programmatically or by the peer. Default behaviour is to allow renegotiation as long as the Secure Renegotiation extension is supported by both client and server.
+
+BR_OPT_TOLERATE_NO_CLIENT_AUTH: if set on a server that asks for a client certificate, and the client does not send a certificate, then the handshake will nonetheless keep on and complete. By default, in such a case, the server code aborts the handshake. This flag has no effect on the client. Client certificates are described in more details in the X.509 page.
+
+BR_OPT_FAIL_ON_ALPN_MISMATCH: the ALPN extension is used to negotiate an application-level protocol name (the protocol that will be used within the SSL tunnel). If this flag is set, and both client and server are configured to use that extension, and no common protocol can be found, then the handshake is aborted. By default, an ALPN negotiation failure does not prevent the handshake from completing.
+
+Known Key Model
+With the “full” client profile, an X.509 validation engine is used. With a custom profile, one can use the br_x509_knownkey_vtable implementation instead, which implements the “known key model”. This is for situations where the client system already knows the server’s public key. In that case, the “known key” engine simply ignores the chain sent by the server, and uses the configured public key instead.
+
+The “known key” engine uses a context (of type br_x509_knownkey_context) initialised with br_x509_knownkey_init_rsa() or br_x509_knownkey_init_ec() (depending on key type: RSA or EC). To set the X.509 engine to use in a client context, call br_ssl_engine_set_x509().
+
+(This is an “engine” call, not a client-specific call, because it will be usable on the server too, when client certificates are implemented.)
+
+Closure
+The br_ssl_engine_close() function triggers the closure, as part of the generic API. Once a closure has been initiated, some I/O must still be performed, since a normal SSL closure involves exchanging a pair of alert messages (of type close_notify and level “warning”). The caller should thus keep on running the engine until BR_SSL_CLOSED state is reached.
+
+Many existing SSL/TLS implementations, when run over TCP sockets, simply drop the connection when they wish to close. This makes such closure indistinguishable from forced truncation by active attackers. Ironically, the lack of verified closure protocol was considered to be one of the mortal sins of SSL-2.0, but nowadays it seems to be OK. The underlying reason is that HTTP evolved:
+
+HTTP-0.9, which was used in the heyday of SSL-2.0, used to indicate end of data by closing the connection. Each HTTP request required a new connection, which was wasteful. Thus, an attacker could force an undetected truncation of the requested data by sending a fake RST packet to drop the underlying TCP connection. SSL-2.0 would not detect the attacker’s action, but SSL-3.0 and later would, because of the lack of proper close_notify.
+
+Modern HTTP (1.0 and later) has explicit content length headers (either Content-Length, or chunked encoding) so any truncation will be detected at the application level. This is how modern SSL libraries involved in HTTPS can get away with not sending the close_notify.
+
+Since BearSSL does not perform I/O itself, you are free, as the caller, to drop the connection whenever you want, and thus be sloppy and not send the close_notify, if that is what you wish to do. Since BearSSL does not do any dynamic allocation, there is no resource to release and no penalty to not completing the SSL connection. However, if you use SSL in a protocol in which the transport medium keeps being used beyond the SSL closure, then you must do the close_notify exchange. BearSSL will do that for you.
+
+Renegotiation
+SSL has a feature called “renegotiation” in which client and server engage into a new handshake at any time after the initial handshake. The new handshake can be triggered by the client or by the server, and the messages will be encrypted.
+
+With BearSSL, a renegotiation is triggered with br_ssl_engine_renegotiate(). This works on both clients and servers. Returned value is 1 on success, 0 on error; a “success” means that a new handshake will take place (but it has not begun yet). A failure happens when either the engine is not ready for a renegotiation (e.g. a handshake is already taking place), or the peer does not support the “secure renegotiation” extension.
+
+Renegotiation, as it was initially defined, suffers from a problem, which is that an attacker may do a sort of man-in-the-middle, between a client that believes it is doing a single handshake, and a server that sees a renegotiation. This can be a vulnerability, depending on how the server behaves. Conceptually, the SSL handshake guarantees to the server that all subsequent data, until the next handshake, comes from the same client; the trouble happens when servers begin to assume that this property applies backwards, i.e. a client authenticated after a renegotiated handshake (e.g. with an HTTP cookie) is the same client as the one who sent some data before the renegotiation.
+
+RFC 5746 describes the problem, and its solution: an extra TLS extension that allows clients and servers to unambiguously distinguish between first handshake and renegotiations. BearSSL implements this extension, and refuses to perform renegotiations with a peer who does not implement it.
+
+In practice, there are mostly two contexts where renegotiations can be useful:
+
+To support certificate-based client authentication on specific portions of a server: an HTTPS server may not ask for a client certificate upon first handshake, but will trigger a renegotiation after seeing the target path in the HTTP request. Microsoft IIS works that way, because Web browsers tend to have suboptimal user interfaces when a client certificate is requested.
+
+To make a “key renewal”, e.g. when using 3DES/CBC encryption over more than a few gigabytes of data, to counter the Sweet32 attack. Arguably, a much better workaround is to use a decent block cipher instead, with 128-bit blocks (the AES comes to mind).
+
+As described above, the BR_OPT_NO_RENEGOTIATION flag can be used to prohibit renegotiations. Note that TLS-1.3 bans renegotiations, and when HTTP/2 is used with TLS-1.2, renegotiations are not permitted either except at the very beginning of the connection.
+
+Context Reuse
+At any time, a context structure (client or server) may be reset, with an explicit br_ssl_client_reset() or br_ssl_server_reset() call. This reuses the cipher suite and algorithm configuration, and the configured I/O buffer. The profile function needs not be called again.
+
+Moreover, for the client, resetting the context (instead of initialising a new one) means that the next connection attempt will try to resume the session (if the server supports it). Resuming a session uses a shorter and faster handshake. For a server context, session resumption depends on the configured session cache.
+
+The br_ssl_client_forget_session() function can be used to make a client context “forget” its session.
+
+Memory Wiping
+Once a SSL connection has been seen to its completion, the resources it used can be released. It is usually considered a good idea to “wipe” memory so that no trace of secret data (in particular the encryption keys) remains. Whether such wiping actually matters depends on the context, and most wiping occurs more by Tradition than for an actual security reason. Nevertheless, memory wiping can be important, if only to woo auditors when complying to various security standards.
+
+Since BearSSL does not perform any dynamic memory allocation, wiping is simple: the caller can simply use some memset() calls on the contexts and I/O buffers, and be done with it. For the stack, the caller may use a specific stack-wiping function like this:
+
+#include <stddef.h>
+#include <stdint.h>
+
+void
+wipe_stack(void)
+{
+        volatile uint32_t tmp[1024];
+        size_t u;
+
+        for (u = 0; u < (sizeof tmp) / (sizeof tmp[0]); u ++) {
+                tmp[u] = 0;
+        }
+}
+This function bombards the stack with zeros, thus obliterating any trace of secret data that may still linger on it. In this case, this clears 4 kilobytes, which should be enough: BearSSL’s code was designed to use less than 4 kilobytes of stack space at all times.
+
+(TODO: this stack size restriction is important for embedded systems, where RAM is scarce. This implies a limitation on RSA key sizes: BearSSL supports RSA only up to 4096 bits, which “ought to be enough for everyone”. Actual stack usage depends on the architecture and what the C compiler did with the code, and it should be measured. Such measures have not been done yet, so the “less than 4 kilobytes”, while plausible, is still an estimate at this point.)
+
+I am not counting the stack here; but whatever a function allocated on the stack, it is released when the function returns.↩
+
+Some implementations have trouble with fragmentation, especially with handshake messages, but BearSSL can process all record sizes, including empty records.↩
+
+```C
+/** client basic **/
+*
+   2  * Copyright (c) 2016 Thomas Pornin <pornin@bolet.org>
+   3  *
+   4  * Permission is hereby granted, free of charge, to any person obtaining
+   5  * a copy of this software and associated documentation files (the
+   6  * "Software"), to deal in the Software without restriction, including
+   7  * without limitation the rights to use, copy, modify, merge, publish,
+   8  * distribute, sublicense, and/or sell copies of the Software, and to
+   9  * permit persons to whom the Software is furnished to do so, subject to
+  10  * the following conditions:
+  11  *
+  12  * The above copyright notice and this permission notice shall be
+  13  * included in all copies or substantial portions of the Software.
+  14  *
+  15  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  16  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  17  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  18  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+  19  * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+  20  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  21  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  22  * SOFTWARE.
+  23  */
+  24
+  25 #include <stdio.h>
+  26 #include <stdlib.h>
+  27 #include <string.h>
+  28 #include <stdint.h>
+  29 #include <errno.h>
+  30
+  31 #include <sys/types.h>
+  32 #include <sys/socket.h>
+  33 #include <netdb.h>
+  34 #include <netinet/in.h>
+  35 #include <arpa/inet.h>
+  36 #include <unistd.h>
+  37
+  38 #include "bearssl.h"
+  39
+  40 /*
+  41  * Connect to the specified host and port. The connected socket is
+  42  * returned, or -1 on error.
+  43  */
+  44 static int
+  45 host_connect(const char *host, const char *port)
+  46 {
+  47         struct addrinfo hints, *si, *p;
+  48         int fd;
+  49         int err;
+  50
+  51         memset(&hints, 0, sizeof hints);
+  52         hints.ai_family = PF_UNSPEC;
+  53         hints.ai_socktype = SOCK_STREAM;
+  54         err = getaddrinfo(host, port, &hints, &si);
+  55         if (err != 0) {
+  56                 fprintf(stderr, "ERROR: getaddrinfo(): %s\n",
+  57                         gai_strerror(err));
+  58                 return -1;
+  59         }
+  60         fd = -1;
+  61         for (p = si; p != NULL; p = p->ai_next) {
+  62                 struct sockaddr *sa;
+  63                 void *addr;
+  64                 char tmp[INET6_ADDRSTRLEN + 50];
+  65
+  66                 sa = (struct sockaddr *)p->ai_addr;
+  67                 if (sa->sa_family == AF_INET) {
+  68                         addr = &((struct sockaddr_in *)sa)->sin_addr;
+  69                 } else if (sa->sa_family == AF_INET6) {
+  70                         addr = &((struct sockaddr_in6 *)sa)->sin6_addr;
+  71                 } else {
+  72                         addr = NULL;
+  73                 }
+  74                 if (addr != NULL) {
+  75                         inet_ntop(p->ai_family, addr, tmp, sizeof tmp);
+  76                 } else {
+  77                         sprintf(tmp, "<unknown family: %d>",
+  78                                 (int)sa->sa_family);
+  79                 }
+  80                 fprintf(stderr, "connecting to: %s\n", tmp);
+  81                 fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+  82                 if (fd < 0) {
+  83                         perror("socket()");
+  84                         continue;
+  85                 }
+  86                 if (connect(fd, p->ai_addr, p->ai_addrlen) < 0) {
+  87                         perror("connect()");
+  88                         close(fd);
+  89                         continue;
+  90                 }
+  91                 break;
+  92         }
+  93         if (p == NULL) {
+  94                 freeaddrinfo(si);
+  95                 fprintf(stderr, "ERROR: failed to connect\n");
+  96                 return -1;
+  97         }
+  98         freeaddrinfo(si);
+  99         fprintf(stderr, "connected.\n");
+ 100         return fd;
+ 101 }
+ 102
+ 103 /*
+ 104  * Low-level data read callback for the simplified SSL I/O API.
+ 105  */
+ 106 static int
+ 107 sock_read(void *ctx, unsigned char *buf, size_t len)
+ 108 {
+ 109         for (;;) {
+ 110                 ssize_t rlen;
+ 111
+ 112                 rlen = read(*(int *)ctx, buf, len);
+ 113                 if (rlen <= 0) {
+ 114                         if (rlen < 0 && errno == EINTR) {
+ 115                                 continue;
+ 116                         }
+ 117                         return -1;
+ 118                 }
+ 119                 return (int)rlen;
+ 120         }
+ 121 }
+ 122
+ 123 /*
+ 124  * Low-level data write callback for the simplified SSL I/O API.
+ 125  */
+ 126 static int
+ 127 sock_write(void *ctx, const unsigned char *buf, size_t len)
+ 128 {
+ 129         for (;;) {
+ 130                 ssize_t wlen;
+ 131
+ 132                 wlen = write(*(int *)ctx, buf, len);
+ 133                 if (wlen <= 0) {
+ 134                         if (wlen < 0 && errno == EINTR) {
+ 135                                 continue;
+ 136                         }
+ 137                         return -1;
+ 138                 }
+ 139                 return (int)wlen;
+ 140         }
+ 141 }
+ 142
+ 143 /*
+ 144  * The hardcoded trust anchors. These are the two DN + public key that
+ 145  * correspond to the self-signed certificates cert-root-rsa.pem and
+ 146  * cert-root-ec.pem.
+ 147  *
+ 148  * C code for hardcoded trust anchors can be generated with the "brssl"
+ 149  * command-line tool (with the "ta" command).
+ 150  */
+ 151
+ 152 static const unsigned char TA0_DN[] = {
+ 153         0x30, 0x1C, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x06, 0x13,
+ 154         0x02, 0x43, 0x41, 0x31, 0x0D, 0x30, 0x0B, 0x06, 0x03, 0x55, 0x04, 0x03,
+ 155         0x13, 0x04, 0x52, 0x6F, 0x6F, 0x74
+ 156 };
+ 157
+ 158 static const unsigned char TA0_RSA_N[] = {
+ 159         0xB6, 0xD9, 0x34, 0xD4, 0x50, 0xFD, 0xB3, 0xAF, 0x7A, 0x73, 0xF1, 0xCE,
+ 160         0x38, 0xBF, 0x5D, 0x6F, 0x45, 0xE1, 0xFD, 0x4E, 0xB1, 0x98, 0xC6, 0x60,
+ 161         0x83, 0x26, 0xD2, 0x17, 0xD1, 0xC5, 0xB7, 0x9A, 0xA3, 0xC1, 0xDE, 0x63,
+ 162         0x39, 0x97, 0x9C, 0xF0, 0x5E, 0x5C, 0xC8, 0x1C, 0x17, 0xB9, 0x88, 0x19,
+ 163         0x6D, 0xF0, 0xB6, 0x2E, 0x30, 0x50, 0xA1, 0x54, 0x6E, 0x93, 0xC0, 0xDB,
+ 164         0xCF, 0x30, 0xCB, 0x9F, 0x1E, 0x27, 0x79, 0xF1, 0xC3, 0x99, 0x52, 0x35,
+ 165         0xAA, 0x3D, 0xB6, 0xDF, 0xB0, 0xAD, 0x7C, 0xCB, 0x49, 0xCD, 0xC0, 0xED,
+ 166         0xE7, 0x66, 0x10, 0x2A, 0xE9, 0xCE, 0x28, 0x1F, 0x21, 0x50, 0xFA, 0x77,
+ 167         0x4C, 0x2D, 0xDA, 0xEF, 0x3C, 0x58, 0xEB, 0x4E, 0xBF, 0xCE, 0xE9, 0xFB,
+ 168         0x1A, 0xDA, 0xA3, 0x83, 0xA3, 0xCD, 0xA3, 0xCA, 0x93, 0x80, 0xDC, 0xDA,
+ 169         0xF3, 0x17, 0xCC, 0x7A, 0xAB, 0x33, 0x80, 0x9C, 0xB2, 0xD4, 0x7F, 0x46,
+ 170         0x3F, 0xC5, 0x3C, 0xDC, 0x61, 0x94, 0xB7, 0x27, 0x29, 0x6E, 0x2A, 0xBC,
+ 171         0x5B, 0x09, 0x36, 0xD4, 0xC6, 0x3B, 0x0D, 0xEB, 0xBE, 0xCE, 0xDB, 0x1D,
+ 172         0x1C, 0xBC, 0x10, 0x6A, 0x71, 0x71, 0xB3, 0xF2, 0xCA, 0x28, 0x9A, 0x77,
+ 173         0xF2, 0x8A, 0xEC, 0x42, 0xEF, 0xB1, 0x4A, 0x8E, 0xE2, 0xF2, 0x1A, 0x32,
+ 174         0x2A, 0xCD, 0xC0, 0xA6, 0x46, 0x2C, 0x9A, 0xC2, 0x85, 0x37, 0x91, 0x7F,
+ 175         0x46, 0xA1, 0x93, 0x81, 0xA1, 0x74, 0x66, 0xDF, 0xBA, 0xB3, 0x39, 0x20,
+ 176         0x91, 0x93, 0xFA, 0x1D, 0xA1, 0xA8, 0x85, 0xE7, 0xE4, 0xF9, 0x07, 0xF6,
+ 177         0x10, 0xF6, 0xA8, 0x27, 0x01, 0xB6, 0x7F, 0x12, 0xC3, 0x40, 0xC3, 0xC9,
+ 178         0xE2, 0xB0, 0xAB, 0x49, 0x18, 0x3A, 0x64, 0xB6, 0x59, 0xB7, 0x95, 0xB5,
+ 179         0x96, 0x36, 0xDF, 0x22, 0x69, 0xAA, 0x72, 0x6A, 0x54, 0x4E, 0x27, 0x29,
+ 180         0xA3, 0x0E, 0x97, 0x15
+ 181 };
+ 182
+ 183 static const unsigned char TA0_RSA_E[] = {
+ 184         0x01, 0x00, 0x01
+ 185 };
+ 186
+ 187 static const unsigned char TA1_DN[] = {
+ 188         0x30, 0x1C, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x06, 0x13,
+ 189         0x02, 0x43, 0x41, 0x31, 0x0D, 0x30, 0x0B, 0x06, 0x03, 0x55, 0x04, 0x03,
+ 190         0x13, 0x04, 0x52, 0x6F, 0x6F, 0x74
+ 191 };
+ 192
+ 193 static const unsigned char TA1_EC_Q[] = {
+ 194         0x04, 0x71, 0x74, 0xBA, 0xAB, 0xB9, 0x30, 0x2E, 0x81, 0xD5, 0xE5, 0x57,
+ 195         0xF9, 0xF3, 0x20, 0x68, 0x0C, 0x9C, 0xF9, 0x64, 0xDB, 0xB4, 0x20, 0x0D,
+ 196         0x6D, 0xEA, 0x40, 0xD0, 0x4A, 0x6E, 0x42, 0xFD, 0xB6, 0x9A, 0x68, 0x25,
+ 197         0x44, 0xF6, 0xDF, 0x7B, 0xC4, 0xFC, 0xDE, 0xDD, 0x7B, 0xBB, 0xC5, 0xDB,
+ 198         0x7C, 0x76, 0x3F, 0x41, 0x66, 0x40, 0x6E, 0xDB, 0xA7, 0x87, 0xC2, 0xE5,
+ 199         0xD8, 0xC5, 0xF3, 0x7F, 0x8D
+ 200 };
+ 201
+ 202 static const br_x509_trust_anchor TAs[2] = {
+ 203         {
+ 204                 (unsigned char *)TA0_DN, sizeof TA0_DN,
+ 205                 BR_X509_TA_CA,
+ 206                 {
+ 207                         BR_KEYTYPE_RSA,
+ 208                         { .rsa = {
+ 209                                 (unsigned char *)TA0_RSA_N, sizeof TA0_RSA_N,
+ 210                                 (unsigned char *)TA0_RSA_E, sizeof TA0_RSA_E,
+ 211                         } }
+ 212                 }
+ 213         },
+ 214         {
+ 215                 (unsigned char *)TA1_DN, sizeof TA1_DN,
+ 216                 BR_X509_TA_CA,
+ 217                 {
+ 218                         BR_KEYTYPE_EC,
+ 219                         { .ec = {
+ 220                                 BR_EC_secp256r1,
+ 221                                 (unsigned char *)TA1_EC_Q, sizeof TA1_EC_Q,
+ 222                         } }
+ 223                 }
+ 224         }
+ 225 };
+ 226
+ 227 #define TAs_NUM   2
+ 228
+ 229 /*
+ 230  * Main program: this is a simple program that expects 2 or 3 arguments.
+ 231  * The first two arguments are a hostname and a port; the program will
+ 232  * open a SSL connection with that server and port. It will then send
+ 233  * a simple HTTP GET request, using the third argument as target path
+ 234  * ("/" is used as path if no third argument was provided). The HTTP
+ 235  * response, complete with header and contents, is received and written
+ 236  * on stdout.
+ 237  */
+ 238 int
+ 239 main(int argc, char *argv[])
+ 240 {
+ 241         const char *host, *port, *path;
+ 242         int fd;
+ 243         br_ssl_client_context sc;
+ 244         br_x509_minimal_context xc;
+ 245         unsigned char iobuf[BR_SSL_BUFSIZE_BIDI];
+ 246         br_sslio_context ioc;
+ 247
+ 248         /*
+ 249          * Parse command-line argument: host, port, and path. The path
+ 250          * is optional; if absent, "/" is used.
+ 251          */
+ 252         if (argc < 3 || argc > 4) {
+ 253                 return EXIT_FAILURE;
+ 254         }
+ 255         host = argv[1];
+ 256         port = argv[2];
+ 257         if (argc == 4) {
+ 258                 path = argv[3];
+ 259         } else {
+ 260                 path = "/";
+ 261         }
+ 262
+ 263         /*
+ 264          * Open the socket to the target server.
+ 265          */
+ 266         fd = host_connect(host, port);
+ 267         if (fd < 0) {
+ 268                 return EXIT_FAILURE;
+ 269         }
+ 270
+ 271         /*
+ 272          * Initialise the client context:
+ 273          * -- Use the "full" profile (all supported algorithms).
+ 274          * -- The provided X.509 validation engine is initialised, with
+ 275          *    the hardcoded trust anchor.
+ 276          */
+ 277         br_ssl_client_init_full(&sc, &xc, TAs, TAs_NUM);
+ 278
+ 279         /*
+ 280          * Set the I/O buffer to the provided array. We allocated a
+ 281          * buffer large enough for full-duplex behaviour with all
+ 282          * allowed sizes of SSL records, hence we set the last argument
+ 283          * to 1 (which means "split the buffer into separate input and
+ 284          * output areas").
+ 285          */
+ 286         br_ssl_engine_set_buffer(&sc.eng, iobuf, sizeof iobuf, 1);
+ 287
+ 288         /*
+ 289          * Reset the client context, for a new handshake. We provide the
+ 290          * target host name: it will be used for the SNI extension. The
+ 291          * last parameter is 0: we are not trying to resume a session.
+ 292          */
+ 293         br_ssl_client_reset(&sc, host, 0);
+ 294
+ 295         /*
+ 296          * Initialise the simplified I/O wrapper context, to use our
+ 297          * SSL client context, and the two callbacks for socket I/O.
+ 298          */
+ 299         br_sslio_init(&ioc, &sc.eng, sock_read, &fd, sock_write, &fd);
+ 300
+ 301         /*
+ 302          * Note that while the context has, at that point, already
+ 303          * assembled the ClientHello to send, nothing happened on the
+ 304          * network yet. Real I/O will occur only with the next call.
+ 305          *
+ 306          * We write our simple HTTP request. We could test each call
+ 307          * for an error (-1), but this is not strictly necessary, since
+ 308          * the error state "sticks": if the context fails for any reason
+ 309          * (e.g. bad server certificate), then it will remain in failed
+ 310          * state and all subsequent calls will return -1 as well.
+ 311          */
+ 312         br_sslio_write_all(&ioc, "GET ", 4);
+ 313         br_sslio_write_all(&ioc, path, strlen(path));
+ 314         br_sslio_write_all(&ioc, " HTTP/1.0\r\nHost: ", 17);
+ 315         br_sslio_write_all(&ioc, host, strlen(host));
+ 316         br_sslio_write_all(&ioc, "\r\n\r\n", 4);
+ 317
+ 318         /*
+ 319          * SSL is a buffered protocol: we make sure that all our request
+ 320          * bytes are sent onto the wire.
+ 321          */
+ 322         br_sslio_flush(&ioc);
+ 323
+ 324         /*
+ 325          * Read the server's response. We use here a small 512-byte buffer,
+ 326          * but most of the buffering occurs in the client context: the
+ 327          * server will send full records (up to 16384 bytes worth of data
+ 328          * each), and the client context buffers one full record at a time.
+ 329          */
+ 330         for (;;) {
+ 331                 int rlen;
+ 332                 unsigned char tmp[512];
+ 333
+ 334                 rlen = br_sslio_read(&ioc, tmp, sizeof tmp);
+ 335                 if (rlen < 0) {
+ 336                         break;
+ 337                 }
+ 338                 fwrite(tmp, 1, rlen, stdout);
+ 339         }
+ 340
+ 341         /*
+ 342          * Close the socket.
+ 343          */
+ 344         close(fd);
+ 345
+ 346         /*
+ 347          * Check whether we closed properly or not. If the engine is
+ 348          * closed, then its error status allows to distinguish between
+ 349          * a normal closure and a SSL error.
+ 350          *
+ 351          * If the engine is NOT closed, then this means that the
+ 352          * underlying network socket was closed or failed in some way.
+ 353          * Note that many Web servers out there do not properly close
+ 354          * their SSL connections (they don't send a close_notify alert),
+ 355          * which will be reported here as "socket closed without proper
+ 356          * SSL termination".
+ 357          */
+ 358         if (br_ssl_engine_current_state(&sc.eng) == BR_SSL_CLOSED) {
+ 359                 int err;
+ 360
+ 361                 err = br_ssl_engine_last_error(&sc.eng);
+ 362                 if (err == 0) {
+ 363                         fprintf(stderr, "closed.\n");
+ 364                         return EXIT_SUCCESS;
+ 365                 } else {
+ 366                         fprintf(stderr, "SSL error %d\n", err);
+ 367                         return EXIT_FAILURE;
+ 368                 }
+ 369         } else {
+ 370                 fprintf(stderr,
+ 371                         "socket closed without proper SSL termination\n");
+ 372                 return EXIT_FAILURE;
+ 373         }
+ 374 }
+```
+
+```C
+/** server basic **/
+/*
+   2  * Copyright (c) 2016 Thomas Pornin <pornin@bolet.org>
+   3  *
+   4  * Permission is hereby granted, free of charge, to any person obtaining
+   5  * a copy of this software and associated documentation files (the
+   6  * "Software"), to deal in the Software without restriction, including
+   7  * without limitation the rights to use, copy, modify, merge, publish,
+   8  * distribute, sublicense, and/or sell copies of the Software, and to
+   9  * permit persons to whom the Software is furnished to do so, subject to
+  10  * the following conditions:
+  11  *
+  12  * The above copyright notice and this permission notice shall be
+  13  * included in all copies or substantial portions of the Software.
+  14  *
+  15  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  16  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  17  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  18  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+  19  * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+  20  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  21  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  22  * SOFTWARE.
+  23  */
+  24
+  25 #include <stdio.h>
+  26 #include <stdlib.h>
+  27 #include <string.h>
+  28 #include <stdint.h>
+  29 #include <errno.h>
+  30
+  31 #include <sys/types.h>
+  32 #include <sys/socket.h>
+  33 #include <netdb.h>
+  34 #include <netinet/in.h>
+  35 #include <arpa/inet.h>
+  36 #include <unistd.h>
+  37
+  38 #include "bearssl.h"
+  39
+  40 /*
+  41  * This sample code can use three possible certificate chains:
+  42  * -- A full-RSA chain (server key is RSA, certificates are signed with RSA)
+  43  * -- A full-EC chain (server key is EC, certificates are signed with ECDSA)
+  44  * -- A mixed chain (server key is EC, certificates are signed with RSA)
+  45  *
+  46  * The macros below define which chain is selected. This impacts the list
+  47  * of supported cipher suites.
+  48  */
+  49
+  50 #if !(SERVER_RSA || SERVER_EC || SERVER_MIXED)
+  51 #define SERVER_RSA     1
+  52 #define SERVER_EC      0
+  53 #define SERVER_MIXED   0
+  54 #endif
+  55
+  56 #if SERVER_RSA
+  57 #include "chain-rsa.h"
+  58 #include "key-rsa.h"
+  59 #define SKEY   RSA
+  60 #elif SERVER_EC
+  61 #include "chain-ec.h"
+  62 #include "key-ec.h"
+  63 #define SKEY   EC
+  64 #elif SERVER_MIXED
+  65 #include "chain-ec+rsa.h"
+  66 #include "key-ec.h"
+  67 #define SKEY   EC
+  68 #else
+  69 #error Must use one of RSA, EC or MIXED chains.
+  70 #endif
+  71
+  72 /*
+  73  * Create a server socket bound to the specified host and port. If 'host'
+  74  * is NULL, this will bind "generically" (all addresses).
+  75  *
+  76  * Returned value is the server socket descriptor, or -1 on error.
+  77  */
+  78 static int
+  79 host_bind(const char *host, const char *port)
+  80 {
+  81         struct addrinfo hints, *si, *p;
+  82         int fd;
+  83         int err;
+  84
+  85         memset(&hints, 0, sizeof hints);
+  86         hints.ai_family = PF_UNSPEC;
+  87         hints.ai_socktype = SOCK_STREAM;
+  88         err = getaddrinfo(host, port, &hints, &si);
+  89         if (err != 0) {
+  90                 fprintf(stderr, "ERROR: getaddrinfo(): %s\n",
+  91                         gai_strerror(err));
+  92                 return -1;
+  93         }
+  94         fd = -1;
+  95         for (p = si; p != NULL; p = p->ai_next) {
+  96                 struct sockaddr *sa;
+  97                 struct sockaddr_in sa4;
+  98                 struct sockaddr_in6 sa6;
+  99                 size_t sa_len;
+ 100                 void *addr;
+ 101                 char tmp[INET6_ADDRSTRLEN + 50];
+ 102                 int opt;
+ 103
+ 104                 sa = (struct sockaddr *)p->ai_addr;
+ 105                 if (sa->sa_family == AF_INET) {
+ 106                         sa4 = *(struct sockaddr_in *)sa;
+ 107                         sa = (struct sockaddr *)&sa4;
+ 108                         sa_len = sizeof sa4;
+ 109                         addr = &sa4.sin_addr;
+ 110                         if (host == NULL) {
+ 111                                 sa4.sin_addr.s_addr = INADDR_ANY;
+ 112                         }
+ 113                 } else if (sa->sa_family == AF_INET6) {
+ 114                         sa6 = *(struct sockaddr_in6 *)sa;
+ 115                         sa = (struct sockaddr *)&sa6;
+ 116                         sa_len = sizeof sa6;
+ 117                         addr = &sa6.sin6_addr;
+ 118                         if (host == NULL) {
+ 119                                 sa6.sin6_addr = in6addr_any;
+ 120                         }
+ 121                 } else {
+ 122                         addr = NULL;
+ 123                         sa_len = p->ai_addrlen;
+ 124                 }
+ 125                 if (addr != NULL) {
+ 126                         inet_ntop(p->ai_family, addr, tmp, sizeof tmp);
+ 127                 } else {
+ 128                         sprintf(tmp, "<unknown family: %d>",
+ 129                                 (int)sa->sa_family);
+ 130                 }
+ 131                 fprintf(stderr, "binding to: %s\n", tmp);
+ 132                 fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
+ 133                 if (fd < 0) {
+ 134                         perror("socket()");
+ 135                         continue;
+ 136                 }
+ 137                 opt = 1;
+ 138                 setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof opt);
+ 139                 opt = 0;
+ 140                 setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, &opt, sizeof opt);
+ 141                 if (bind(fd, sa, sa_len) < 0) {
+ 142                         perror("bind()");
+ 143                         close(fd);
+ 144                         continue;
+ 145                 }
+ 146                 break;
+ 147         }
+ 148         if (p == NULL) {
+ 149                 freeaddrinfo(si);
+ 150                 fprintf(stderr, "ERROR: failed to bind\n");
+ 151                 return -1;
+ 152         }
+ 153         freeaddrinfo(si);
+ 154         if (listen(fd, 5) < 0) {
+ 155                 perror("listen()");
+ 156                 close(fd);
+ 157                 return -1;
+ 158         }
+ 159         fprintf(stderr, "bound.\n");
+ 160         return fd;
+ 161 }
+ 162
+ 163 /*
+ 164  * Accept a single client on the provided server socket. This is blocking.
+ 165  * On error, this returns -1.
+ 166  */
+ 167 static int
+ 168 accept_client(int server_fd)
+ 169 {
+ 170         int fd;
+ 171         struct sockaddr sa;
+ 172         socklen_t sa_len;
+ 173         char tmp[INET6_ADDRSTRLEN + 50];
+ 174         const char *name;
+ 175
+ 176         sa_len = sizeof sa;
+ 177         fd = accept(server_fd, &sa, &sa_len);
+ 178         if (fd < 0) {
+ 179                 perror("accept()");
+ 180                 return -1;
+ 181         }
+ 182         name = NULL;
+ 183         switch (sa.sa_family) {
+ 184         case AF_INET:
+ 185                 name = inet_ntop(AF_INET,
+ 186                         &((struct sockaddr_in *)&sa)->sin_addr,
+ 187                         tmp, sizeof tmp);
+ 188                 break;
+ 189         case AF_INET6:
+ 190                 name = inet_ntop(AF_INET,
+ 191                         &((struct sockaddr_in *)&sa)->sin_addr,
+ 192                         tmp, sizeof tmp);
+ 193                 break;
+ 194         }
+ 195         if (name == NULL) {
+ 196                 sprintf(tmp, "<unknown: %lu>", (unsigned long)sa.sa_family);
+ 197                 name = tmp;
+ 198         }
+ 199         fprintf(stderr, "accepting connection from: %s\n", name);
+ 200         return fd;
+ 201 }
+ 202
+ 203 /*
+ 204  * Low-level data read callback for the simplified SSL I/O API.
+ 205  */
+ 206 static int
+ 207 sock_read(void *ctx, unsigned char *buf, size_t len)
+ 208 {
+ 209         for (;;) {
+ 210                 ssize_t rlen;
+ 211
+ 212                 rlen = read(*(int *)ctx, buf, len);
+ 213                 if (rlen <= 0) {
+ 214                         if (rlen < 0 && errno == EINTR) {
+ 215                                 continue;
+ 216                         }
+ 217                         return -1;
+ 218                 }
+ 219                 return (int)rlen;
+ 220         }
+ 221 }
+ 222
+ 223 /*
+ 224  * Low-level data write callback for the simplified SSL I/O API.
+ 225  */
+ 226 static int
+ 227 sock_write(void *ctx, const unsigned char *buf, size_t len)
+ 228 {
+ 229         for (;;) {
+ 230                 ssize_t wlen;
+ 231
+ 232                 wlen = write(*(int *)ctx, buf, len);
+ 233                 if (wlen <= 0) {
+ 234                         if (wlen < 0 && errno == EINTR) {
+ 235                                 continue;
+ 236                         }
+ 237                         return -1;
+ 238                 }
+ 239                 return (int)wlen;
+ 240         }
+ 241 }
+ 242
+ 243 /*
+ 244  * Sample HTTP response to send.
+ 245  */
+ 246 static const char *HTTP_RES =
+ 247         "HTTP/1.0 200 OK\r\n"
+ 248         "Content-Length: 46\r\n"
+ 249         "Connection: close\r\n"
+ 250         "Content-Type: text/html; charset=iso-8859-1\r\n"
+ 251         "\r\n"
+ 252         "<html>\r\n"
+ 253         "<body>\r\n"
+ 254         "<p>Test!</p>\r\n"
+ 255         "</body>\r\n"
+ 256         "</html>\r\n";
+ 257
+ 258 /*
+ 259  * Main program: this is a simple program that expects 1 argument: a
+ 260  * port number. This will start a simple network server on that port,
+ 261  * that expects incoming SSL clients. It handles only one client at a
+ 262  * time (handling several would require threads, sub-processes, or
+ 263  * multiplexing with select()/poll(), all of which being possible).
+ 264  *
+ 265  * For each client, the server will wait for two successive newline
+ 266  * characters (ignoring CR characters, so CR+LF is accepted), then
+ 267  * produce a sample static HTTP response. This is very crude, but
+ 268  * sufficient for explanatory purposes.
+ 269  */
+ 270 int
+ 271 main(int argc, char *argv[])
+ 272 {
+ 273         const char *port;
+ 274         int fd;
+ 275
+ 276         if (argc != 2) {
+ 277                 return EXIT_FAILURE;
+ 278         }
+ 279         port = argv[1];
+ 280
+ 281         /*
+ 282          * Open the server socket.
+ 283          */
+ 284         fd = host_bind(NULL, port);
+ 285         if (fd < 0) {
+ 286                 return EXIT_FAILURE;
+ 287         }
+ 288
+ 289         /*
+ 290          * Process each client, one at a time.
+ 291          */
+ 292         for (;;) {
+ 293                 int cfd;
+ 294                 br_ssl_server_context sc;
+ 295                 unsigned char iobuf[BR_SSL_BUFSIZE_BIDI];
+ 296                 br_sslio_context ioc;
+ 297                 int lcwn, err;
+ 298
+ 299                 cfd = accept_client(fd);
+ 300                 if (cfd < 0) {
+ 301                         return EXIT_FAILURE;
+ 302                 }
+ 303
+ 304                 /*
+ 305                  * Initialise the context with the cipher suites and
+ 306                  * algorithms. This depends on the server key type
+ 307                  * (and, for EC keys, the signature algorithm used by
+ 308                  * the CA to sign the server's certificate).
+ 309                  *
+ 310                  * Depending on the defined macros, we may select one of
+ 311                  * the "minimal" profiles. Key exchange algorithm depends
+ 312                  * on the key type:
+ 313                  *   RSA key: RSA or ECDHE_RSA
+ 314                  *   EC key, cert signed with ECDSA: ECDH_ECDSA or ECDHE_ECDSA
+ 315                  *   EC key, cert signed with RSA: ECDH_RSA or ECDHE_ECDSA
+ 316                  */
+ 317 #if SERVER_RSA
+ 318 #if SERVER_PROFILE_MIN_FS
+ 319                 br_ssl_server_init_mine2g(&sc, CHAIN, CHAIN_LEN, &SKEY);
+ 320 #elif SERVER_PROFILE_MIN_NOFS
+ 321                 br_ssl_server_init_minr2g(&sc, CHAIN, CHAIN_LEN, &SKEY);
+ 322 #else
+ 323                 br_ssl_server_init_full_rsa(&sc, CHAIN, CHAIN_LEN, &SKEY);
+ 324 #endif
+ 325 #elif SERVER_EC
+ 326 #if SERVER_PROFILE_MIN_FS
+ 327                 br_ssl_server_init_minf2g(&sc, CHAIN, CHAIN_LEN, &SKEY);
+ 328 #elif SERVER_PROFILE_MIN_NOFS
+ 329                 br_ssl_server_init_minv2g(&sc, CHAIN, CHAIN_LEN, &SKEY);
+ 330 #else
+ 331                 br_ssl_server_init_full_ec(&sc, CHAIN, CHAIN_LEN,
+ 332                         BR_KEYTYPE_EC, &SKEY);
+ 333 #endif
+ 334 #else /* SERVER_MIXED */
+ 335 #if SERVER_PROFILE_MIN_FS
+ 336                 br_ssl_server_init_minf2g(&sc, CHAIN, CHAIN_LEN, &SKEY);
+ 337 #elif SERVER_PROFILE_MIN_NOFS
+ 338                 br_ssl_server_init_minu2g(&sc, CHAIN, CHAIN_LEN, &SKEY);
+ 339 #else
+ 340                 br_ssl_server_init_full_ec(&sc, CHAIN, CHAIN_LEN,
+ 341                         BR_KEYTYPE_RSA, &SKEY);
+ 342 #endif
+ 343 #endif
+ 344                 /*
+ 345                  * Set the I/O buffer to the provided array. We
+ 346                  * allocated a buffer large enough for full-duplex
+ 347                  * behaviour with all allowed sizes of SSL records,
+ 348                  * hence we set the last argument to 1 (which means
+ 349                  * "split the buffer into separate input and output
+ 350                  * areas").
+ 351                  */
+ 352                 br_ssl_engine_set_buffer(&sc.eng, iobuf, sizeof iobuf, 1);
+ 353
+ 354                 /*
+ 355                  * Reset the server context, for a new handshake.
+ 356                  */
+ 357                 br_ssl_server_reset(&sc);
+ 358
+ 359                 /*
+ 360                  * Initialise the simplified I/O wrapper context.
+ 361                  */
+ 362                 br_sslio_init(&ioc, &sc.eng, sock_read, &cfd, sock_write, &cfd);
+ 363
+ 364                 /*
+ 365                  * Read bytes until two successive LF (or CR+LF) are received.
+ 366                  */
+ 367                 lcwn = 0;
+ 368                 for (;;) {
+ 369                         unsigned char x;
+ 370
+ 371                         if (br_sslio_read(&ioc, &x, 1) < 0) {
+ 372                                 goto client_drop;
+ 373                         }
+ 374                         if (x == 0x0D) {
+ 375                                 continue;
+ 376                         }
+ 377                         if (x == 0x0A) {
+ 378                                 if (lcwn) {
+ 379                                         break;
+ 380                                 }
+ 381                                 lcwn = 1;
+ 382                         } else {
+ 383                                 lcwn = 0;
+ 384                         }
+ 385                 }
+ 386
+ 387                 /*
+ 388                  * Write a response and close the connection.
+ 389                  */
+ 390                 br_sslio_write_all(&ioc, HTTP_RES, strlen(HTTP_RES));
+ 391                 br_sslio_close(&ioc);
+ 392
+ 393         client_drop:
+ 394                 err = br_ssl_engine_last_error(&sc.eng);
+ 395                 if (err == 0) {
+ 396                         fprintf(stderr, "SSL closed (correctly).\n");
+ 397                 } else {
+ 398                         fprintf(stderr, "SSL error: %d\n", err);
+ 399                 }
+ 400                 close(cfd);
+ 401         }
+ 402 }
+```
+
+```c
+/** chain-rsa.h **/
+   1 /*
+   2  * Copyright (c) 2016 Thomas Pornin <pornin@bolet.org>
+   3  *
+   4  * Permission is hereby granted, free of charge, to any person obtaining
+   5  * a copy of this software and associated documentation files (the
+   6  * "Software"), to deal in the Software without restriction, including
+   7  * without limitation the rights to use, copy, modify, merge, publish,
+   8  * distribute, sublicense, and/or sell copies of the Software, and to
+   9  * permit persons to whom the Software is furnished to do so, subject to
+  10  * the following conditions:
+  11  *
+  12  * The above copyright notice and this permission notice shall be
+  13  * included in all copies or substantial portions of the Software.
+  14  *
+  15  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  16  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  17  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  18  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+  19  * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+  20  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  21  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  22  * SOFTWARE.
+  23  */
+  24
+  25 #include "bearssl.h"
+  26
+  27 /*
+  28  * A sample server certificate chain with a single intermediate CA.
+  29  * Certificate key type: RSA
+  30  * Signing algorithm for both certificates: RSA
+  31  */
+  32
+  33 static const unsigned char CERT0[] = {
+  34         0x30, 0x82, 0x03, 0x3C, 0x30, 0x82, 0x02, 0x24, 0xA0, 0x03, 0x02, 0x01,
+  35         0x02, 0x02, 0x14, 0x58, 0xDA, 0xBA, 0x36, 0xCD, 0xED, 0xA0, 0xDA, 0x5C,
+  36         0x10, 0x33, 0x73, 0x8E, 0x0C, 0x64, 0x92, 0x79, 0x92, 0xAF, 0x03, 0x30,
+  37         0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0B,
+  38         0x05, 0x00, 0x30, 0x27, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04,
+  39         0x06, 0x13, 0x02, 0x43, 0x41, 0x31, 0x18, 0x30, 0x16, 0x06, 0x03, 0x55,
+  40         0x04, 0x03, 0x13, 0x0F, 0x49, 0x6E, 0x74, 0x65, 0x72, 0x6D, 0x65, 0x64,
+  41         0x69, 0x61, 0x74, 0x65, 0x20, 0x43, 0x41, 0x30, 0x1E, 0x17, 0x0D, 0x31,
+  42         0x30, 0x30, 0x31, 0x30, 0x31, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x5A,
+  43         0x17, 0x0D, 0x33, 0x37, 0x31, 0x32, 0x33, 0x31, 0x32, 0x33, 0x35, 0x39,
+  44         0x35, 0x39, 0x5A, 0x30, 0x21, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55,
+  45         0x04, 0x06, 0x13, 0x02, 0x43, 0x41, 0x31, 0x12, 0x30, 0x10, 0x06, 0x03,
+  46         0x55, 0x04, 0x03, 0x13, 0x09, 0x6C, 0x6F, 0x63, 0x61, 0x6C, 0x68, 0x6F,
+  47         0x73, 0x74, 0x30, 0x82, 0x01, 0x22, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86,
+  48         0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00, 0x03, 0x82, 0x01,
+  49         0x0F, 0x00, 0x30, 0x82, 0x01, 0x0A, 0x02, 0x82, 0x01, 0x01, 0x00, 0xD4,
+  50         0x7A, 0x1D, 0x27, 0xBA, 0x2B, 0x3A, 0x67, 0xB2, 0x91, 0x6A, 0xFB, 0xE7,
+  51         0x83, 0x44, 0xCA, 0xED, 0x1C, 0x75, 0xAD, 0xDD, 0x4D, 0x83, 0x62, 0xD6,
+  52         0xAA, 0x68, 0x95, 0xB2, 0x24, 0x21, 0x7B, 0x15, 0xAE, 0x2A, 0x99, 0x68,
+  53         0x15, 0xED, 0x66, 0xF0, 0xB8, 0x58, 0xE7, 0xD3, 0xF5, 0x2E, 0xC6, 0xD9,
+  54         0x2A, 0x5E, 0xE7, 0x0E, 0x2E, 0xE7, 0xFC, 0x67, 0x59, 0xC0, 0xC8, 0x61,
+  55         0x7D, 0x4B, 0xA4, 0x6F, 0xDD, 0x9F, 0xD9, 0xC8, 0x85, 0x87, 0x64, 0xC7,
+  56         0xBA, 0x1A, 0x0F, 0x29, 0xD4, 0x96, 0xA8, 0x78, 0x9A, 0x6B, 0x62, 0x20,
+  57         0xA9, 0x32, 0xD0, 0xEE, 0xA9, 0x8C, 0x28, 0x61, 0x47, 0xA2, 0x50, 0x2A,
+  58         0x63, 0xF6, 0x21, 0xDE, 0xDA, 0xD8, 0xD5, 0xF0, 0x7F, 0xC5, 0x00, 0x82,
+  59         0x70, 0xE6, 0xA3, 0xBF, 0x5C, 0x89, 0x27, 0x4F, 0x51, 0x92, 0x77, 0x03,
+  60         0xC3, 0xB0, 0xCC, 0x2E, 0x3B, 0xEC, 0x23, 0xF2, 0x2F, 0x53, 0x41, 0xAF,
+  61         0x89, 0x93, 0xFF, 0xD2, 0x80, 0xB1, 0x43, 0x97, 0xDE, 0xD6, 0x19, 0xA0,
+  62         0x92, 0x12, 0x7A, 0x3D, 0x66, 0x79, 0xE1, 0xC1, 0xBC, 0xE1, 0x77, 0x70,
+  63         0xA2, 0x8B, 0x3D, 0x46, 0x84, 0x53, 0x3F, 0xE4, 0x4E, 0x42, 0x41, 0x37,
+  64         0x92, 0x1E, 0x1F, 0xFD, 0x38, 0xB3, 0xF7, 0xEF, 0x87, 0x39, 0x80, 0xD3,
+  65         0x56, 0xCF, 0xF4, 0xE0, 0x13, 0xDE, 0x64, 0xB0, 0x72, 0xA4, 0x03, 0x84,
+  66         0xC4, 0x41, 0xED, 0x6F, 0xFA, 0x3E, 0xE2, 0xCA, 0x04, 0x20, 0xD2, 0xD7,
+  67         0xDC, 0x2C, 0x82, 0x2B, 0x7A, 0xE2, 0x6D, 0xA1, 0x1C, 0x48, 0xDB, 0xCF,
+  68         0x89, 0x4F, 0x34, 0x97, 0x3D, 0x28, 0xA8, 0x53, 0xDA, 0xE7, 0xC1, 0xE1,
+  69         0x73, 0x15, 0xA3, 0x30, 0x76, 0x7F, 0x8F, 0x23, 0x42, 0x14, 0x3D, 0x51,
+  70         0x34, 0xD2, 0x5A, 0xAD, 0x3C, 0x9B, 0xCB, 0xC8, 0xFE, 0x7F, 0x6E, 0x8E,
+  71         0x40, 0xF3, 0xBD, 0x02, 0x03, 0x01, 0x00, 0x01, 0xA3, 0x66, 0x30, 0x64,
+  72         0x30, 0x1F, 0x06, 0x03, 0x55, 0x1D, 0x23, 0x04, 0x18, 0x30, 0x16, 0x80,
+  73         0x14, 0xC5, 0x01, 0xAD, 0x7C, 0xE6, 0x63, 0xC9, 0x9C, 0x17, 0x5F, 0xC5,
+  74         0xA2, 0xA7, 0xE1, 0x50, 0x5F, 0xE8, 0xF5, 0xA8, 0xC6, 0x30, 0x1D, 0x06,
+  75         0x03, 0x55, 0x1D, 0x0E, 0x04, 0x16, 0x04, 0x14, 0xC5, 0x01, 0xAD, 0x7C,
+  76         0xE6, 0x63, 0xC9, 0x9C, 0x17, 0x5F, 0xC5, 0xA2, 0xA7, 0xE1, 0x50, 0x5F,
+  77         0xE8, 0xF5, 0xA8, 0xC6, 0x30, 0x0C, 0x06, 0x03, 0x55, 0x1D, 0x13, 0x01,
+  78         0x01, 0xFF, 0x04, 0x02, 0x30, 0x00, 0x30, 0x14, 0x06, 0x03, 0x55, 0x1D,
+  79         0x11, 0x04, 0x0D, 0x30, 0x0B, 0x82, 0x09, 0x6C, 0x6F, 0x63, 0x61, 0x6C,
+  80         0x68, 0x6F, 0x73, 0x74, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86,
+  81         0xF7, 0x0D, 0x01, 0x01, 0x0B, 0x05, 0x00, 0x03, 0x82, 0x01, 0x01, 0x00,
+  82         0x71, 0xB3, 0x5D, 0x21, 0xC2, 0x0E, 0xD7, 0xD0, 0xC6, 0xF8, 0x4A, 0x73,
+  83         0x87, 0x4D, 0x22, 0x02, 0x27, 0xD0, 0xC7, 0xF8, 0xFD, 0x1A, 0x6D, 0x62,
+  84         0x58, 0x82, 0x08, 0x76, 0x20, 0x07, 0xC0, 0x48, 0x92, 0xF3, 0xE9, 0x98,
+  85         0x5A, 0xEB, 0x0D, 0x4E, 0x56, 0x95, 0x63, 0x68, 0x4D, 0xAB, 0xD4, 0x00,
+  86         0x76, 0xE0, 0x37, 0xCF, 0x0B, 0x11, 0x61, 0x59, 0x5C, 0xDE, 0xF6, 0xA5,
+  87         0x14, 0x59, 0xD9, 0x25, 0x9F, 0x59, 0xD9, 0xD3, 0x5E, 0x86, 0xAC, 0x1D,
+  88         0xA6, 0x2C, 0x32, 0x42, 0x19, 0x32, 0x13, 0x40, 0x0B, 0x54, 0xCD, 0x67,
+  89         0x26, 0xB6, 0xBD, 0xB4, 0x96, 0xA4, 0xCA, 0x1F, 0x7F, 0x37, 0xD6, 0xA8,
+  90         0x75, 0xEB, 0x3A, 0x81, 0x51, 0x30, 0xB9, 0xF9, 0x4A, 0x01, 0x6F, 0xD1,
+  91         0xD6, 0xED, 0x4F, 0xDF, 0x3F, 0x30, 0x60, 0x06, 0x67, 0x92, 0x8E, 0x61,
+  92         0x85, 0x5F, 0x1A, 0xB5, 0x8C, 0xB3, 0x0F, 0x61, 0xA9, 0xFA, 0xDF, 0x5D,
+  93         0xC4, 0x64, 0x00, 0xEA, 0x87, 0xB1, 0x33, 0x5F, 0x7D, 0xCB, 0xA3, 0x85,
+  94         0x24, 0x6E, 0x2C, 0x65, 0x3B, 0xEA, 0x73, 0x3F, 0x86, 0xD3, 0xFD, 0xE8,
+  95         0xE4, 0x02, 0xC6, 0x61, 0x6A, 0x26, 0x17, 0x52, 0x01, 0x25, 0x5C, 0x7F,
+  96         0xA8, 0xCE, 0x69, 0x1F, 0xAC, 0x61, 0x2C, 0xB7, 0x04, 0xAF, 0xFD, 0xA4,
+  97         0x7A, 0x99, 0xCB, 0x26, 0x15, 0x4C, 0xFF, 0x74, 0xD4, 0x73, 0x0C, 0x57,
+  98         0x0C, 0x26, 0xEB, 0xD7, 0x2A, 0xDC, 0x5C, 0xC3, 0x41, 0xBB, 0xC2, 0xF3,
+  99         0xCE, 0x16, 0xBD, 0x8E, 0x7B, 0xFB, 0xE9, 0xDF, 0xAB, 0x21, 0x0D, 0x91,
+ 100         0xB3, 0x8D, 0xD8, 0xCF, 0xC8, 0xF4, 0x49, 0xB9, 0xD0, 0xE3, 0x16, 0x70,
+ 101         0x3F, 0xB3, 0xDE, 0xD4, 0x07, 0x25, 0xFA, 0x46, 0x44, 0x52, 0x89, 0x4D,
+ 102         0x89, 0xC8, 0xE2, 0xCA, 0xB5, 0x33, 0x7F, 0xC7, 0x21, 0xBD, 0x28, 0xEF,
+ 103         0xFE, 0x66, 0x74, 0x03
+ 104 };
+ 105
+ 106 static const unsigned char CERT1[] = {
+ 107         0x30, 0x82, 0x03, 0x34, 0x30, 0x82, 0x02, 0x1C, 0xA0, 0x03, 0x02, 0x01,
+ 108         0x02, 0x02, 0x14, 0x70, 0x0F, 0x60, 0xEE, 0xF0, 0x07, 0x9A, 0x9C, 0x69,
+ 109         0xAC, 0x97, 0x62, 0x26, 0x4F, 0x5D, 0x05, 0xB6, 0xF9, 0x8F, 0x48, 0x30,
+ 110         0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0B,
+ 111         0x05, 0x00, 0x30, 0x1C, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04,
+ 112         0x06, 0x13, 0x02, 0x43, 0x41, 0x31, 0x0D, 0x30, 0x0B, 0x06, 0x03, 0x55,
+ 113         0x04, 0x03, 0x13, 0x04, 0x52, 0x6F, 0x6F, 0x74, 0x30, 0x1E, 0x17, 0x0D,
+ 114         0x31, 0x30, 0x30, 0x31, 0x30, 0x31, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30,
+ 115         0x5A, 0x17, 0x0D, 0x33, 0x37, 0x31, 0x32, 0x33, 0x31, 0x32, 0x33, 0x35,
+ 116         0x39, 0x35, 0x39, 0x5A, 0x30, 0x27, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03,
+ 117         0x55, 0x04, 0x06, 0x13, 0x02, 0x43, 0x41, 0x31, 0x18, 0x30, 0x16, 0x06,
+ 118         0x03, 0x55, 0x04, 0x03, 0x13, 0x0F, 0x49, 0x6E, 0x74, 0x65, 0x72, 0x6D,
+ 119         0x65, 0x64, 0x69, 0x61, 0x74, 0x65, 0x20, 0x43, 0x41, 0x30, 0x82, 0x01,
+ 120         0x22, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01,
+ 121         0x01, 0x01, 0x05, 0x00, 0x03, 0x82, 0x01, 0x0F, 0x00, 0x30, 0x82, 0x01,
+ 122         0x0A, 0x02, 0x82, 0x01, 0x01, 0x00, 0xB3, 0xE8, 0x6B, 0xAF, 0x9C, 0x16,
+ 123         0x52, 0xE3, 0x81, 0x0C, 0x50, 0xAB, 0x25, 0xCE, 0xCC, 0x0D, 0xC7, 0xF2,
+ 124         0x1F, 0x7F, 0x50, 0xDF, 0x2C, 0x5C, 0x35, 0xD6, 0x62, 0x2E, 0x63, 0x27,
+ 125         0x41, 0xA7, 0xE4, 0x53, 0xA8, 0x4B, 0x27, 0xFA, 0x13, 0x91, 0xA3, 0xFA,
+ 126         0x09, 0x4A, 0x2F, 0x3B, 0x5E, 0xCF, 0x77, 0xB3, 0x8A, 0xC1, 0xCD, 0x49,
+ 127         0x95, 0x9C, 0x75, 0x0D, 0x64, 0x74, 0xEF, 0xE4, 0xD7, 0x4B, 0xB9, 0xA1,
+ 128         0x9B, 0x68, 0xD2, 0x30, 0x71, 0x48, 0xEA, 0xF7, 0x4B, 0x14, 0xDF, 0x3F,
+ 129         0x47, 0xA9, 0xD8, 0xBB, 0xEC, 0x8F, 0x28, 0xCC, 0xFA, 0xDF, 0xB4, 0x1F,
+ 130         0x94, 0x7C, 0x96, 0xFC, 0x08, 0x05, 0x28, 0xF9, 0xE8, 0xF4, 0x2F, 0x2F,
+ 131         0xEE, 0x62, 0x9C, 0x8A, 0x3A, 0xE0, 0x85, 0x58, 0x60, 0xB6, 0x0F, 0x2D,
+ 132         0x30, 0xB4, 0xC0, 0x41, 0x54, 0x91, 0x4C, 0x1F, 0x5F, 0xAD, 0xF1, 0x19,
+ 133         0xF0, 0xC0, 0x22, 0xA6, 0x7D, 0xD8, 0x3F, 0x79, 0x34, 0x59, 0x42, 0x7B,
+ 134         0x5B, 0xB5, 0x41, 0xC4, 0x64, 0x7F, 0x52, 0xCF, 0x3C, 0x37, 0x22, 0xA1,
+ 135         0x2F, 0x79, 0x25, 0x94, 0x24, 0x41, 0xC2, 0x3F, 0xFA, 0xC7, 0x75, 0xFB,
+ 136         0x48, 0xB5, 0x0D, 0x18, 0xA7, 0xF4, 0x54, 0xF3, 0x2E, 0x6E, 0xD8, 0x43,
+ 137         0x58, 0xC4, 0xAB, 0x50, 0xE8, 0x05, 0xAD, 0x91, 0xB6, 0x1E, 0x01, 0x75,
+ 138         0xB3, 0x54, 0x9C, 0xDE, 0xA0, 0x99, 0x15, 0xFB, 0xAC, 0xF1, 0x5C, 0x97,
+ 139         0x49, 0x51, 0xCC, 0xEF, 0x58, 0x12, 0x6F, 0x73, 0x6B, 0xB3, 0x34, 0x14,
+ 140         0x01, 0x0F, 0x5A, 0x9D, 0xFA, 0xAA, 0xD6, 0x93, 0xD3, 0xE2, 0xEA, 0xC3,
+ 141         0xAB, 0xBC, 0x4E, 0xED, 0xCC, 0x51, 0xA1, 0xB8, 0xF8, 0x94, 0xB6, 0xB4,
+ 142         0x2C, 0xA8, 0x86, 0x2B, 0x1F, 0xF6, 0x51, 0x43, 0x29, 0x52, 0x5E, 0x13,
+ 143         0x89, 0xB3, 0x6A, 0x78, 0x60, 0x4E, 0x4E, 0xC0, 0x1B, 0xA5, 0x02, 0x03,
+ 144         0x01, 0x00, 0x01, 0xA3, 0x63, 0x30, 0x61, 0x30, 0x1F, 0x06, 0x03, 0x55,
+ 145         0x1D, 0x23, 0x04, 0x18, 0x30, 0x16, 0x80, 0x14, 0xC3, 0x0A, 0xBC, 0xB4,
+ 146         0x90, 0x63, 0x96, 0x92, 0x45, 0xBC, 0x27, 0xA0, 0xF0, 0x58, 0x89, 0x2A,
+ 147         0xD5, 0x78, 0x00, 0x12, 0x30, 0x1D, 0x06, 0x03, 0x55, 0x1D, 0x0E, 0x04,
+ 148         0x16, 0x04, 0x14, 0x7C, 0xCF, 0xA3, 0xC6, 0x29, 0xF7, 0xF3, 0xC5, 0xAA,
+ 149         0x19, 0xD0, 0xC0, 0x16, 0xEB, 0xE0, 0x40, 0x0F, 0xCE, 0x44, 0xA7, 0x30,
+ 150         0x0E, 0x06, 0x03, 0x55, 0x1D, 0x0F, 0x01, 0x01, 0xFF, 0x04, 0x04, 0x03,
+ 151         0x02, 0x00, 0x86, 0x30, 0x0F, 0x06, 0x03, 0x55, 0x1D, 0x13, 0x01, 0x01,
+ 152         0xFF, 0x04, 0x05, 0x30, 0x03, 0x01, 0x01, 0xFF, 0x30, 0x0D, 0x06, 0x09,
+ 153         0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0B, 0x05, 0x00, 0x03,
+ 154         0x82, 0x01, 0x01, 0x00, 0x54, 0x3B, 0xF4, 0xEA, 0xC6, 0xE4, 0xE8, 0xC0,
+ 155         0x5B, 0x12, 0xB2, 0xAD, 0xFA, 0xBD, 0xA9, 0xF4, 0x62, 0x03, 0xAD, 0x57,
+ 156         0x4C, 0x6F, 0x07, 0xA7, 0x47, 0x35, 0x75, 0x3E, 0x48, 0xA2, 0x5B, 0x71,
+ 157         0x10, 0x01, 0x8F, 0x93, 0x99, 0x9D, 0xA7, 0x47, 0xE3, 0x8E, 0x3E, 0xAF,
+ 158         0x2D, 0xBA, 0x06, 0xFE, 0xD4, 0xE4, 0x97, 0xBC, 0x10, 0x8D, 0xA6, 0xA5,
+ 159         0x3A, 0x3C, 0xE6, 0x21, 0xCB, 0x3B, 0xDA, 0x13, 0xE3, 0x4A, 0x23, 0xEB,
+ 160         0xBC, 0xBA, 0xA5, 0x90, 0x91, 0xAD, 0x55, 0x6E, 0xD5, 0xDD, 0x85, 0x4B,
+ 161         0x6B, 0x27, 0xD2, 0x39, 0x76, 0x06, 0x2E, 0xD4, 0x23, 0x5B, 0xBB, 0x55,
+ 162         0xB5, 0x49, 0x3F, 0x7D, 0x2F, 0x21, 0xCB, 0x96, 0x75, 0x19, 0x99, 0xA9,
+ 163         0x99, 0xF1, 0x0B, 0xBB, 0x3E, 0xC7, 0x10, 0xA7, 0x8B, 0x7A, 0x52, 0xB9,
+ 164         0x49, 0xE4, 0x14, 0x08, 0x78, 0xE7, 0x3D, 0xD9, 0x98, 0x57, 0xDA, 0xFF,
+ 165         0xDA, 0xB9, 0x8D, 0x66, 0x75, 0x80, 0xB5, 0x5D, 0xB9, 0xDF, 0x69, 0x65,
+ 166         0xDB, 0x16, 0xE7, 0x1E, 0xC4, 0x40, 0xE4, 0x46, 0x8A, 0x1E, 0x76, 0x32,
+ 167         0x16, 0xE7, 0x83, 0x67, 0xDA, 0x78, 0x56, 0xAB, 0x0F, 0x4C, 0x5C, 0xF1,
+ 168         0x70, 0xDA, 0x66, 0x20, 0xF4, 0xF8, 0x0F, 0xF6, 0xDC, 0x2F, 0x72, 0x97,
+ 169         0x6B, 0x78, 0x40, 0x79, 0x9D, 0x5B, 0x6D, 0xBE, 0x03, 0xCE, 0x70, 0x42,
+ 170         0xA8, 0x2A, 0x71, 0x11, 0xDF, 0x2E, 0x81, 0x01, 0xEA, 0x86, 0x12, 0x91,
+ 171         0x4F, 0xD0, 0x18, 0xED, 0x84, 0xA4, 0x48, 0x30, 0xB9, 0xB9, 0x7B, 0x56,
+ 172         0x3E, 0xEF, 0x8D, 0xE1, 0x1F, 0xFD, 0x90, 0xB2, 0x44, 0x85, 0x58, 0x6F,
+ 173         0xA7, 0x30, 0x74, 0x7C, 0xF1, 0xAE, 0x8C, 0x99, 0x3F, 0xF1, 0x4D, 0x57,
+ 174         0xC5, 0x95, 0x68, 0xC2, 0x36, 0xB2, 0xEC, 0xC2, 0x68, 0x7A, 0xC0, 0x81,
+ 175         0xA9, 0x55, 0x05, 0xE7, 0xCF, 0xAF, 0x50, 0xAC
+ 176 };
+ 177
+ 178 static const br_x509_certificate CHAIN[] = {
+ 179         { (unsigned char *)CERT0, sizeof CERT0 },
+ 180         { (unsigned char *)CERT1, sizeof CERT1 }
+ 181 };
+ 182
+ 183 #define CHAIN_LEN   2
+```
+
+```c
+/** key-rsa.h **/
+   1 /*
+   2  * Copyright (c) 2016 Thomas Pornin <pornin@bolet.org>
+   3  *
+   4  * Permission is hereby granted, free of charge, to any person obtaining
+   5  * a copy of this software and associated documentation files (the
+   6  * "Software"), to deal in the Software without restriction, including
+   7  * without limitation the rights to use, copy, modify, merge, publish,
+   8  * distribute, sublicense, and/or sell copies of the Software, and to
+   9  * permit persons to whom the Software is furnished to do so, subject to
+  10  * the following conditions:
+  11  *
+  12  * The above copyright notice and this permission notice shall be
+  13  * included in all copies or substantial portions of the Software.
+  14  *
+  15  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  16  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  17  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  18  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+  19  * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+  20  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  21  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  22  * SOFTWARE.
+  23  */
+  24
+  25 #include "bearssl.h"
+  26
+  27 /*
+  28  * The private key for the server certificate (RSA).
+  29  */
+  30
+  31 static const unsigned char RSA_P[] = {
+  32         0xF9, 0xF6, 0x32, 0x9C, 0x51, 0xD7, 0x71, 0xB2, 0x62, 0xED, 0x81, 0x24,
+  33         0xDA, 0xF6, 0xA9, 0x2C, 0xC3, 0x2D, 0x55, 0x94, 0x95, 0x51, 0xE5, 0x36,
+  34         0x12, 0x9E, 0x2E, 0x1F, 0x8E, 0xD8, 0x22, 0x22, 0x64, 0x5E, 0xA3, 0xFC,
+  35         0x60, 0xF0, 0x14, 0xDC, 0x10, 0x48, 0x6F, 0x4F, 0x1A, 0x7D, 0xCC, 0x37,
+  36         0x23, 0x27, 0x76, 0xB6, 0x31, 0xAA, 0xDE, 0x70, 0xC9, 0xEC, 0xAB, 0x0A,
+  37         0x50, 0xF1, 0xEA, 0x79, 0x79, 0x74, 0xBE, 0x3B, 0xAB, 0x2E, 0x63, 0x97,
+  38         0xA2, 0x6F, 0x0A, 0x45, 0x7B, 0xD7, 0x6C, 0xD2, 0x6D, 0x1B, 0x70, 0x31,
+  39         0x03, 0xAF, 0x26, 0x8B, 0x28, 0xC5, 0xF8, 0x49, 0x67, 0x45, 0x41, 0xF1,
+  40         0xD3, 0x35, 0x05, 0x27, 0x2A, 0x79, 0x21, 0xDA, 0x06, 0xB6, 0x3D, 0xA2,
+  41         0xE8, 0x3C, 0x40, 0xFA, 0x6F, 0xC4, 0xFC, 0xF5, 0xC4, 0x05, 0xEB, 0x9A,
+  42         0x31, 0xAA, 0x40, 0x7E, 0x5E, 0xEE, 0x22, 0x5B
+  43 };
+  44
+  45 static const unsigned char RSA_Q[] = {
+  46         0xD9, 0x9C, 0x1A, 0xDC, 0x94, 0x51, 0xF6, 0xC1, 0x96, 0xDA, 0x0E, 0x11,
+  47         0x3F, 0x37, 0x28, 0x7A, 0x33, 0xB0, 0xC4, 0xBE, 0xDF, 0x68, 0x2B, 0xD3,
+  48         0x1C, 0x65, 0x67, 0x7A, 0x3C, 0xAF, 0x59, 0x50, 0xAB, 0x29, 0x36, 0x17,
+  49         0x39, 0x15, 0x71, 0x97, 0x62, 0xDD, 0xCD, 0x25, 0xEE, 0x8D, 0xFF, 0x26,
+  50         0x8F, 0x71, 0x21, 0xBE, 0x8F, 0x9C, 0x85, 0x4E, 0x3A, 0xE1, 0x24, 0xC7,
+  51         0xE1, 0x4A, 0xDF, 0xD0, 0x60, 0xB3, 0xC4, 0x44, 0x2E, 0xAC, 0x73, 0x16,
+  52         0x5F, 0x07, 0xC9, 0x3A, 0x73, 0x5E, 0xDA, 0x9B, 0xEE, 0xE2, 0xB4, 0xA9,
+  53         0x3D, 0x33, 0x14, 0x7B, 0xEE, 0xA7, 0xD4, 0xAC, 0xF7, 0x53, 0xE6, 0x3E,
+  54         0xF0, 0x85, 0x57, 0x4C, 0x8B, 0x96, 0x1B, 0xDD, 0xD7, 0x36, 0xFC, 0x89,
+  55         0x37, 0x59, 0x75, 0x96, 0x75, 0x8B, 0x2E, 0xF7, 0x04, 0x2D, 0x29, 0x89,
+  56         0xD9, 0xB7, 0x9F, 0x71, 0x3B, 0xE2, 0xED, 0xC7
+  57 };
+  58
+  59 static const unsigned char RSA_DP[] = {
+  60         0xE4, 0xFC, 0x02, 0x2F, 0x2B, 0xD6, 0x47, 0x04, 0xD9, 0x15, 0xA4, 0x5A,
+  61         0x23, 0xF1, 0x14, 0xD7, 0xB9, 0xD1, 0x1C, 0xF6, 0x29, 0xB8, 0x45, 0x57,
+  62         0x3C, 0xC5, 0x05, 0x91, 0xC9, 0x64, 0xFC, 0x18, 0x2F, 0x84, 0x77, 0x8B,
+  63         0x6B, 0x2E, 0x64, 0x9D, 0x98, 0x99, 0x12, 0xC7, 0x0F, 0x88, 0xB0, 0x7C,
+  64         0xCE, 0x4A, 0x87, 0xB8, 0xAE, 0x55, 0x4E, 0xC3, 0x5A, 0x67, 0xE1, 0xE4,
+  65         0x68, 0x74, 0xC5, 0x8D, 0x14, 0x93, 0xBA, 0xF5, 0xA4, 0x82, 0xB1, 0x9F,
+  66         0xA6, 0xA1, 0x3C, 0x72, 0x9C, 0xD9, 0xA3, 0x8A, 0x3D, 0x83, 0x86, 0x4A,
+  67         0x90, 0x8A, 0x72, 0xAF, 0xC6, 0xE1, 0x5C, 0xEB, 0xB9, 0x9C, 0x3B, 0xA6,
+  68         0x12, 0x0B, 0x1F, 0x36, 0x5A, 0xF5, 0x6E, 0xEA, 0x71, 0x7D, 0x9F, 0x87,
+  69         0x4E, 0x62, 0x6C, 0x50, 0x3F, 0xF5, 0xE0, 0x9A, 0x30, 0x42, 0x10, 0x2C,
+  70         0x48, 0x55, 0x24, 0x11, 0xE0, 0x5B, 0x1C, 0xC3
+  71 };
+  72
+  73 static const unsigned char RSA_DQ[] = {
+  74         0x8D, 0xAC, 0xE0, 0xA0, 0x33, 0xC0, 0x99, 0x52, 0xB8, 0x90, 0x07, 0x10,
+  75         0x9B, 0x83, 0xA1, 0xCA, 0xCD, 0xD4, 0x8C, 0x83, 0x68, 0x98, 0x3D, 0xD0,
+  76         0x18, 0x70, 0xBC, 0xCA, 0x0C, 0xB0, 0x6D, 0x09, 0xE4, 0x25, 0xD4, 0x9D,
+  77         0x92, 0x00, 0xB0, 0x0F, 0xCB, 0xC2, 0x74, 0x49, 0xF9, 0xE2, 0x60, 0xF8,
+  78         0x0D, 0xF3, 0xAD, 0xF0, 0x8F, 0x37, 0x6C, 0x62, 0xDE, 0x5A, 0xAE, 0xC3,
+  79         0xA3, 0x9E, 0x47, 0xD1, 0x36, 0xE4, 0x53, 0x27, 0xC0, 0xEB, 0x6D, 0x92,
+  80         0x67, 0x14, 0x7E, 0xA2, 0x9B, 0x72, 0x6A, 0x09, 0x93, 0xA1, 0xED, 0xD5,
+  81         0x31, 0x8F, 0x0C, 0x0B, 0x13, 0xFA, 0x18, 0xB0, 0xF3, 0xE5, 0x9F, 0xC5,
+  82         0xE2, 0x7A, 0x2D, 0xB8, 0x1C, 0x39, 0x02, 0xB3, 0x8F, 0xE6, 0xB0, 0xCB,
+  83         0xF5, 0x49, 0x3D, 0x11, 0x54, 0x3D, 0xE5, 0xB9, 0xD4, 0xF2, 0x42, 0x55,
+  84         0x09, 0x76, 0x4F, 0x4C, 0x3D, 0x9D, 0x25, 0x09
+  85 };
+  86
+  87 static const unsigned char RSA_IQ[] = {
+  88         0x72, 0x0C, 0xA7, 0xCF, 0x06, 0x95, 0x69, 0xF4, 0x75, 0x20, 0x34, 0x03,
+  89         0xE0, 0xCF, 0x9A, 0x51, 0x93, 0xF5, 0x42, 0x2E, 0xF2, 0x85, 0xBE, 0xCE,
+  90         0x4F, 0x38, 0xB5, 0x8C, 0xA2, 0x99, 0x42, 0xF3, 0xBD, 0x65, 0x38, 0xE2,
+  91         0x34, 0x3F, 0x21, 0x9D, 0xF5, 0xBD, 0xB3, 0xBF, 0x73, 0x3C, 0x18, 0xDE,
+  92         0xF6, 0xF0, 0x7F, 0xA1, 0xC2, 0x55, 0xF2, 0x38, 0xE9, 0x0E, 0x1E, 0x31,
+  93         0xE7, 0xDB, 0x51, 0xC5, 0x71, 0x8D, 0x67, 0x71, 0x3A, 0x9F, 0x55, 0x52,
+  94         0x60, 0xEE, 0x45, 0xF6, 0x08, 0x98, 0x81, 0xB7, 0x7B, 0x2F, 0xF2, 0x96,
+  95         0x7D, 0x73, 0xD0, 0xA6, 0xAB, 0xAA, 0x83, 0x49, 0x41, 0x35, 0xA9, 0x90,
+  96         0x67, 0xCE, 0xD3, 0xB9, 0x73, 0x54, 0xAA, 0x84, 0x00, 0x88, 0x88, 0x90,
+  97         0x1D, 0x86, 0x9B, 0xE5, 0xB8, 0xCE, 0x89, 0x0A, 0x1B, 0x47, 0x62, 0x31,
+  98         0xC2, 0x3F, 0xC3, 0x8C, 0x86, 0x09, 0x3C, 0x86
+  99 };
+ 100
+ 101 static const br_rsa_private_key RSA = {
+ 102         2048,
+ 103         (unsigned char *)RSA_P, sizeof RSA_P,
+ 104         (unsigned char *)RSA_Q, sizeof RSA_Q,
+ 105         (unsigned char *)RSA_DP, sizeof RSA_DP,
+ 106         (unsigned char *)RSA_DQ, sizeof RSA_DQ,
+ 107         (unsigned char *)RSA_IQ, sizeof RSA_IQ
+ 108 };
+ ```
+
+Certificates in SSL/TLS
+Chain Validation
+X.509 certificates are a public-key distribution method. The client needs to know the public key of the server in order to perform the asymmetric cryptography involved in the handshake; the server shows its certificate to the client, and that certificate contains the server’s public key. The client will trust that information, i.e. accept to use that public key as the genuine server’s public key, after a process called validation.
+
+Certificate validation involves a lot of checks detailed in all their mind-boggling details in RFC 5280. The gist of the process is the following:
+
+Each certificate is signed. The signature shall be verified against the public key of a Certification Authority, an entity that we trust for signing certificates (i.e. the CA is supposed to check the match between the identity and the public key in each certificate that it signs).
+
+CA public keys are also obtained through certificates, which must be validated, so the process is recursive. It stops on a trust anchor, which is a public key that the validator already knows and trusts. Trust anchors are often called “root certificates” and typically come preinstalled in the operating system or Web browser; similarly, non-root certificates are often called “intermediate CA”. Validation is thus applied on a certificate chain that goes from the trust anchor down to the certificate which is the one we really are interested in, and called the end-entity (EE) because it is at the end of the chain. Chains are also known as “paths”.
+
+Each certificate contains two Distinguished Names (names in a complicated format known as “X.500”). The subjectDN is the identity of the certificate owner; the issuerDN is the identity of the CA that issued (signed) that certificate. In the chain, the subjectDN of each certificate should be equal to the issuerDN of the next certificate in the chain. The trust anchor, nominally, has no issuer, but in many cases trust anchors are stored in the format of a certificate, usually self-issued (its subjectDN and issuerDN are identical) and self-signed (the signature on the certificate matches the public key in the certificate itself). Self-signed certificates are traditional; that self-signature does not provide any security feature, but it must be there because the X.509 certificate format mandates a non-optional field for the signature.
+
+Each certificate has a pair of validity dates; the certificate is valid only as long as the validation time (normally, the current time) lies between these two dates (internally called notBefore and notAfter, respectively). This means that certificates may expire, and also that certificate validation requires knowledge of the current date and time (at least approximately).
+
+Each certificate may contain a large number of extensions, with an open-ended format, that may impact the validation process in arbitrary ways. Each extension can be marked as “critical” or “not critical”: a critical extension is one that must not be ignored (thus, a system that does not recognise an extension can ignore it if it is non-critical, but it must reject the certificate if the extension is critical).
+
+Within the extensions that can be present in a certificate, one is called “Key Usage”; if present, then it specifies the allowed usages for that public key, all others being forbidden. The defined usages are:
+
+digitalSignature
+nonRepudiation
+keyEncipherment
+dataEncipherment
+keyAgreement
+keyCertSign
+cRLSign
+encipherOnly
+decipherOnly
+The precise meaning of these values is subject to debate; for instance, when the SSL client generates a random pre-master secret and encrypts it with the server’s RSA public key, is that “keyEncipherment” (because the pre-master secret is a key and is being encrypted), “dataEncipherment” (because the pre-master secret is also a piece of data), or “keyAgreement” (since this is done in order to have a transient shared secret between client and server)? In order to ensure interoperability, BearSSL considers that:
+
+if either (or both) of digitalSignature or nonRepudiation is set, then the key is valid for verifying signatures (but not for signatures on certificates by CA);
+
+if keyEncipherment, dataEncipherment and/or keyAgreement is set, then the key is valid for key exchange (encryption in the case of RSA);
+
+if keyCertSign is set, then the key is accepted for validating signatures on certificates.
+
+If the Key Usage extension is not present, all usages are deemed allowed.
+
+Chains in SSL/TLS
+In full X.509 theory, a system that wishes to perform certificate validation (called a “relying party” in X.509 terminology) should perform path building, a process consisting in gathering certificates from various sources (locally known, provided within the protocol, automatically downloaded…) and assembling them into chains until one of them can be validated. There is no limit on the complexity of such a process; indeed, any validation engine that indulges in generic path building can usually be made to run and loop for arbitrary amounts of time (this is why such implementations often enforce a strict time limit).
+
+Fortunately, SSL specifies that each server should provide its certificate as part of an already built and valid chain. A client is then allowed to validate just that chain, in due order. Each client is free to perform generic path building if that’s its thing; some SSL clients do (e.g. Schannel, the SSL implementation in Windows) while some others do not (typical applications using OpenSSL).
+
+In that already assembled chain, the root certificate (if the trust anchor is represented as a certificate) may or may not be included. Sending the root is useless since the receiving party must already have it, and won’t learn anything new if it is sent; however, SSL allows it, and some SSL implementations include the root certificate in their chains. This is mostly harmless.
+
+In all of the above, I used the X.509 terminology in which the chain is ordered from trust anchor to end-entity. In SSL, the chain is actually sent in reverse order, the end-entity coming first.
+
+Certificates and Cipher Suites
+There are interactions between certificates and cipher suites:
+
+TLS_RSA_* cipher suites use RSA key exchange, in which the client encrypts a random value (the “pre-master secret”) with the server’s public key, obtained from its certificate. That public key must be of type RSA and amenable to key exchange or encryption.
+
+TLS_ECDH_* cipher suites use Elliptic Curve Diffie-Hellman, which is a key agreement protocol. That public key must be of type EC, and amenable to key exchange or encryption. There are two sub-types, that depend on the type of the key of the issuing CA (i.e. not the server’s public key itself, but the public key of the CA that issued the server’s certificate): TLS_ECDH_RSA_* (issuing CA has a RSA key) and TLS_ECDH_ECDSA_* (issuing CA has an EC key).
+
+TLS_ECDHE_RSA cipher suites use “ephemeral ECDH”: the ECDH key pairs are transient; the server’s public key (the one in the certificate) has type RSA, and the server uses the corresponding private key to sign its ephemeral ECDH public key.
+
+TLS_ECDHE_ECDSA cipher suites are like TLS_ECDHE_RSA but with an ECDSA signature instead of RSA, so the server’s public key (in its certificate) has type EC and is allowed for signatures.
+
+Nominally, an SSL server or client does not need to decode or process in any way its own certificate: when a server sends its certificate to the client, it is to convince the client, not the server. From the server’s point of view, this is just an opaque blob that might help the client; the server does not need to trust its own certificate. BearSSL follows that point of view and thus allows a server not to include any certificate validation code; the server knows its private key and this is enough. However, the TLS_ECDH_* cipher suites depend also on the type of key used by the issuing CA, and that information can be retrieved by decoding the certificate itself (at least the signature part). In BearSSL, that information is meant to be provided by the calling application (the br_ssl_server_set_single_ec() function has a parameter called cert_issuer_key_type) but the calling application may certainly used the X.509 decoding functions of BearSSL to obtain it dynamically.
+
+Client Certificates
+In basic SSL usage, the server has a certificate and the corresponding private key, and sends that certificate to the client. The client validates the server’s certificate chain, extract the public key from the server’s certificate, and uses it in some way in the handshake. This means that the client authenticates the server: through the certificate, the client gains some guarantee that whatever it will send through the SSL connection will be readable only by the intended server. However, from the point of view of the server, the client is anonymous.
+
+In many usage contexts, client authentication is performed afterwards, within the SSL tunnel (e.g. the client sends a username and password). However, SSL also allows for client certificates. In that model, the server requests a certificate from the client (with a CertificateRequest message). The client is free not to send a certificate, in which case it remains anonymous and the server decides whether to keep on with the connection or not. But if the client has a private key and a corresponding certificate, then it may send that certificate (again, in a chain) and use the private key to convince the server that it really controls the private key that matches the public key in the certificate.
+
+Usually, the client-side private key operation is a signature, thus the client certificate must be amenable to signatures (PKCS#1 signatures for RSA keys, ECDSA signatures for EC keys). This signature is computed over a hash of all previous handshake messages, and sent as a CertificateVerify message (it is after the ClientKeyExchange message, and this is important for security). However, there is another mode known as static ECDH which can be applied in the following conditions:
+
+The server certificate contains an EC public key.
+
+The client certificate also contains an EC public key, in the same curve.
+
+The cipher suite is one of the TLS_ECDH_* suites (not TLS_ECDHE_*).
+
+In the SSL handshake, when this mode is selected, the ClientKeyExchange will be empty, and there will be no CertificateVerify message. Nevertheless, client and server are mutually authenticated, and the shared secret (the “pre-master secret”) they come up with is obtained with Diffie-Hellman using their respective ECDH key pairs.
+
+Mathematically speaking, one might envision a semi-static ECDH key exchange, in which the key exchange would use TLS_ECDHE_*, and the client would use its own static private key against the ephemeral ECDH key pair sent by the server. However, RFC 4492 explicitly forbids that:
+
+The ECDSA_fixed_ECDH and RSA_fixed_ECDH mechanisms are usable with ECDH_ECDSA and ECDH_RSA. Their use with ECDHE_ECDSA and ECDHE_RSA is prohibited because the use of a long-term ECDH client key would jeopardize the forward secrecy property of these algorithms.
+
+The reasoning here is that if the client uses its permanent private key as part of the key exchange mechanism, then the compromise of that private key would allow decrypting past sessions recorded by the attacker. Whether this reason really makes sense is debatable, because the need for forward secrecy depends on how much ulterior private key compromises are likely and matter in the context at hand; it is not necessarily the case that a client private key compromise and a server private key compromise are as likely or as important as each other. Nevertheless, so it is specified.
+
+BearSSL supports all modes (RSA signatures, ECDSA signatures, static ECDH). Static ECDH is not forward secure (as explained above), but it is also the lightest mode, for CPU usage, total size of exchanged messages, and code footprint.
+
+Chain Validation in BearSSL
+Chain Validation API
+BearSSL defines a chain validation API, which is used by both client and server (to validate the server’s and the client’s certificate chains, respectively). It uses BearSSL’s OOP concept:
+
+A chain validation engine has a context structure that maintains the running state for the current validation.
+
+The first field of that context structure is a pointer to a vtable that includes pointers to the methods (functions) for the engine.
+
+The type of that vtable is defined in the bearssl_x509.h header. The methods are:
+
+void (*start_chain)(const br_x509_class **ctx,
+        const char *server_name);
+
+void (*start_cert)(const br_x509_class **ctx, uint32_t length);
+
+void (*append)(const br_x509_class **ctx,
+        const unsigned char *buf, size_t len);
+
+void (*end_cert)(const br_x509_class **ctx);
+
+unsigned (*end_chain)(const br_x509_class **ctx);
+
+const br_x509_pkey *(*get_pkey)(
+        const br_x509_class *const *ctx, unsigned *usages);
+start_chain() is called first, when a chain is about to be received and validated. The server_name parameter may be non-NULL, normally on the client side (i.e. when validating the server’s certificate): this is the “intended server name” (in an HTTPS context, the server name part in the target URL) and the validation engine shall make sure that the provided name appears at the proper emplacement in the server’s certificate (the EE certificate). The “proper emplacement” is defined in RFC 2818 as the Subject Alt Name (SAN) extension, with names of type dNSName; if there is no SAN extension at all, then the Common Name (CN) part of the subjectDN field is used. The name(s) in the certificate may further contain “wildcards” (the * character).
+
+start_cert() is called at the start of each new certificate in the chain; the length (in bytes) of that certificate is provided as parameter. Note that the length of a certificate is encoded over three bytes in the SSL protocol, so it may potentially be as big as 16 megabytes, though “normal” certificates rarely exceed one or two kilobytes in length.
+
+The certificate itself (supposedly DER-encoded) is injected as one or several append() calls, each with a chunk of certificate data. Chunks may be arbitrarily small (but never less than 1 byte) since they depend in part on encoding details on the wire. The total length of all chunks matches the length provided to start_cert() exactly. Implementations need not necessarily keep track of how many bytes were provided, since the end_cert() method is called when the certificate is finished.
+
+When all certificates have been injected, the end_chain() method is called. At that point, the engine shall return either 0 (if the chain could be validated), or a non-zero error code.
+
+The get_pkey() method is called after the chain validation, when end_chain() returned 0. The caller thus asks for the public key which was successfully validated. It is expected that the returned pointer (pointer to br_x509_pkey) points to some emplacement allocated in the validation engine context structure. The caller will use and/or copy the parts that it needs. There will be no explicit “deallocation” call, so if the public key structure is dynamically allocated, then it is up to the validation engine to release it afterwards. Moreover, get_pkey() may be called several times, and it should return the same pointer every time.
+
+This API was meant to allow plugging any arbitrary validation engine, while not requiring heavy buffering. The certificates are provided chunk by chunk, in the order they are received, which is the SSL order (EE first). Chains should normally link to some sort of root certificate; as per SSL rules, the root certificate itself (traditionally self-signed) may or may not be sent.
+
+BearSSL provides two implementations of that API. Either may be used both on the client and server sides.
+
+The “Known Key” Engine
+The “known key” engine is a simple implementation that does not actually validate the certificates. It is meant for specific situations where the peer’s public key is already known (e.g. some sort of SSH model in which clients remember the server’s public key); the implementation will then simply ignore the received certificate, will always succeed, and will return the configured public key1.
+
+In BearSSL, this engine’s context structure has type br_x509_knownkey_context and is initialised with br_x509_knownkey_init_rsa() (for a known key of type RSA) or br_x509_knownkey_init_ec() (for a known key of type EC). In either case, the “allowed usages” (signatures and/or key exchange) must be specified; BearSSL will thus use that information to decide which kind of cipher suite or authentication mechanism is appropriate.
+
+Since the “known key” engine does not actually look at the received certificates, it can perfectly tolerate pure junk data or even an empty chain (an empty chain is a chain containing no certificate at all). Note, though, that in the case of client certificates, sending an empty chain is the signal (in the protocol) for a client refusing or unable to honour a server’s request for a client certificate; therefore, if you use the “known key” model for client authentication, then you must take care that the client won’t try to send an empty chain in that case. Instead, the client could send a chain of one empty certificate, which won’t be much larger on the wire.
+
+Of course, when interoperability is important, clients and servers should send actual DER-encoded X.509 certificates, or other types of certificates, e.g. OpenPGP messages, as specified in RFC 6091, if supported in your case (BearSSL does not include any support for OpenPGP messages, but such a support could be added within the validation API described here).
+
+The “Minimal” Engine
+The “minimal” engine is the implementation that uses the br_x509_minimal_context structure. It performs basic chain validation, with the following behaviour:
+
+The “minimal” engine validates only the chain as received; there is no path building.
+
+The engine uses a configurable set of trust anchors. Each trust anchor is the combination of a name (a DER-encoded X.500 name) and a public key. There are two types of trust anchors:
+
+CA trust anchors are used to verify signatures on certificates. If validation encounters a certificate whose issuerDN matches a trust anchor name, and the signature on the certificate is verifiable against the anchor’s public key, then validation succeeds and subsequent certificates are ignored. Thus, trust anchors can be root CA but also intermediate CA.
+
+Non-CA trust anchors implement direct trust: if the EE certificate matches a non-CA trust anchor (subjectDN identical to the anchor name, and same public key), then validation succeeds. The EE certificate itself is still fully decoded to allow for name extraction and matching, and key usage gathering.
+
+Subject / issuer DN are matched with binary equality only. This was allowed in a previous version of X.509 (RFC 3280); current version (RFC 5280) mandates some relatively heavy DN normalisation (including lots of Unicode case folding) that BearSSL does not implement. In practice, though, existing CA ensure identical names, so that specific constraint is not a problem.
+
+Actual DN matching is down with hashing (to avoid buffering names that can be arbitrarily long). The hash function to use is provided as parameter to the br_x509_minimal_init() function.
+
+Expiry dates (notAfter and notBefore) are checked for each certificate (except those after the trust anchor). If BearSSL was compiled for a platform on which current date and time can be easily obtained, then this will be done automatically. Otherwise, the date and time must be provided externally with a br_x509_minimal_set_time() call.
+
+That function expects the date and time as a pair of 32-bit integers; one counts the number of days since January 1st, 0 AD, while the other is the number of seconds since midnight. This is made so to avoid the Year 2038 problem.
+
+The count of days uses a proleptic Gregorian calendar, i.e. the virtual extension of the Gregorian rules, currently in force in almost all countries, to dates prior to the actual adoption of the calendar rules on October 15th, 15822.
+
+The count of seconds is between 0 and 86400. The value 86400 (corresponding to the 61st second of the last minute of the day) is technically possible in case of a leap second. In general, leap seconds can be safely ignored in everything that involves certificate, since they operate with much coarser dates (certificates are typically valid for years so such accuracy is not needed).
+
+X.509 certificate extensions are processed:
+
+The Basic Constraints extension is honoured, not only for the “CA” flag (all certificates except the EE must have a Basic Constraints extension with that flag set to TRUE), but also for the maximum path length constraint3.
+
+The Key Usage extension is honoured. For the EE certificate, the relevant flags are used to decide which cipher suites or authentication mechanisms can be used with that public key; for CA certificates, the keyCertSign bit is required if the Key Usage extension is present.
+
+The “minimal” engine does not handle revocation. Therefore, it ignores the CRL Distribution Points extension and the Freshest CRL extension.
+
+Some informative extensions (Authority Key Identifier, Subject Key Identifier, Issuer Alt Name, Subject Directory Attributes, Authority Info Access and Subject Info Access) are also ignored.
+
+The Subject Alt Name extension is used, for extracting names, especially for server name matching. As for wildcards, BearSSL supports a single “*” character, standing for the complete first name element of the name; in other words, only a starting “*.” sequence will be considered to be a wildcard.
+
+For all other extensions, they are ignored if non-critical, or imply validation failure if marked critical.
+
+Public keys of type RSA and EC are extracted.
+
+RSA keys must be no longer than 4096 bits. Furthermore, the total size of the encoded modulus and encoded public exponent must not exceed 520 bytes, so a 4096-bit RSA key must have a public exponent that fits on at most 8 bytes4.
+
+EC keys must use a “named curve” which must be one of the curves supported by BearSSL (currently only three, the NIST curves P-256, P-384 and P-521; other curves, especially Curve25519 and Curve448, will be added in due course).
+
+Signatures are verified, subject to the algorithms that are configured in the engine. Hash functions from the SHA family (SHA-1 to SHA-512) can be used for hashing; MD5 is explicitly disallowed. Support for any hash function can be disabled by simply not configuring its implementation in the validation engine (I expect some people to do that for SHA-1). RSA signatures (PKCS#1 v1.5) and ECDSA are supported (again, if the corresponding implementations are provided).
+
+As an illustration to the trust anchor management: let’s suppose that a SSL server sends a chain consisting in three certificates C0, C1 and C2 (in that order). The SSL client, using the “minimal” engine, will apply the following process:
+
+If C0’s subjectDN matches a non-CA trust anchor name, and the public key in C0 is identical to the key of that anchor, then success (this is direct trust).
+
+If C0’s issuerDN matches a CA trust anchor name, and the signature on C0 can be verified with the anchor’s public key, then success.
+
+If C0’s issuerDN does not match C1’s subjectDN, or the signature on C0 cannot be verified with the public key in C1, then failure.
+
+If C1’s issuerDN matches a CA trust anchor name, and the signature on C1 can be verified with the anchor’s public key, then success.
+
+If C1’s issuerDN does not match C2’s subjectDN, or the signature on C1 cannot be verified with the public key in C2, then failure.
+
+If C2’s issuerDN matches a CA trust anchor name, and the signature on C2 can be verified with the anchor’s public key, then success.
+
+Failure.
+
+(In these steps I omitted processing of expiry dates, certificate extensions, and name checks.)
+
+If, for instance, the client uses C2 as trust anchor, then the process will succeed at step 4; the certificate C2 as transmitted will be simply ignored and the server might have omitted it. In all generality, the validation walks the chain, verifying signatures and names, until it can hook up on one of the trust anchors.
+
+The “minimal” engine is initialised with br_x509_minimal_init(). That function expects as parameters a pointer to the context to initialise, a hash function implementation for DN comparisons (any hash function may be used, but of course a collision-resistant one is preferred), and a list of trust anchors. The list of trust anchors may be arbitrarily long, but if you provide thousands of them, then some slowdown may be expected, since each name lookup will entail re-hashing all these names (and your trust model is weird, too).
+
+Hash function implementations (for signature support) are set with br_x509_miminal_set_hash(). Signature verification implementations are set with br_x509_minimal_set_rsa() and br_x509_minimal_set_ecdsa(), for RSA and ECDSA, respectively.
+
+An additional minimal size for RSA keys can be configured with br_x509_minimal_set_minrsa(). The minimal size is expressed in bytes; RSA keys smaller than that size will be rejected. The default minimal size is 128 bytes, thereby refusing to use RSA keys of less than 1017 bits. Generally speaking, issuing CA are supposed to enforce proper key sizes, and such a test should not be needed, but existing practice by slightly sloppy CA, and conformance issues, may force the use of that minimal RSA key size constraint.
+
+Additional name extraction can be configured with br_x509_minimal_set_name_elements() (see below).
+
+Name Extraction
+Validating a certificate is all fine, in that it allows a “relying party” to gain some confidence in the binding of a public key with an identity. It is still necessary to extract that identity and check it. For instance, certificate validation by a client may inform it that the server’s certificate is genuine, i.e. is a real certificate truly signed by a trusted CA; however, the client also needs to make sure that this genuine certificate was issued to the expected server, not to some other server.
+
+Identity checks are automatic in the case of the server’s certificate: the SSL client engine provides the intended server name to the start_chain() method, and the “minimal” validation engine will enforce RFC 2818 rules (the name must match one of the dNSName instances in the Subject Alt Name extension, or one of the Common Name elements in the subjectDN if there is no SAN extension). For the client certificate (sent upon request by the server, and validated by the server), there is no really standard specification of which name elements shall be used in the client certificate. Therefore, a generic name extraction API is provided by BearSSL.
+
+The API consists in an array of br_name_element structures that are provided by the caller, with a call to br_x509_minimal_set_name_elements(). Each br_name_element structure identifies a specific name element, and points to a destination buffer in which the name will be written if encountered. The following notes apply:
+
+Names can be elements of the subjectDN or in the SAN extension.
+
+Extracted names must use one of the following ASN.1 types:
+
+NumericString, PrintableString, IA5String and TeletexString are decoded with ISO-8859-1 (“latin-1”) conventions. There is no validation that the decoded characters are really part of the set of characters allowed by that specific ASN.1 type.
+
+UTF8String is decoded with UTF-8 conventions. Invalid UTF-8 encodings (including a non-minimal length) are rejected. A leading BOM (U+FEFF code point), if present, is skipped.
+
+BMPString is decoded with UTF-16 conventions (big-endian by default, but a leading BOM is properly detected and may be used to switch to little-endian). Surrogate pairs are assembled; lone surrogates imply rejection.
+
+If any of the encodings produces a code point of value 0, or a noncharacter5, then the string as a whole is rejected.
+
+Extracted names are converted to UTF-8 and written in the relevant buffer with a terminating zero. If the buffer is too small to receive the name, then the name is rejected.
+
+There is an internal limitation (that might be removed in a future version), by which names longer than 255 bytes (when encoded in UTF-8, but without the terminating zero) are rejected, even if the destination buffer would allow it.
+
+Each br_name_element identifies a specific name, with its oid field:
+
+For name elements in the subject DN, the oid field shall point to an encoded OID, consisting in a leading length byte, followed by the DER-encoded OID value (no tag or length). E.g. the OID 2.5.4.3, for id-at-commonName, shall be specified as an array of four bytes, with values 03 55 04 03 (the leading byte of value 3 specifies that it is followed by exactly 3 bytes).
+
+For SAN elements other than otherName, the oid field shall point to a two-byte array, first one being 0, and second one being the tag value. This is supported for rfc822Name (with 00 01), dNSName (with 00 02), and uniformResourceIdentifier (with 00 06).
+
+For SAN elements of type otherName, the oid field shall point to an array that begins with two bytes of value 0, followed by an encoded OID as described above (with the leading length byte). In practice, this is mostly used for Microsoft’s UPN (a “User Principal Name” with a syntax reminiscent of email addresses), with the encoded string 00 00 0A 2B 06 01 04 01 82 37 14 02 03.
+
+When the EE certificate is received, the status field of all provided name elements is set to zero. Then, as each name is received, if its type matches the oid element of one of the still-unused structures, then the name is extracted, and the status is set to 1 on success, or -1 on error on that name. It is possible to configure several br_name_element structures with the same oid, so as to gather several names of the same type, if the certificate does contains several such names: the matching names will fill the structures in the order they are encountered.
+
+In practice, name extraction is expected to be used by servers when requesting client certificates; they will probably target the subject DN name elements “Common Name” (for display purposes), “UID” (for actual account names), and some “Organization” and “Organizational Unit” elements (for systems where these values are used for user scoping). SAN elements rfc822Name (for email addresses) and otherName (for Microsoft UPN) should also be typical targets.
+
+Certificate Choosing
+All of the above relates to how certificates are processed when they are received. API are also defined for the sending.
+
+The SSL server chooses its certificate chain with an implementation of br_ssl_server_policy_class (see the header file). This is (yet again) an OOP context with vtable system. The choose() method is invoked when the ClientHello message has been received; it selects the cipher suite to use, and the certificate chain to send back. Depending on what cipher suite was chosen, one of do_keyx() or do_sign() will be called to use the server’s private key.
+
+The choose() method receives a list of cipher suites that corresponds to the list sent by the client, trimmed to remove cipher suites that are not supported by the server, and possibly sorted by server preferences (if that specific flag was set). This API was meant to allow arbitrary implementations to be plugged in, especially external providers of private key cryptography (think: HSM, smart cards…). It also allows the server to select its certificate among an arbitrary number of certificates, based on, for instance, client support for specific key types, or intended server names (clients can send an intended server name as part of the ClientHello message, in the Server Name Indication extension).
+
+BearSSL comes with basic implementations of that type, that simply return a single certificate chain, and use a software private key (RSA or EC, with BearSSL’s code). The context structures for these simple implementations are included in br_ssl_server_context, so there is no need for extra allocation by the caller if they are used. The chain and private key are provided with one of the br_ssl_server_init_*() methods. Note that in the case of EC keys, the key type of the CA that issued the server’s certificate should be provided, in order to support TLS_ECDH_* cipher suites.
+
+An arbitrary, externally provided implementation of the br_ssl_server_policy_class type can be set with the br_ssl_server_set_policy() function.
+
+The SSL client uses a similar API for the client certificate, relating to the br_ssl_client_certificate_class vtable type. This type has some extra methods for receiving the list of anchor names sent by the server. Indeed, the CertificateRequest message sent by the server may include a possibly long list of “anchor names” (DER-encoded X.500 names) that are supposed to identify the trust anchors that the server will use to validate the client certificate. The idea is that a client may use these names to choose the certificate to send.
+
+The start_name_list(), start_name(), append_name(), end_name() and end_name_list() methods are invoked in due order to receive the names, one by one, and chunk by chunk within each name, in about the same way as certificate chain processing in the validation API.
+
+There again, some simple implementations of the type are provided, with context structures already included in the SSL client context. The functions br_ssl_client_set_single_rsa() and br_ssl_client_set_single_ec() are used to configure a single RSA-based or EC-based certificate chain and private key, that will use BearSSL’s implementations for cryptographic operations. Alternatively, an externally provided implementation can be set with br_ssl_client_set_client_certificate().
+
+Client certificates are requested by the server if the br_ssl_server_set_trust_anchor_names() function is called. That function receives the anchor names that should be sent to the client. In practice, most of the time, that list of names matches the list of names of anchors that will really be used to validate the client; in order to make the configuration task easier for the server application, the br_ssl_server_set_trust_anchor_names_alt() function may be called instead, to use a list of trust anchors as the source for the anchor names.
+
+It shall be noted that since SSL supports renegotiations initiated by both the client and the server, the validation engines and certificate choosing contexts may be reused at any time, as long as the connection is alive. Therefore, provided arrays of trust anchors (and trust anchor names) shall remain valid at all times. If (and only if) renegotiations are disabled (with the BR_OPT_NO_RENEGOTIATION flag), then the structures used by validation may be released when the handshake is done. As of version 0.2 of BearSSL, end of the initial handshake can be detected by the engine accepting application data (br_ssl_engine_sendapp_buf() returns a non-NULL pointer).
+
+“Success” here means that the public key is given to the SSL engine; that engine will still perform all necessary cryptographic operations with that key; for instance, with a TLS_ECDHE_* cipher suite, a SSL client will verify the server’s signature computed over the ServerKeyExchange message.↩
+
+Or later in some other countries, e.g. Great Britain switched to it in 1752, while Russia waited for 1918.↩
+
+The “minimal” engine does not skip self-issued certificates from the path length count, so it may reject some paths which are technically valid, but not the other way round. In other words, it “fails safe”. Self-issued certificates are certificates with identical subject and issuer names, and might conceptually be used in some key renewal mechanisms, but in practice they are extremely rare.↩
+
+Almost all RSA keys in existence use the 17-bit value 65537 as public exponent, for reasons that have a lot more to do with tradition and mythology than security. Some widespread SSL/X.509 implementations cannot deal with public exponents larger than 32 bits, so 8 bytes ought to be enough. If the modulus is smaller than 4096 bits, the public exponent may be larger than 64 bits.↩
+
+Noncharacters are code points in the U+FDD0 to U+FEDF range, code points whose value ends with FFFE or FFFF when truncated to 16 bits, code points beyond U+10FFFD, and surrogates in the U+D800 to U+DFFF range.↩

@@ -3,45 +3,84 @@
  * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
 
-/* filepath: src/main.c */
+/* filepath: /devcontainer/web-app/src/main.c */
+
+#define _POSIX_C_SOURCE 200809L
+#define _XOPEN_SOURCE 500
+#define __BSD_VISIBLE 1
+#define _DEFAULT_SOURCE
+#define _GNU_SOURCE
+
 #include "../include/server.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <signal.h>
+#include <syslog.h>
+#include <errno.h>
+#include <string.h>
 
-static volatile int keep_running = 1;
+/* Global state */
+static volatile sig_atomic_t keep_running = 1;
+extern struct server_context ssl_ctx;
 
-static void
-handle_signal(int sig)
-{
-    (void)sig;
-    keep_running = 0;
-}
+/* Signal handler prototype */
+static void handle_signal(int sig);
 
 int
 main(void)
 {
     int server_fd;
+    int port;
     struct sigaction sa;
+    int ret = EXIT_SUCCESS;
 
     /* Setup signal handler */
+    memset(&sa, 0, sizeof(sa));
     sa.sa_handler = handle_signal;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
-    sigaction(SIGINT, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
 
+    if (sigaction(SIGINT, &sa, NULL) == -1 ||
+        sigaction(SIGTERM, &sa, NULL) == -1) {
+        fprintf(stderr, "Failed to set signal handlers: %s\n",
+                strerror(errno));
+        return EXIT_FAILURE;
+    }
+
+    /* Initialize server (includes SSL initialization) */
     server_fd = server_init();
     if (server_fd < 0) {
         fprintf(stderr, "Failed to initialize server\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    printf("Server running on port %d\n", SERVER_PORT);
+    port = server_get_port(server_fd);
+    if (port < 0) {
+        fprintf(stderr, "Failed to get server port\n");
+        server_cleanup(server_fd);
+        return EXIT_FAILURE;
+    }
 
+    printf("Server running on port %d\n", port);
+
+    /* Main server loop */
     while (keep_running) {
-        server_run(server_fd);
+        if (server_run(server_fd) < 0) {
+            syslog(LOG_ERR, "Server run failed");
+            ret = EXIT_FAILURE;
+            break;
+        }
     }
 
+    printf("\nShutting down server on port %d\n", port);
     server_cleanup(server_fd);
-    return 0;
+    return ret;
+}
+
+static void
+handle_signal(int sig)
+{
+    if (sig == SIGINT || sig == SIGTERM) {
+        keep_running = 0;
+    }
 }

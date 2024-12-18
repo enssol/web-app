@@ -1,0 +1,88 @@
+# Container Specifications Report
+=====================================================================
+
+## Basic Information
+--------------------
+Environment:    Development Container
+Container ID:   e542f3b6a8be
+User Context:   appuser (uid=1000, gid=1000)
+
+## Network Configuration
+-----------------------
+Internal IP:    10.0.2.100
+Interface:      tap0 (MTU 65520)
+Gateway:        10.0.2.2
+DNS Servers:
+- 10.0.2.3
+- 192.168.30.10
+
+## Active Services
+-----------------
+LISTEN ports:
+- 127.0.0.1:44203 (node process, PID 143)
+
+## Resource Allocation
+---------------------
+### Memory
+Total:          7.5 GB
+Used:           3.1 GB
+Free:           809 MB
+Buffer/Cache:   3.7 GB
+Available:      4.1 GB
+
+### Swap
+Total:          2.9 GB
+Used:           99 MB
+Free:           2.8 GB
+
+## Filesystem Mounts
+-------------------
+### Primary Storage
+Mount:          overlay
+Size:           216.6 GB
+Used:           10.2 GB
+Available:      195.3 GB
+Usage:          5%
+
+### System Mounts
+- /dev (tmpfs, 64.0M)
+- /devcontainer (/dev/sda5)
+- /dev/shm (shm, 62.5M)
+- /run/.containerenv (tmpfs, 767.4M)
+- /etc/resolv.conf (tmpfs)
+- /etc/hosts (tmpfs)
+- /etc/hostname (tmpfs)
+
+### Device Mounts (udev, 3.7G each)
+- /dev/null
+- /dev/zero
+- /dev/full
+- /dev/tty
+- /dev/random
+- /dev/urandom
+- /proc/kcore
+- /proc/keys
+- /proc/timer_list
+
+## Network Routes
+----------------
+- default via 10.0.2.2 dev tap0
+- 10.0.2.0/24 dev tap0 scope link src 10.0.2.100
+
+## Missing Utilities
+-------------------
+The following utilities are not installed:
+- curl (for external IP checks)
+- dig (for DNS resolution)
+
+## Service Status
+----------------
+Web Server:     Not running
+Port 80:        Closed
+Port 443:       Closed
+
+- gcc 12.2.1 available
+- musl libc environment
+- Limited system utilities
+- Container IP: 10.0.2.100
+- Port 8080 available

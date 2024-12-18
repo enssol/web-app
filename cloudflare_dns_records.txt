@@ -1,0 +1,47 @@
+;;
+;; Domain:     enssol.com.au.
+;; Exported:   2024-12-18 07:40:28
+;;
+;; This file is intended for use for informational and archival
+;; purposes ONLY and MUST be edited before use on a production
+;; DNS server.  In particular, you must:
+;;   -- update the SOA record with the correct authoritative name server
+;;   -- update the SOA record with the contact e-mail address information
+;;   -- update the NS record(s) with the authoritative name servers for this domain.
+;;
+;; For further information, please consult the BIND documentation
+;; located on the following website:
+;;
+;; http://www.isc.org/
+;;
+;; And RFC 1035:
+;;
+;; http://www.ietf.org/rfc/rfc1035.txt
+;;
+;; Please note that we do NOT offer technical support for any use
+;; of this zone data, the BIND name server, or any other third-party
+;; DNS software.
+;;
+;; Use at your own risk.
+;; SOA Record
+enssol.com.au	3600	IN	SOA	alla.ns.cloudflare.com. dns.cloudflare.com. 2048617422 10000 2400 604800 3600
+
+;; NS Records
+enssol.com.au.	86400	IN	NS	alla.ns.cloudflare.com.
+enssol.com.au.	86400	IN	NS	leo.ns.cloudflare.com.
+
+;; A Records
+enssol.com.au.	1	IN	A	203.51.2.82
+
+;; CAA Records
+enssol.com.au.	1	IN	CAA	0 issue "letsencrypt.org"
+
+;; CNAME Records
+www.enssol.com.au.	1	IN	CNAME	enssol.com.au.
+
+;; MX Records
+enssol.com.au.	1	IN	MX	10 mail.enssol.com.au.
+
+;; TXT Records
+_dmarc.enssol.com.au.	1	IN	TXT	"v=DMARC1; p=none; rua=mailto:ab810acddb2448e89d311f9e5eac0902@dmarc-reports.cloudflare.net"
+enssol.com.au.	1	IN	TXT	"google-site-verification=Ap2zepar2FSdW_RyZPC6wEdBcy7c7PBhoE3ff86lzqQ"
