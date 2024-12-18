@@ -6,11 +6,8 @@
 
 #define _POSIX_C_SOURCE 200809L
 #define _XOPEN_SOURCE 500
-#define __BSD_VISIBLE 1
-#define _DEFAULT_SOURCE
 
 #include "../include/server.h"
-#include "../include/bearssl_wrapper.h"
 
 /* System headers */
 #include <arpa/inet.h>    /* for inet_ntop */
@@ -29,12 +26,12 @@
 #include <stdlib.h>  /* for atoi() */
 #include <sys/stat.h>  /* For stat() */
 
-/* Move static functions to top */
+/* Keep only static function prototypes */
 static int sock_read(void *ctx, unsigned char *buf, size_t len);
 static int sock_write(void *ctx, const unsigned char *buf, size_t len);
 static int load_key_data(struct server_context *ctx);
 static int load_cert_data(struct server_context *ctx);
-static int handle_client_connection(br_sslio_context *ioc, int client_fd);
+static int handle_client_connection(int client_fd, struct server_context *ctx);
 
 /* Add Cloudflare IP ranges */
 const char *cloudflare_ip_ranges[CLOUDFLARE_IP_RANGES_COUNT] = {
@@ -55,7 +52,7 @@ const char *cloudflare_ip_ranges[CLOUDFLARE_IP_RANGES_COUNT] = {
     "131.0.72.0/22"
 };
 
-/* Define static response strings */
+/* Define the const strings declared in header */
 const char *response_header =
     "HTTP/1.0 200 OK\r\n"
     "Content-Type: text/html\r\n"
@@ -74,112 +71,113 @@ const char *response_404 =
     "File Not Found\r\n";
 
 /* Global variables */
-struct server_context g_ssl_ctx;  /* Global SSL context */
-struct server_context ssl_ctx;  /* Global SSL context */
+struct server_context ssl_ctx;  /* Single SSL context */
 unsigned short g_bound_port = 0;
 
 int
 server_init(void)
 {
-    int server_fd;
-    int opt;
+    int sock_fd;
     struct sockaddr_in address;
     socklen_t addrlen;
     struct stat st;
+    int opt = 1;
+    char cwd[1024];
 
-    /* Initialize with error value */
-    server_fd = -1;
-    opt = 1;
+#ifdef DEBUG
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        fprintf(stderr, "Debug: Server init - CWD: %s\n", cwd);
+    }
+    fprintf(stderr, "Debug: Server init - WWW_DIR: %s\n", WWW_DIR);
+    fprintf(stderr, "Debug: Server init - INDEX_FILE: %s\n", INDEX_FILE);
+#ifdef TEST_BUILD
+    fprintf(stderr, "Debug: Running in TEST_BUILD mode\n");
+#else
+    fprintf(stderr, "Debug: Running in PRODUCTION mode\n");
+#endif
+#endif
 
-    /* Initialize syslog */
-    openlog("webserver", LOG_PID|LOG_CONS, LOG_DAEMON);
-    syslog(LOG_INFO, "Server starting initialization");
-
-    /* Check directories */
-    if (stat(WWW_DIR, &st) != 0 || !S_ISDIR(st.st_mode)) {
-        syslog(LOG_ERR, "WWW directory does not exist");
+    /* Check www directory with detailed error reporting */
+    if (stat(WWW_DIR, &st) != 0) {
+        fprintf(stderr, "WWW directory check failed (%s): %s\n",
+                WWW_DIR, strerror(errno));
         return -1;
     }
 
-    if (stat(INDEX_FILE, &st) != 0 || !S_ISREG(st.st_mode)) {
-        syslog(LOG_ERR, "Index file does not exist");
+    if (!S_ISDIR(st.st_mode)) {
+        fprintf(stderr, "WWW path is not a directory: %s\n", WWW_DIR);
+        return -1;
+    }
+
+    /* Check index file with detailed error reporting */
+    if (stat(INDEX_FILE, &st) != 0) {
+        fprintf(stderr, "Index file check failed (%s): %s\n",
+                INDEX_FILE, strerror(errno));
+        return -1;
+    }
+
+    if (!S_ISREG(st.st_mode)) {
+        fprintf(stderr, "Index path is not a regular file: %s\n", INDEX_FILE);
         return -1;
     }
 
     /* Create socket */
-    server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd < 0) {
-        syslog(LOG_ERR, "socket failed");
+    sock_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock_fd < 0) {
+        fprintf(stderr, "Socket creation failed: %s\n", strerror(errno));
         return -1;
     }
 
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
+    if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
                    &opt, sizeof(opt)) < 0) {
-        syslog(LOG_ERR, "setsockopt failed: %m");
-        close(server_fd);
+        syslog(LOG_ERR, "setsockopt failed: %s", strerror(errno));
+        close(sock_fd);
         return -1;
     }
 
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = htonl(INADDR_ANY);  /* Explicit conversion */
+    address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(SERVER_PORT);
 
-    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-        syslog(LOG_ERR, "bind failed: %m");
-        close(server_fd);
+    if (bind(sock_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        syslog(LOG_ERR, "bind failed: %s", strerror(errno));
+        close(sock_fd);
         return -1;
     }
 
-    /* Get actual bound address */
+    /* Get bound port */
     addrlen = sizeof(address);
-    if (getsockname(server_fd, (struct sockaddr *)&address, &addrlen) == 0) {
+    if (getsockname(sock_fd, (struct sockaddr *)&address, &addrlen) == 0) {
         g_bound_port = ntohs(address.sin_port);
-        syslog(LOG_INFO, "Bound to port %d", g_bound_port);
     }
 
-    if (init_ssl_ctx(&ssl_ctx) != 0) {
-        syslog(LOG_ERR, "SSL context initialization failed");
-        close(server_fd);
-        return -1;
-    }
-
-    if (load_certificates(&ssl_ctx) != 0) {
-        syslog(LOG_ERR, "Certificate loading failed");
-        cleanup_ssl_ctx(&ssl_ctx);
-        close(server_fd);
-        return -1;
-    }
-
-#if !SKIP_PRIVILEGE_DROP
-    if (drop_privileges() != 0) {
-        syslog(LOG_ERR, "Failed to drop privileges");
-        close(server_fd);
+#ifndef TEST_BUILD
+    /* Skip SSL initialization in test mode */
+    if (init_ssl_ctx(&ssl_ctx) != 0 || load_certificates(&ssl_ctx) != 0) {
+        syslog(LOG_ERR, "SSL initialization failed");
+        close(sock_fd);
         return -1;
     }
 #endif
 
-    if (listen(server_fd, SOMAXCONN) < 0) {
-        syslog(LOG_ERR, "listen failed: %m");
-        close(server_fd);
+    if (listen(sock_fd, SOMAXCONN) < 0) {
+        syslog(LOG_ERR, "listen failed: %s", strerror(errno));
+        close(sock_fd);
         return -1;
     }
 
-    syslog(LOG_INFO, "Server initialized successfully");
-    return server_fd;
+    return sock_fd;
 }
 
-/* Update server_run function */
-static int
+/* Internal server run implementation */
+int
 server_run(int server_fd)
 {
     int client_fd;
     struct sockaddr_in client_addr;
     socklen_t client_len;
     char client_ip[INET_ADDRSTRLEN];
-    br_sslio_context ioc;
-    br_ssl_io_read_t read_func = (br_ssl_io_read_t)sock_read;
-    br_ssl_io_write_t write_func = (br_ssl_io_write_t)sock_write;
 
     client_len = sizeof(client_addr);
 
@@ -191,7 +189,11 @@ server_run(int server_fd)
         }
 
         /* Get client IP */
-        inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
+        if (inet_ntop(AF_INET, &client_addr.sin_addr, client_ip,
+                      sizeof(client_ip)) == NULL) {
+            close(client_fd);
+            continue;
+        }
 
         /* Validate Cloudflare IP */
         if (!is_cloudflare_ip(client_ip)) {
@@ -200,21 +202,9 @@ server_run(int server_fd)
             continue;
         }
 
-        /* Reset SSL context */
-        br_ssl_server_reset(&ssl_ctx.sc);
-
-        /* Initialize BearSSL I/O with wrapper */
-        if (br_sslio_init_wrapper(&ioc, &ssl_ctx.sc.eng,
-                                read_func, write_func,
-                                &client_fd, &client_fd) != 0) {
-            close(client_fd);
-            continue;
-        }
-
         /* Handle connection */
-        if (handle_client_connection(&ioc, client_fd) != 0) {
-            close(client_fd);
-            continue;
+        if (handle_client_connection(client_fd, &ssl_ctx) != 0) {
+            syslog(LOG_ERR, "Failed to handle client connection");
         }
 
         close(client_fd);
@@ -222,7 +212,7 @@ server_run(int server_fd)
     return 0;
 }
 
-/* Add a public wrapper function */
+/* Public wrapper function */
 int
 run_server(int server_fd)
 {
@@ -230,49 +220,20 @@ run_server(int server_fd)
 }
 
 int
-validate_host(const char *request)
+validate_host(const char *host)
 {
-    const char *host_start;
-    const char *host_end;
-    size_t host_len;
-    char host[HOST_BUFFER_SIZE];
-
-    if (request == NULL) {
+    /* Basic input validation */
+    if (host == NULL) {
         return 0;
     }
 
-    /* Find Host header */
-    host_start = strstr(request, "Host:");
-    if (host_start == NULL) {
-        return 0;
+    /* Check against allowed hostnames */
+    if (strcmp(host, VALID_HOST) == 0 ||
+        strcmp(host, VALID_WWW_HOST) == 0) {
+        return 1;
     }
 
-    /* Skip "Host:" prefix and any whitespace */
-    host_start += 5;
-    while (*host_start == ' ') {
-        host_start++;
-    }
-
-    /* Find end of line */
-    host_end = strstr(host_start, "\r\n");
-    if (host_end == NULL) {
-        return 0;
-    }
-
-    /* Extract host value */
-    host_len = (size_t)(host_end - host_start);
-    if (host_len >= HOST_BUFFER_SIZE || host_len == 0) {
-        return 0;
-    }
-
-    memcpy(host, host_start, host_len);
-    host[host_len] = '\0';
-
-    /* Validate against allowed hosts */
-    return (strcmp(host, VALID_HOST) == 0 ||
-            strcmp(host, VALID_WWW_HOST) == 0 ||
-            strcmp(host, "localhost") == 0 ||
-            strcmp(host, "127.0.0.1") == 0);
+    return 0;
 }
 
 int
@@ -332,6 +293,12 @@ is_cloudflare_ip(const char *ip_addr)
     int i;
     int prefix;
 
+    /* Check for NULL input */
+    if (ip_addr == NULL) {
+        return 0;
+    }
+
+    /* Convert IP address */
     if (inet_pton(AF_INET, ip_addr, &addr) != 1) {
         return 0;
     }
@@ -339,6 +306,12 @@ is_cloudflare_ip(const char *ip_addr)
     ip = ntohl(addr.s_addr);
 
     for (i = 0; i < CLOUDFLARE_IP_RANGES_COUNT; i++) {
+        /* Bounds check */
+        if (cloudflare_ip_ranges[i] == NULL) {
+            continue;
+        }
+
+        /* Copy network safely */
         strncpy(network, cloudflare_ip_ranges[i], sizeof(network) - 1);
         network[sizeof(network) - 1] = '\0';
 
@@ -349,6 +322,11 @@ is_cloudflare_ip(const char *ip_addr)
 
         *slash = '\0';
         prefix = atoi(slash + 1);
+
+        /* Validate prefix range */
+        if (prefix < 0 || prefix > 32) {
+            continue;
+        }
 
         if (inet_pton(AF_INET, network, &net) != 1) {
             continue;
@@ -368,32 +346,10 @@ is_cloudflare_ip(const char *ip_addr)
 int
 init_ssl_ctx(struct server_context *ctx)
 {
-    uint16_t suites_buf[2];
-    const uint16_t *suites = suites_buf;
-
-    if (ctx == NULL) {
-        return -1;
-    }
-
-    /* Clear context */
-    memset(ctx, 0, sizeof(*ctx));
-
-    /* Set cipher suites */
-    suites_buf[0] = BR_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256;
-    suites_buf[1] = BR_TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384;
-
-    /* Initialize server core using wrapper */
-    br_ssl_server_init_full_rsa_wrapper(&ctx->sc, ctx->chain, MAX_CHAIN_LENGTH,
-                                       &ctx->private_key);
-
-    /* Set minimum TLS version using wrapper */
-    br_ssl_engine_set_versions_wrapper(&ctx->sc.eng, TLS_MIN_VERSION, BR_TLS12);
-
-    /* Set buffer using wrapper */
-    br_ssl_engine_set_buffer_wrapper(&ctx->sc.eng, ctx->iobuf, BUFFER_SIZE, 1);
-
-    /* Set cipher suites using wrapper */
-    br_ssl_engine_set_suites_wrapper(&ctx->sc.eng, suites, 2);
+    /* Basic TLS 1.2 setup */
+    br_ssl_server_init_full_rsa(&ctx->sc, ctx->chain, 1, &ctx->private_key);
+    br_ssl_engine_set_versions(&ctx->sc.eng, BR_TLS12, BR_TLS12);
+    br_ssl_engine_set_buffer(&ctx->sc.eng, ctx->iobuf, sizeof(ctx->iobuf), 1);
 
     return 0;
 }
@@ -531,19 +487,12 @@ sock_read(void *ctx, unsigned char *buf, size_t len)
     int fd;
     ssize_t rlen;
 
-    if (!ctx || !buf || len == 0) {
-        return -1;
-    }
-
     fd = *(int *)ctx;
     rlen = read(fd, buf, len);
 
     if (rlen <= 0) {
-        if (rlen == 0) return -1;  /* EOF */
-        if (errno == EINTR) return 0;  /* Retry */
-        return -1;
+        return rlen == 0 ? -1 : 0;
     }
-
     return (int)rlen;
 }
 
@@ -553,73 +502,65 @@ sock_write(void *ctx, const unsigned char *buf, size_t len)
     int fd;
     ssize_t wlen;
 
-    if (!ctx || !buf || len == 0) {
-        return -1;
-    }
-
     fd = *(int *)ctx;
     wlen = write(fd, buf, len);
 
     if (wlen <= 0) {
-        if (errno == EINTR) return 0;  /* Retry */
-        return -1;
+        return 0;
     }
-
     return (int)wlen;
 }
 
 static int
-handle_client_connection(br_sslio_context *ioc, int client_fd)
+handle_client_connection(int client_fd, struct server_context *ctx)
 {
-    char buffer[BUFFER_SIZE];
-    size_t len;
-    int html_fd;
-    int result;
+    unsigned char *buf;
     ssize_t read_len;
+    br_sslio_context ioc;
+    int ret;
 
-    (void)client_fd;
-
-    /* Use wrapper for handshake */
-    if (br_ssl_do_handshake_wrapper(ioc) != 0) {
+    /* Reset server context */
+    ret = br_ssl_server_reset(&ctx->sc);
+    if (ret != 1) {
         return -1;
     }
 
-    /* Use wrapper for read */
-    len = (size_t)br_ssl_read_all_wrapper(ioc, buffer, sizeof(buffer) - 1);
-    if (len <= 0) {
-        return -1;
-    }
-    buffer[len] = '\0';
+    /* Initialize I/O wrapper */
+    br_sslio_init(&ioc, &ctx->sc.eng, sock_read, &client_fd,
+                  sock_write, &client_fd);
 
-    /* Validate host */
-    if (!validate_host(buffer)) {
-        br_ssl_write_all_wrapper(ioc, response_400, strlen(response_400));
-        br_ssl_flush_wrapper(ioc);
+    /* Perform handshake */
+    if (br_sslio_flush(&ioc) < 0) {
         return -1;
     }
 
-    /* Use wrapper for write */
-    result = br_ssl_write_all_wrapper(ioc, response_header, strlen(response_header));
-    if (result < 0) {
+    /* Read request */
+    buf = ctx->iobuf;
+    read_len = br_sslio_read(&ioc, buf, sizeof(ctx->iobuf) - 1);
+    if (read_len < 0) {
+        br_sslio_close(&ioc);
         return -1;
     }
 
-    /* Send file content */
-    html_fd = open(INDEX_FILE, O_RDONLY);
-    if (html_fd < 0) {
+    /* Null terminate received data */
+    if (read_len > 0) {
+        buf[read_len] = '\0';
+    } else {
+        buf[0] = '\0';
+    }
+
+    /* Send response */
+    if (br_sslio_write_all(&ioc, response_header, strlen(response_header)) < 0) {
+        br_sslio_close(&ioc);
         return -1;
     }
 
-    while ((read_len = read(html_fd, buffer, sizeof(buffer))) > 0) {
-        result = br_ssl_write_all_wrapper(ioc, buffer, (size_t)read_len);
-        if (result < 0) {
-            close(html_fd);
-            return -1;
-        }
+    /* Flush and close properly */
+    if (br_sslio_flush(&ioc) < 0) {
+        br_sslio_close(&ioc);
+        return -1;
     }
 
-    close(html_fd);
-    br_ssl_flush_wrapper(ioc);
-
+    br_sslio_close(&ioc);
     return 0;
 }

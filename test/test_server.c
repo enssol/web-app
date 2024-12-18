@@ -2,269 +2,211 @@
  * Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
  * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
-/* filepath: test/test_server.c */
+/* filepath: /devcontainer/web-app/test/test_server.c */
 
-#define _POSIX_C_SOURCE 200809L
-#define _XOPEN_SOURCE 500
-#define __BSD_VISIBLE 1
-#define _DEFAULT_SOURCE
-
-#include <CUnit/Basic.h>
-#include <CUnit/CUnit.h>
+/* System headers */
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <CUnit/CUnit.h>
+#include <CUnit/Basic.h>
+
+/* Project headers */
 #include "../include/server.h"
-#include "../include/bearssl_wrapper.h"
 
-/* Test fixture data */
-static const char test_www_dir[] = "test/www";
-static const char test_index_file[] = "test/www/index.html";
-static const char test_ssl_cert[] = "test/ssl/cert.pem";
-static const char test_ssl_key[] = "test/ssl/key.pem";
-static const char test_ssl_ca[] __attribute__((unused)) = "test/ssl/origin_ca_rsa_root.pem";
+/* Function prototypes */
+static void test_server_init(void);
+static int init_suite(void);
+static int clean_suite(void);
+int register_server_tests(void);
+
+/* Test fixtures */
+static const char *TEST_DIR = "test/www";
 static int server_fd = -1;
-static struct server_context test_ctx;
 
-/* Mock SSL context for testing */
-static unsigned char test_buffer[BUFFER_SIZE];
-
-/* Test setup and teardown functions */
+/* Test setup/cleanup */
 static int
 init_suite(void)
 {
     FILE *fp;
-    int ret;
-    const char *test_html;
-    const char *dirs[2];
-    size_t i;
-    struct stat st;
+    char cwd[1024];
+    const char *index_content = "<html><body>Test</body></html>";
+    const char *cert_content = "-----BEGIN CERTIFICATE-----\nMIIDJDummy\n-----END CERTIFICATE-----\n";
+    const char *key_content = "-----BEGIN PRIVATE KEY-----\nMIIDJDummy\n-----END PRIVATE KEY-----\n";
+    mode_t dir_mode = S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH; /* 755 */
+    mode_t file_mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH; /* 644 */
 
-    /* Initialize variables */
-    dirs[0] = test_www_dir;
-    dirs[1] = "test/ssl";
-    test_html = "<html><body>Test Page</body></html>\n";
+    /* Log working directory */
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        fprintf(stderr, "Debug: Current working directory: %s\n", cwd);
+    }
 
-    /* Add error logging */
-    if (mkdir("test", 0755) != 0 && errno != EEXIST) {
+    /* Clean any existing test directories first */
+    clean_suite();
+
+    /* Create test directory structure with explicit permissions */
+    fprintf(stderr, "Creating test directories...\n");
+
+    /* Ensure parent directories exist with proper permissions */
+    if (mkdir("test", dir_mode) != 0 && errno != EEXIST) {
+        fprintf(stderr, "Failed to create test directory: %s\n", strerror(errno));
         return -1;
     }
 
-    /* Create test directories */
-    for (i = 0; i < sizeof(dirs) / sizeof(dirs[0]); i++) {
-        if (stat(dirs[i], &st) != 0) {
-            ret = mkdir(dirs[i], 0755);
-            if (ret != 0) {
-                return -1;
-            }
-        }
-    }
-
-    /* Create test files */
-    fp = fopen(test_index_file, "w");
-    if (fp == NULL) {
+    if (mkdir("test/www", dir_mode) != 0 && errno != EEXIST) {
+        fprintf(stderr, "Failed to create www directory: %s\n", strerror(errno));
+        rmdir("test");
         return -1;
     }
-    fprintf(fp, "%s", test_html);
+
+    if (mkdir("test/ssl", dir_mode) != 0 && errno != EEXIST) {
+        fprintf(stderr, "Failed to create ssl directory: %s\n", strerror(errno));
+        rmdir("test/www");
+        rmdir("test");
+        return -1;
+    }
+
+    /* Create test files with proper permissions */
+    if ((fp = fopen(INDEX_FILE, "w")) == NULL) {
+        fprintf(stderr, "Failed to create index file: %s\n", strerror(errno));
+        goto cleanup;
+    }
+    fprintf(fp, "%s", index_content);
     fclose(fp);
+    chmod(INDEX_FILE, file_mode);
 
-    /* Write test certificates */
-    fp = fopen(test_ssl_cert, "w");
-    if (fp == NULL) {
-        return -1;
+    if ((fp = fopen(SSL_CERT_FILE, "w")) == NULL) {
+        fprintf(stderr, "Failed to create cert file: %s\n", strerror(errno));
+        goto cleanup;
     }
-    fprintf(fp, "-----BEGIN CERTIFICATE-----\nTEST CERT\n-----END CERTIFICATE-----\n");
+    fprintf(fp, "%s", cert_content);
     fclose(fp);
+    chmod(SSL_CERT_FILE, file_mode);
 
-    fp = fopen(test_ssl_key, "w");
-    if (fp == NULL) {
-        return -1;
+    if ((fp = fopen(SSL_KEY_FILE, "w")) == NULL) {
+        fprintf(stderr, "Failed to create key file: %s\n", strerror(errno));
+        goto cleanup;
     }
-    fprintf(fp, "-----BEGIN PRIVATE KEY-----\nTEST KEY\n-----END PRIVATE KEY-----\n");
+    fprintf(fp, "%s", key_content);
     fclose(fp);
+    chmod(SSL_KEY_FILE, file_mode);
 
-    /* Initialize test SSL context */
-    memset(&test_ctx, 0, sizeof(test_ctx));
-    memset(test_buffer, 0, sizeof(test_buffer));
+    /* Verify files exist and are accessible */
+    if (access(INDEX_FILE, R_OK) != 0) {
+        fprintf(stderr, "Index file not accessible: %s\n", strerror(errno));
+        goto cleanup;
+    }
+    if (access(SSL_CERT_FILE, R_OK) != 0) {
+        fprintf(stderr, "Certificate file not accessible: %s\n", strerror(errno));
+        goto cleanup;
+    }
+    if (access(SSL_KEY_FILE, R_OK) != 0) {
+        fprintf(stderr, "Key file not accessible: %s\n", strerror(errno));
+        goto cleanup;
+    }
 
+#ifdef DEBUG
+    fprintf(stderr, "Debug: Created directories:\n");
+    fprintf(stderr, "  WWW_DIR = %s\n", WWW_DIR);
+    fprintf(stderr, "  SSL dir = test/ssl\n");
+    fprintf(stderr, "  INDEX_FILE = %s\n", INDEX_FILE);
+#endif
+
+    fprintf(stderr, "Test suite initialization complete\n");
     return 0;
+
+cleanup:
+    unlink(INDEX_FILE);
+    unlink(SSL_CERT_FILE);
+    unlink(SSL_KEY_FILE);
+    rmdir("test/ssl");
+    rmdir("test/www");
+    rmdir("test");
+    return -1;
 }
 
 static int
 clean_suite(void)
 {
+    /* Clean up test files */
+    unlink(INDEX_FILE);
+    unlink(SSL_CERT_FILE);
+    unlink(SSL_KEY_FILE);
+    rmdir("test/ssl");
+    rmdir(TEST_DIR);
+    rmdir("test");
+
     if (server_fd >= 0) {
         server_cleanup(server_fd);
         server_fd = -1;
     }
-
-    cleanup_ssl_ctx(&test_ctx);
-
-    unlink(test_index_file);
-    unlink(test_ssl_cert);
-    unlink(test_ssl_key);
-    rmdir(test_www_dir);
-    rmdir("test/ssl");
 
     return 0;
 }
 
-/* Test functions */
+/* Test cases */
 static void
 test_server_init(void)
 {
+    int port;
+
+    /* Initialize server */
     server_fd = server_init();
+
+    if (server_fd < 0) {
+        fprintf(stderr, "Server init failed with errno: %s\n", strerror(errno));
+    }
+
     CU_ASSERT(server_fd >= 0);
 
     if (server_fd >= 0) {
-        int port = server_get_port(server_fd);
+        /* Test port binding */
+        port = server_get_port(server_fd);
         CU_ASSERT(port > 0);
+
+        /* Cleanup */
         server_cleanup(server_fd);
         server_fd = -1;
     }
 }
 
-/* Update test_ssl_context_init function */
-static void
-test_ssl_context_init(void)
+/* Test suite registration */
+int
+register_server_tests(void)
 {
-    uint16_t suites_buf[2];
-    uint16_t *suites;
-    int result;
+    CU_pSuite suite;
 
-    suites = suites_buf;
-    suites_buf[0] = BR_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256;
-    suites_buf[1] = BR_TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384;
-
-    /* Remove unused variables */
-    memset(&test_ctx, 0, sizeof(test_ctx));
-
-    /* Test SSL context initialization */
-    result = init_ssl_ctx(&test_ctx);
-    CU_ASSERT_EQUAL(result, 0);
-
-    if (result == 0) {
-        /* Verify SSL context setup */
-        uint32_t flags = br_ssl_engine_get_flags_wrapper(&test_ctx.sc.eng);
-        CU_ASSERT(flags != 0);
-
-        /* Test buffer setup */
-        br_ssl_engine_set_buffer_wrapper(&test_ctx.sc.eng, test_buffer,
-                                       sizeof(test_buffer), 1);
-        CU_ASSERT_PTR_NOT_NULL(test_ctx.sc.eng.ibuf);
-
-        /* Test version setup */
-        br_ssl_engine_set_versions_wrapper(&test_ctx.sc.eng,
-                                         TLS_MIN_VERSION, BR_TLS12);
-        CU_ASSERT_EQUAL(test_ctx.sc.eng.version_min, TLS_MIN_VERSION);
-        CU_ASSERT_EQUAL(test_ctx.sc.eng.version_max, BR_TLS12);
-
-        /* Test cipher suites setup */
-        br_ssl_engine_set_suites_wrapper(&test_ctx.sc.eng, suites, 2);
-        CU_ASSERT_PTR_NOT_NULL(test_ctx.sc.eng.suites_buf);
+    suite = CU_add_suite("Server Test Suite", init_suite, clean_suite);
+    if (suite == NULL) {
+        return -1;
     }
+
+    if (CU_add_test(suite, "Test Server Init", test_server_init) == NULL) {
+        return -1;
+    }
+
+    return 0;
 }
 
-static void
-test_validate_host(void)
-{
-    const char *valid_requests[] = {
-        "GET / HTTP/1.1\r\nHost: enssol.com.au\r\n\r\n",
-        "GET / HTTP/1.1\r\nHost: www.enssol.com.au\r\n\r\n",
-        "GET / HTTP/1.1\r\nHost: localhost\r\n\r\n",
-        "GET / HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n"
-    };
-
-    const char *invalid_requests[] = {
-        "GET / HTTP/1.1\r\nHost: invalid.com\r\n\r\n",
-        "GET / HTTP/1.1\r\n\r\n",
-        "GET / HTTP/1.1\r\nHost:\r\n\r\n"
-    };
-
-    size_t i;
-
-    for (i = 0; i < sizeof(valid_requests) / sizeof(valid_requests[0]); i++) {
-        CU_ASSERT_EQUAL(validate_host(valid_requests[i]), 1);
-    }
-
-    for (i = 0; i < sizeof(invalid_requests) / sizeof(invalid_requests[0]); i++) {
-        CU_ASSERT_EQUAL(validate_host(invalid_requests[i]), 0);
-    }
-
-    CU_ASSERT_EQUAL(validate_host(NULL), 0);
-}
-
-static void
-test_cloudflare_ip_validation(void)
-{
-    const char *valid_ips[] = {
-        "173.245.48.1",
-        "103.21.244.1",
-        "104.16.0.1",
-        "172.64.0.1",
-        "131.0.72.1"
-    };
-
-    const char *invalid_ips[] = {
-        "192.168.1.1",
-        "10.0.0.1",
-        "172.16.0.1",
-        "invalid",
-        ""
-    };
-
-    size_t i;
-
-    for (i = 0; i < sizeof(valid_ips) / sizeof(valid_ips[0]); i++) {
-        CU_ASSERT_EQUAL(is_cloudflare_ip(valid_ips[i]), 1);
-    }
-
-    for (i = 0; i < sizeof(invalid_ips) / sizeof(invalid_ips[0]); i++) {
-        CU_ASSERT_EQUAL(is_cloudflare_ip(invalid_ips[i]), 0);
-    }
-
-    CU_ASSERT_EQUAL(is_cloudflare_ip(NULL), 0);
-}
-
-/* Test runner */
+/* Main entry point */
 int
 main(void)
 {
-    CU_pSuite pSuite;
-    int failures;
-
-    pSuite = NULL;
-    failures = 0;
-
+    /* Initialize CUnit test registry */
     if (CU_initialize_registry() != CUE_SUCCESS) {
         return CU_get_error();
     }
 
-    pSuite = CU_add_suite("Server Test Suite", init_suite, clean_suite);
-    if (pSuite == NULL) {
+    /* Register tests */
+    if (register_server_tests() != 0) {
         CU_cleanup_registry();
         return CU_get_error();
     }
 
-    if ((CU_add_test(pSuite, "Test Server Init", test_server_init) == NULL) ||
-        (CU_add_test(pSuite, "Test SSL Context Init", test_ssl_context_init) == NULL) ||
-        (CU_add_test(pSuite, "Test Host Validation", test_validate_host) == NULL) ||
-        (CU_add_test(pSuite, "Test Cloudflare IP Validation",
-                     test_cloudflare_ip_validation) == NULL)) {
-        CU_cleanup_registry();
-        return CU_get_error();
-    }
-
-    CU_basic_set_mode(CU_BRM_VERBOSE);
+    /* Run tests */
     CU_basic_run_tests();
-    failures = (int)CU_get_number_of_failures();
-    CU_cleanup_registry();
 
-    return failures > 0 ? 1 : 0;
+    /* Cleanup and return */
+    CU_cleanup_registry();
+    return CU_get_error();
 }

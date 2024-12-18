@@ -7,9 +7,6 @@
 
 #define _POSIX_C_SOURCE 200809L
 #define _XOPEN_SOURCE 500
-#define __BSD_VISIBLE 1
-#define _DEFAULT_SOURCE
-#define _GNU_SOURCE
 
 #include "../include/server.h"
 #include <stdio.h>
@@ -33,6 +30,7 @@ main(void)
     int port;
     struct sigaction sa;
     int ret = EXIT_SUCCESS;
+    struct server_context ctx;
 
     /* Setup signal handler */
     memset(&sa, 0, sizeof(sa));
@@ -44,6 +42,16 @@ main(void)
         sigaction(SIGTERM, &sa, NULL) == -1) {
         fprintf(stderr, "Failed to set signal handlers: %s\n",
                 strerror(errno));
+        return EXIT_FAILURE;
+    }
+
+    /* Initialize SSL context */
+    if (init_ssl_ctx(&ctx) != 0) {
+        return EXIT_FAILURE;
+    }
+
+    /* Load certificates */
+    if (load_certificates(&ctx) != 0) {
         return EXIT_FAILURE;
     }
 
@@ -65,7 +73,7 @@ main(void)
 
     /* Main server loop */
     while (keep_running) {
-        if (server_run(server_fd) < 0) {
+        if (server_run(server_fd) < 0) {  /* Now properly declared */
             syslog(LOG_ERR, "Server run failed");
             ret = EXIT_FAILURE;
             break;

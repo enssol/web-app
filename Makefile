@@ -24,7 +24,9 @@ endif
 
 # Base flags (always included)
 BASEFLAGS=-std=c90 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500 \
-		  -Wall -Wextra -pedantic -Werror -Wshadow \
+		  -DBR_USE_UNIX_TIME -DBR_SLOW_MUL15 -DBR_LOMUL \
+          -DBR_NO_INLINE_ASM -DBR_STRICT_ANSI_C -DBR_SAFE_ALIASES \
+		  -Dinline= -Wall -Wextra -pedantic -Werror -Wshadow \
 		  -Wconversion -Wstrict-prototypes -Wmissing-prototypes
 
 # Security flags
@@ -36,13 +38,11 @@ SECFLAGS=-fstack-protector-strong -fstack-check \
 
 # Combined CFLAGS
 CFLAGS=$(BASEFLAGS) $(OPTFLAGS) $(SECFLAGS) -I/usr/include -fPIC
-CFLAGS += -D_GNU_SOURCE -std=gnu99
-CFLAGS += -Wno-error=declaration-after-statement
-CFLAGS += -Wno-error=c90-c99-compat
 
 # Test-specific flags
 TEST_LDFLAGS=-L/usr/lib -lbearssl -Wl,-rpath,/usr/lib
-TEST_LIBS=-lcunit
+TEST_LIBS=$(LIBS) -lcunit
+TEST_CFLAGS = $(CFLAGS) -DTEST_BUILD -DDEBUG
 
 # Includes
 INCLUDES=-I./include
@@ -52,15 +52,22 @@ SRCDIR=src
 OBJDIR=obj
 BINDIR=bin
 
+# Test directories and files
+TEST_SRCDIR=test
+TEST_OBJDIR=$(OBJDIR)/test
+TEST_BINDIR=$(BINDIR)
+TEST_TARGET=$(TEST_BINDIR)/test_server
+TEST_SOURCES=$(TEST_SRCDIR)/test_server.c
+TEST_OBJECTS=$(TEST_SOURCES:$(TEST_SRCDIR)/%.c=$(TEST_OBJDIR)/%.o)
+
 # Sources
-SERVER_SOURCES=$(SRCDIR)/server.c $(SRCDIR)/bearssl_wrapper.c
+SERVER_SOURCES=$(SRCDIR)/server.c
 SERVER_OBJECTS=$(SERVER_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 MAIN_SOURCES=$(SRCDIR)/main.c
 MAIN_OBJECTS=$(MAIN_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 TARGET=$(BINDIR)/webserver
-TEST_TARGET=$(BINDIR)/test_server
 
 # Package name and version
 PACKAGE_NAME = webserver
@@ -79,20 +86,24 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	@mkdir -p $(OBJDIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-$(TEST_TARGET): $(SERVER_OBJECTS) test/test_server.c
-	@mkdir -p $(BINDIR)
-	$(CC) $(CFLAGS) $(INCLUDES) -DTEST_BUILD $^ -o $@ $(LDFLAGS) $(TEST_LIBS)
+# Test build rules (update)
+$(TEST_TARGET): CFLAGS+=-DTEST_BUILD -DDEBUG
+$(TEST_TARGET): $(TEST_OBJECTS) $(filter-out $(OBJDIR)/main.o,$(SERVER_OBJECTS))
+	@mkdir -p $(TEST_BINDIR)
+	$(CC) $(TEST_CFLAGS) $(INCLUDES) $^ -o $@ $(TEST_LDFLAGS) $(TEST_LIBS)
+
+$(TEST_OBJDIR)/%.o: $(TEST_SRCDIR)/%.c
+	@mkdir -p $(TEST_OBJDIR)
+	$(CC) $(TEST_CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	rm -rf $(OBJDIR) $(BINDIR) webserver-*.tar*
+	rm -f $(TARGET) $(SERVER_OBJECTS) $(MAIN_OBJECTS) $(TEST_OBJECTS) $(TEST_TARGET)
+	rm -rf $(OBJDIR) $(BINDIR)
 
-test: CFLAGS += -DTEST_BUILD
-test: prepare
-	$(CC) $(CFLAGS) -DTEST_BUILD \
-		test/test_server.c \
-		src/server.c \
-		src/bearssl_wrapper.c \
-		-o test/test_server $(TEST_LDFLAGS) $(TEST_LIBS)
+test: $(TEST_TARGET)
+	@mkdir -p $(TEST_BINDIR)
+	@echo "Running tests..."
+	@./$(TEST_TARGET)
 
 # Package target
 package: $(TARGET)
