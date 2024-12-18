@@ -9,25 +9,21 @@ CC=gcc
 
 # Environment-specific settings
 ifeq ($(ENV),prod)
-	# Production: Static linking, full optimization
 	OPTFLAGS=-O3 -march=native -mtune=native \
 			 -fdata-sections -ffunction-sections \
 			 -flto -fno-common -fstrict-aliasing
-	LDFLAGS=-static -lbearssl -Wl,--gc-sections -Wl,-O1
-	LIBS=
+	LDFLAGS=-static -Wl,--gc-sections -Wl,-O1 -Wl,--as-needed \
+			-Wl,--whole-archive -Wl,--no-undefined
 else
-	# Development: Dynamic linking, debugging
 	OPTFLAGS=-O0 -g3 -fanalyzer
-	LDFLAGS=-lbearssl -Wl,-rpath,/usr/lib
-	LIBS=
+	LDFLAGS=-static -Wl,--gc-sections
 endif
 
 # Base flags (always included)
 BASEFLAGS=-std=c90 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500 \
-		  -DBR_USE_UNIX_TIME -DBR_SLOW_MUL15 -DBR_LOMUL \
-          -DBR_NO_INLINE_ASM -DBR_STRICT_ANSI_C -DBR_SAFE_ALIASES \
-		  -Dinline= -Wall -Wextra -pedantic -Werror -Wshadow \
-		  -Wconversion -Wstrict-prototypes -Wmissing-prototypes
+			-Wall -Wextra -pedantic -Werror -Wshadow \
+		  -Wconversion -Wstrict-prototypes -Wmissing-prototypes \
+		  -static  # Add static flag to base flags
 
 # Security flags
 SECFLAGS=-fstack-protector-strong -fstack-check \
@@ -37,7 +33,7 @@ SECFLAGS=-fstack-protector-strong -fstack-check \
 		 -Walloca -Wvla -fno-omit-frame-pointer
 
 # Combined CFLAGS
-CFLAGS=$(BASEFLAGS) $(OPTFLAGS) $(SECFLAGS) -I/usr/include -fPIC
+CFLAGS=$(BASEFLAGS) $(OPTFLAGS) $(SECFLAGS) -I/usr/include -fPIC -static
 
 # Test-specific flags
 TEST_LDFLAGS=-L/usr/lib -lbearssl -Wl,-rpath,/usr/lib
@@ -61,7 +57,7 @@ TEST_SOURCES=$(TEST_SRCDIR)/test_server.c
 TEST_OBJECTS=$(TEST_SOURCES:$(TEST_SRCDIR)/%.c=$(TEST_OBJDIR)/%.o)
 
 # Sources
-SERVER_SOURCES=$(SRCDIR)/server.c
+SERVER_SOURCES=$(SRCDIR)/server.c $(SRCDIR)/hosts.c
 SERVER_OBJECTS=$(SERVER_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 MAIN_SOURCES=$(SRCDIR)/main.c
@@ -74,17 +70,26 @@ PACKAGE_NAME = webserver
 PACKAGE_VERSION = 1.0.0
 PACKAGE_FILE = $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
 
+# Dependency tracking
+DEPS=$(SERVER_SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.d)
+-include $(DEPS)
+
 .PHONY: all clean test package prod prepare
 
 all: $(TARGET)
 
+# Update linking step for the main target
 $(TARGET): $(SERVER_OBJECTS) $(MAIN_OBJECTS)
 	@mkdir -p $(BINDIR)
-	$(CC) $^ -o $@ $(LDFLAGS) $(LIBS)
+	$(CC) -static $^ -o $@ $(LDFLAGS) $(LIBS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	@mkdir -p $(OBJDIR)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+$(OBJDIR)/%.d: $(SRCDIR)/%.c
+	@mkdir -p $(OBJDIR)
+	@$(CC) $(CFLAGS) $(INCLUDES) -MM -MT '$(OBJDIR)/$*.o' $< > $@
 
 # Test build rules (update)
 $(TEST_TARGET): CFLAGS+=-DTEST_BUILD -DDEBUG

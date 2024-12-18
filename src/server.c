@@ -2,565 +2,364 @@
  * Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
  * SPDX-License-Identifier: 	AGPL-3.0-or-later
  */
-/* filepath: src/server.c */
-
-#define _POSIX_C_SOURCE 200809L
-#define _XOPEN_SOURCE 500
-
-#include "../include/server.h"
-
-/* System headers */
-#include <arpa/inet.h>    /* for inet_ntop */
-#include <errno.h>
-#include <fcntl.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <string.h>
-#include <syslog.h>
 #include <sys/socket.h>
-#include <time.h>
-#include <unistd.h>
-#include <pwd.h>
-#include <grp.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
-#include <stdlib.h>  /* for atoi() */
-#include <sys/stat.h>  /* For stat() */
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <time.h>
+#include "../include/server.h"
+#include "../include/hosts.h"
+#include <ctype.h>
+#include <strings.h> /* For strncasecmp */
 
-/* Keep only static function prototypes */
-static int sock_read(void *ctx, unsigned char *buf, size_t len);
-static int sock_write(void *ctx, const unsigned char *buf, size_t len);
-static int load_key_data(struct server_context *ctx);
-static int load_cert_data(struct server_context *ctx);
-static int handle_client_connection(int client_fd, struct server_context *ctx);
+#define BACKLOG 10
+#define BUF_SIZE 8192
+#define RECV_BUFFER_SIZE 8192
 
-/* Add Cloudflare IP ranges */
-const char *cloudflare_ip_ranges[CLOUDFLARE_IP_RANGES_COUNT] = {
-    "173.245.48.0/20",
-    "103.21.244.0/22",
-    "103.22.200.0/22",
-    "103.31.4.0/22",
-    "141.101.64.0/18",
-    "108.162.192.0/18",
-    "190.93.240.0/20",
-    "188.114.96.0/20",
-    "197.234.240.0/22",
-    "198.41.128.0/17",
-    "162.158.0.0/15",
-    "104.16.0.0/13",
-    "104.24.0.0/14",
-    "172.64.0.0/13",
-    "131.0.72.0/22"
-};
+static int server_fd = -1;
+static char doc_root[MAX_PATH];
+static char access_log_path[MAX_PATH];
+static char error_log_path[MAX_PATH];
+static time_t last_request_time = 0;
+static int request_count = 0;
 
-/* Define the const strings declared in header */
-const char *response_header =
-    "HTTP/1.0 200 OK\r\n"
-    "Content-Type: text/html\r\n"
-    "\r\n";
-
-const char *response_400 =
-    "HTTP/1.0 400 Bad Request\r\n"
-    "Content-Type: text/plain\r\n"
-    "\r\n"
-    "Invalid Host\r\n";
-
-const char *response_404 =
-    "HTTP/1.0 404 Not Found\r\n"
-    "Content-Type: text/plain\r\n"
-    "\r\n"
-    "File Not Found\r\n";
-
-/* Global variables */
-struct server_context ssl_ctx;  /* Single SSL context */
-unsigned short g_bound_port = 0;
-
-int
-server_init(void)
+static void
+log_access(const char *client_ip, const char *method, const char *path, int status)
 {
-    int sock_fd;
-    struct sockaddr_in address;
-    socklen_t addrlen;
-    struct stat st;
-    int opt = 1;
-    char cwd[1024];
+    FILE *log_file;
+    time_t now;
+    char time_str[32];
 
-#ifdef DEBUG
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        fprintf(stderr, "Debug: Server init - CWD: %s\n", cwd);
+    now = time(NULL);
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", localtime(&now));
+
+    log_file = fopen(access_log_path, "a");
+    if (log_file != NULL) {
+        fprintf(log_file, "[%s] %s - %s %s %d\n",
+                time_str, client_ip, method, path, status);
+        fclose(log_file);
     }
-    fprintf(stderr, "Debug: Server init - WWW_DIR: %s\n", WWW_DIR);
-    fprintf(stderr, "Debug: Server init - INDEX_FILE: %s\n", INDEX_FILE);
-#ifdef TEST_BUILD
-    fprintf(stderr, "Debug: Running in TEST_BUILD mode\n");
-#else
-    fprintf(stderr, "Debug: Running in PRODUCTION mode\n");
-#endif
-#endif
-
-    /* Check www directory with detailed error reporting */
-    if (stat(WWW_DIR, &st) != 0) {
-        fprintf(stderr, "WWW directory check failed (%s): %s\n",
-                WWW_DIR, strerror(errno));
-        return -1;
-    }
-
-    if (!S_ISDIR(st.st_mode)) {
-        fprintf(stderr, "WWW path is not a directory: %s\n", WWW_DIR);
-        return -1;
-    }
-
-    /* Check index file with detailed error reporting */
-    if (stat(INDEX_FILE, &st) != 0) {
-        fprintf(stderr, "Index file check failed (%s): %s\n",
-                INDEX_FILE, strerror(errno));
-        return -1;
-    }
-
-    if (!S_ISREG(st.st_mode)) {
-        fprintf(stderr, "Index path is not a regular file: %s\n", INDEX_FILE);
-        return -1;
-    }
-
-    /* Create socket */
-    sock_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock_fd < 0) {
-        fprintf(stderr, "Socket creation failed: %s\n", strerror(errno));
-        return -1;
-    }
-
-    if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
-                   &opt, sizeof(opt)) < 0) {
-        syslog(LOG_ERR, "setsockopt failed: %s", strerror(errno));
-        close(sock_fd);
-        return -1;
-    }
-
-    memset(&address, 0, sizeof(address));
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(SERVER_PORT);
-
-    if (bind(sock_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-        syslog(LOG_ERR, "bind failed: %s", strerror(errno));
-        close(sock_fd);
-        return -1;
-    }
-
-    /* Get bound port */
-    addrlen = sizeof(address);
-    if (getsockname(sock_fd, (struct sockaddr *)&address, &addrlen) == 0) {
-        g_bound_port = ntohs(address.sin_port);
-    }
-
-#ifndef TEST_BUILD
-    /* Skip SSL initialization in test mode */
-    if (init_ssl_ctx(&ssl_ctx) != 0 || load_certificates(&ssl_ctx) != 0) {
-        syslog(LOG_ERR, "SSL initialization failed");
-        close(sock_fd);
-        return -1;
-    }
-#endif
-
-    if (listen(sock_fd, SOMAXCONN) < 0) {
-        syslog(LOG_ERR, "listen failed: %s", strerror(errno));
-        close(sock_fd);
-        return -1;
-    }
-
-    return sock_fd;
 }
 
-/* Internal server run implementation */
-int
-server_run(int server_fd)
+void
+log_error(const char *message)
 {
-    int client_fd;
-    struct sockaddr_in client_addr;
-    socklen_t client_len;
-    char client_ip[INET_ADDRSTRLEN];
+    FILE *log_file;
+    time_t now;
+    char time_str[26];
 
-    client_len = sizeof(client_addr);
+    time(&now);
+    ctime_r(&now, time_str);
+    time_str[24] = '\0';
 
-    while (1) {
-        client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_len);
-        if (client_fd < 0) {
-            syslog(LOG_ERR, "Accept failed: %m");
-            continue;
-        }
-
-        /* Get client IP */
-        if (inet_ntop(AF_INET, &client_addr.sin_addr, client_ip,
-                      sizeof(client_ip)) == NULL) {
-            close(client_fd);
-            continue;
-        }
-
-        /* Validate Cloudflare IP */
-        if (!is_cloudflare_ip(client_ip)) {
-            syslog(LOG_WARNING, "Rejected non-Cloudflare IP: %s", client_ip);
-            close(client_fd);
-            continue;
-        }
-
-        /* Handle connection */
-        if (handle_client_connection(client_fd, &ssl_ctx) != 0) {
-            syslog(LOG_ERR, "Failed to handle client connection");
-        }
-
-        close(client_fd);
+    log_file = fopen(error_log_path, "a");
+    if (log_file != NULL) {
+        fprintf(log_file, "[%s] ERROR: %s\n", time_str, message);
+        fclose(log_file);
     }
+}
+
+int
+server_init(const struct server_config *config)
+{
+    struct sockaddr_in addr;
+    int opt;
+    uint16_t port;
+
+    /* Validate port range */
+    if (config->port <= 0 || config->port > 65535) {
+        log_error("Invalid port number");
+        return -1;
+    }
+
+    port = (uint16_t)config->port;
+
+    /* Save paths */
+    strncpy(doc_root, config->doc_root, sizeof(doc_root) - 1);
+    strncpy(access_log_path, config->access_log, sizeof(access_log_path) - 1);
+    strncpy(error_log_path, config->error_log, sizeof(error_log_path) - 1);
+
+    /* Create socket */
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd < 0) {
+        log_error("Failed to create socket");
+        return -1;
+    }
+
+    /* Set socket options */
+    opt = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+        log_error("Failed to set socket options");
+        close(server_fd);
+        return -1;
+    }
+
+    /* Bind to port */
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_port = htons(port);
+
+    if (bind(server_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        log_error("Failed to bind to port");
+        close(server_fd);
+        return -1;
+    }
+
+    /* Listen for connections */
+    if (listen(server_fd, BACKLOG) < 0) {
+        log_error("Failed to listen on socket");
+        close(server_fd);
+        return -1;
+    }
+
     return 0;
 }
 
-/* Public wrapper function */
-int
-run_server(int server_fd)
+static int validate_path(const char *path)
 {
-    return server_run(server_fd);
-}
-
-int
-validate_host(const char *host)
-{
-    /* Basic input validation */
-    if (host == NULL) {
+    if (path == NULL) {
         return 0;
     }
 
-    /* Check against allowed hostnames */
-    if (strcmp(host, VALID_HOST) == 0 ||
-        strcmp(host, VALID_WWW_HOST) == 0) {
+    /* Prevent directory traversal */
+    if (strstr(path, "..") != NULL) {
+        return 0;
+    }
+
+    /* Check for valid characters */
+    while (*path) {
+        if (!isprint((unsigned char)*path)) {
+            return 0;
+        }
+        path++;
+    }
+
+    return 1;
+}
+
+int
+handle_static_file(const char *path, struct http_response *resp)
+{
+    char full_path[MAX_PATH];
+    struct stat st;
+    FILE *fp;
+    size_t bytes_read;
+    time_t now;
+    char date_buf[32];
+    int ret;
+
+    if (path == NULL || resp == NULL) {
+        return -1;
+    }
+
+    /* Initialize response */
+    memset(resp, 0, sizeof(*resp));
+    resp->status_code = HTTP_OK;
+    resp->content_type = "text/html";
+
+    /* Handle root path */
+    if (strcmp(path, "/") == 0) {
+        path = "/index.html";
+    }
+
+    /* Build full path */
+    ret = snprintf(full_path, sizeof(full_path), "%s%s", doc_root, path);
+    if (ret < 0 || (size_t)ret >= sizeof(full_path)) {
+        resp->status_code = HTTP_INTERNAL_ERROR;
+        return -1;
+    }
+
+    /* Check file exists and readable */
+    if (stat(full_path, &st) != 0 || !S_ISREG(st.st_mode)) {
+        resp->status_code = HTTP_NOT_FOUND;
+        return -1;
+    }
+
+    /* Open and read file */
+    fp = fopen(full_path, "r");
+    if (fp == NULL) {
+        resp->status_code = HTTP_NOT_FOUND;
+        return -1;
+    }
+
+    bytes_read = fread(resp->content, 1, sizeof(resp->content) - 1, fp);
+    fclose(fp);
+
+    resp->content[bytes_read] = '\0';
+    resp->content_length = bytes_read;
+
+    /* Get current time for headers */
+    now = time(NULL);
+    strftime(date_buf, sizeof(date_buf), "%a, %d %b %Y %H:%M:%S GMT", gmtime(&now));
+
+    /* Format response headers */
+    ret = snprintf(resp->headers, sizeof(resp->headers),
+            "HTTP/1.1 %d OK\r\n"
+            "Content-Length: %zu\r\n"
+            "Content-Type: %s\r\n"
+            "Date: %s\r\n"
+            "Connection: close\r\n"
+            "\r\n",
+            resp->status_code,
+            resp->content_length,
+            resp->content_type,
+            date_buf);
+
+    if (ret < 0 || (size_t)ret >= sizeof(resp->headers)) {
+        resp->status_code = HTTP_INTERNAL_ERROR;
+        return -1;
+    }
+
+    return 0;
+}
+
+static int check_rate_limit(void)
+{
+    time_t current_time = time(NULL);
+
+    if (current_time - last_request_time >= 60) {
+        last_request_time = current_time;
+        request_count = 1;
         return 1;
     }
 
-    return 0;
+    if (request_count >= MAX_REQUESTS_PER_MINUTE) {
+        return 0;
+    }
+
+    request_count++;
+    return 1;
 }
 
 int
-server_get_port(int server_fd)
+server_process(void)
 {
-    struct sockaddr_in addr;
-    socklen_t len = sizeof(addr);
+    struct sockaddr_in client_addr;
+    socklen_t client_len;
+    int client_fd;
+    char recv_buffer[RECV_BUFFER_SIZE];
+    ssize_t bytes_received;
+    char *line;
+    char *method;
+    char *path;
+    char *protocol;
+    char client_ip[INET_ADDRSTRLEN];
+    struct http_response resp;
+    char *saveptr;
 
-    if (getsockname(server_fd, (struct sockaddr *)&addr, &len) < 0) {
+    client_len = sizeof(client_addr);
+    client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_len);
+
+    if (client_fd < 0) {
+        log_error("Failed to accept connection");
         return -1;
     }
-    return ntohs(addr.sin_port);
+
+    /* Get client IP */
+    inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, sizeof(client_ip));
+
+    /* Rate limiting */
+    if (!check_rate_limit()) {
+        dprintf(client_fd,
+                "HTTP/1.1 429 Too Many Requests\r\n"
+                "Content-Length: 20\r\n"
+                "Content-Type: text/plain\r\n"
+                "Connection: close\r\n"
+                "\r\n"
+                "Too many requests\r\n");
+        close(client_fd);
+        log_access(client_ip, "LIMIT", "/", 429);
+        return 0;
+    }
+
+    /* Receive request */
+    bytes_received = recv(client_fd, recv_buffer, sizeof(recv_buffer) - 1, 0);
+    if (bytes_received <= 0) {
+        close(client_fd);
+        return 0;
+    }
+    recv_buffer[bytes_received] = '\0';
+
+    /* Parse request line */
+    line = strtok_r(recv_buffer, "\r\n", &saveptr);
+    if (line == NULL) {
+        close(client_fd);
+        return 0;
+    }
+
+    method = strtok(line, " ");
+    path = strtok(NULL, " ");
+    protocol = strtok(NULL, " ");
+
+    if (method == NULL || path == NULL || protocol == NULL) {
+        dprintf(client_fd,
+                "HTTP/1.1 400 Bad Request\r\n"
+                "Content-Length: 11\r\n"
+                "Content-Type: text/plain\r\n"
+                "Connection: close\r\n"
+                "\r\n"
+                "Bad Request");
+        close(client_fd);
+        log_access(client_ip, "INVALID", "/", 400);
+        return 0;
+    }
+
+    /* Validate path */
+    if (!validate_path(path)) {
+        dprintf(client_fd,
+                "HTTP/1.1 403 Forbidden\r\n"
+                "Content-Length: 9\r\n"
+                "Content-Type: text/plain\r\n"
+                "Connection: close\r\n"
+                "\r\n"
+                "Forbidden");
+        close(client_fd);
+        log_access(client_ip, method, path, 403);
+        return 0;
+    }
+
+    /* Handle static file */
+    memset(&resp, 0, sizeof(resp));
+    if (handle_static_file(path, &resp) == 0) {
+        dprintf(client_fd,
+                "HTTP/1.1 %d OK\r\n"
+                "Content-Length: %zu\r\n"
+                "Content-Type: %s\r\n"
+                "Connection: close\r\n"
+                "\r\n"
+                "%s",
+                resp.status_code,
+                resp.content_length,
+                resp.content_type,
+                resp.content);
+        log_access(client_ip, method, path, resp.status_code);
+    } else {
+        dprintf(client_fd,
+                "HTTP/1.1 404 Not Found\r\n"
+                "Content-Length: 9\r\n"
+                "Content-Type: text/plain\r\n"
+                "Connection: close\r\n"
+                "\r\n"
+                "Not Found");
+        log_access(client_ip, method, path, 404);
+    }
+
+    close(client_fd);
+    return 0;
 }
 
-void
-server_cleanup(int server_fd)
+void server_cleanup(void)
 {
     if (server_fd >= 0) {
         close(server_fd);
+        server_fd = -1;
     }
-}
-
-int
-drop_privileges(void)
-{
-    struct passwd *pw;
-
-    pw = getpwnam("webserver");
-    if (pw == NULL) {
-        syslog(LOG_ERR, "getpwnam failed: %m");
-        return -1;
-    }
-
-    if (setgid(pw->pw_gid) != 0) {
-        syslog(LOG_ERR, "setgid failed: %m");
-        return -1;
-    }
-
-    if (setuid(pw->pw_uid) != 0) {
-        syslog(LOG_ERR, "setuid failed: %m");
-        return -1;
-    }
-
-    return 0;
-}
-
-/* Add function to check if IP is from Cloudflare */
-int
-is_cloudflare_ip(const char *ip_addr)
-{
-    struct in_addr addr;
-    struct in_addr net;
-    struct in_addr mask;
-    unsigned long ip;
-    char network[20];
-    char *slash;
-    int i;
-    int prefix;
-
-    /* Check for NULL input */
-    if (ip_addr == NULL) {
-        return 0;
-    }
-
-    /* Convert IP address */
-    if (inet_pton(AF_INET, ip_addr, &addr) != 1) {
-        return 0;
-    }
-
-    ip = ntohl(addr.s_addr);
-
-    for (i = 0; i < CLOUDFLARE_IP_RANGES_COUNT; i++) {
-        /* Bounds check */
-        if (cloudflare_ip_ranges[i] == NULL) {
-            continue;
-        }
-
-        /* Copy network safely */
-        strncpy(network, cloudflare_ip_ranges[i], sizeof(network) - 1);
-        network[sizeof(network) - 1] = '\0';
-
-        slash = strchr(network, '/');
-        if (slash == NULL) {
-            continue;
-        }
-
-        *slash = '\0';
-        prefix = atoi(slash + 1);
-
-        /* Validate prefix range */
-        if (prefix < 0 || prefix > 32) {
-            continue;
-        }
-
-        if (inet_pton(AF_INET, network, &net) != 1) {
-            continue;
-        }
-
-        mask.s_addr = htonl(0xffffffff << (32 - prefix));
-
-        if ((ip & ntohl(mask.s_addr)) == (ntohl(net.s_addr) & ntohl(mask.s_addr))) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-/* Fix init_ssl_ctx function */
-int
-init_ssl_ctx(struct server_context *ctx)
-{
-    /* Basic TLS 1.2 setup */
-    br_ssl_server_init_full_rsa(&ctx->sc, ctx->chain, 1, &ctx->private_key);
-    br_ssl_engine_set_versions(&ctx->sc.eng, BR_TLS12, BR_TLS12);
-    br_ssl_engine_set_buffer(&ctx->sc.eng, ctx->iobuf, sizeof(ctx->iobuf), 1);
-
-    return 0;
-}
-
-/* Fix load_certificates function */
-int
-load_certificates(struct server_context *ctx)
-{
-    FILE *f = NULL;
-    long file_size;
-
-    /* Load certificate chain */
-    if (!(f = fopen(SSL_CERT_FILE, "rb"))) {
-        goto error;
-    }
-
-    if (fseek(f, 0, SEEK_END) != 0 || (file_size = ftell(f)) < 0) {
-        goto error;
-    }
-
-    rewind(f);
-
-    if (!(ctx->cert_data = malloc((size_t)file_size))) {
-        goto error;
-    }
-
-    if (fread(ctx->cert_data, 1, (size_t)file_size, f) != (size_t)file_size) {
-        goto error;
-    }
-
-    ctx->cert_data_len = (size_t)file_size;
-    fclose(f);
-    f = NULL;
-
-    /* Load private key */
-    if (!(f = fopen(SSL_KEY_FILE, "rb"))) {
-        goto error;
-    }
-
-    if (fseek(f, 0, SEEK_END) != 0 || (file_size = ftell(f)) < 0) {
-        goto error;
-    }
-
-    rewind(f);
-
-    if (!(ctx->key_data = malloc((size_t)file_size))) {
-        goto error;
-    }
-
-    if (fread(ctx->key_data, 1, (size_t)file_size, f) != (size_t)file_size) {
-        goto error;
-    }
-
-    ctx->key_data_len = (size_t)file_size;
-    fclose(f);
-
-    /* Parse certificate and key */
-    if (load_cert_data(ctx) != 0 || load_key_data(ctx) != 0) {
-        goto error;
-    }
-
-    return 0;
-
-error:
-    if (f) fclose(f);
-    cleanup_ssl_ctx(ctx);
-    return -1;
-}
-
-void
-cleanup_ssl_ctx(struct server_context *ctx)
-{
-    if (ctx != NULL) {
-        if (ctx->cert_data != NULL) {
-            memset(ctx->cert_data, 0, ctx->cert_data_len);
-            free(ctx->cert_data);
-            ctx->cert_data = NULL;
-        }
-        if (ctx->key_data != NULL) {
-            memset(ctx->key_data, 0, ctx->key_data_len);
-            free(ctx->key_data);
-            ctx->key_data = NULL;
-        }
-        memset(ctx->iobuf, 0, sizeof(ctx->iobuf));
-        ctx->cert_data_len = 0;
-        ctx->key_data_len = 0;
-    }
-}
-
-static int
-load_key_data(struct server_context *ctx)
-{
-    br_skey_decoder_context dc;
-    const br_rsa_private_key *rsa;
-
-    /* Initialize key decoder */
-    br_skey_decoder_init(&dc);
-    br_skey_decoder_push(&dc, ctx->key_data, ctx->key_data_len);
-
-    /* Get RSA key */
-    rsa = br_skey_decoder_get_rsa(&dc);
-    if (rsa == NULL) {
-        return -1;
-    }
-
-    /* Copy key data */
-    ctx->private_key = *rsa;
-
-    return 0;
-}
-
-static int
-load_cert_data(struct server_context *ctx)
-{
-    br_x509_decoder_context dc;
-
-    /* Initialize certificate decoder */
-    br_x509_decoder_init(&dc, 0, 0);
-    br_x509_decoder_push(&dc, ctx->cert_data, ctx->cert_data_len);
-
-    /* Check if decoding was successful */
-    if (!br_x509_decoder_last_error(&dc)) {
-        /* Set up certificate */
-        ctx->chain[0].data = ctx->cert_data;
-        ctx->chain[0].data_len = ctx->cert_data_len;
-        return 0;
-    }
-
-    return -1;
-}
-
-static int
-sock_read(void *ctx, unsigned char *buf, size_t len)
-{
-    int fd;
-    ssize_t rlen;
-
-    fd = *(int *)ctx;
-    rlen = read(fd, buf, len);
-
-    if (rlen <= 0) {
-        return rlen == 0 ? -1 : 0;
-    }
-    return (int)rlen;
-}
-
-static int
-sock_write(void *ctx, const unsigned char *buf, size_t len)
-{
-    int fd;
-    ssize_t wlen;
-
-    fd = *(int *)ctx;
-    wlen = write(fd, buf, len);
-
-    if (wlen <= 0) {
-        return 0;
-    }
-    return (int)wlen;
-}
-
-static int
-handle_client_connection(int client_fd, struct server_context *ctx)
-{
-    unsigned char *buf;
-    ssize_t read_len;
-    br_sslio_context ioc;
-    int ret;
-
-    /* Reset server context */
-    ret = br_ssl_server_reset(&ctx->sc);
-    if (ret != 1) {
-        return -1;
-    }
-
-    /* Initialize I/O wrapper */
-    br_sslio_init(&ioc, &ctx->sc.eng, sock_read, &client_fd,
-                  sock_write, &client_fd);
-
-    /* Perform handshake */
-    if (br_sslio_flush(&ioc) < 0) {
-        return -1;
-    }
-
-    /* Read request */
-    buf = ctx->iobuf;
-    read_len = br_sslio_read(&ioc, buf, sizeof(ctx->iobuf) - 1);
-    if (read_len < 0) {
-        br_sslio_close(&ioc);
-        return -1;
-    }
-
-    /* Null terminate received data */
-    if (read_len > 0) {
-        buf[read_len] = '\0';
-    } else {
-        buf[0] = '\0';
-    }
-
-    /* Send response */
-    if (br_sslio_write_all(&ioc, response_header, strlen(response_header)) < 0) {
-        br_sslio_close(&ioc);
-        return -1;
-    }
-
-    /* Flush and close properly */
-    if (br_sslio_flush(&ioc) < 0) {
-        br_sslio_close(&ioc);
-        return -1;
-    }
-
-    br_sslio_close(&ioc);
-    return 0;
+    hosts_cleanup();
 }
