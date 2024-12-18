@@ -11,6 +11,21 @@ These instructions ensure Copilot's suggestions align with our project's technic
     - Avoid features requiring `glibc` or non-portable platform-specific APIs.
 - Write code optimized for lightweight environments (e.g. `musl`).
 - Data oriented design is preferred over object oriented design.
+- Never overcomplicate the code generated.
+    - Keep generated code as simple and straightforward as possible.
+    - Avoid complex control structures and nested loops.
+- Provide code snippets that can be easily integrated into existing codebases.
+- Ensure generated code is **safe**, **efficient**, and **maintainable**.
+- Follow the project's **coding standards** and **style guidelines**.
+- Only provide the necessary code to fulfill the user's request that is to perform the most basic operations.
+- Avoid generating code that is overly verbose or redundant.
+- Provide clear and concise comments to explain the purpose of the code.
+- Use **consistent naming conventions** for variables, functions, and files.
+- Avoid generating code that is overly complex or difficult to understand.
+- Ensure that the generated code is **well-documented** and **self-explanatory**.
+- Keep generated code **minimal**, **modular** and **reusable**.
+- Avoid generating code that is overly specific to a particular use case.
+- Ensure that the generated code is **well-structured** and **easy to read**.
 - Format C Code following GNU Coding Standards.
 - Do not use C++ comments (`//`) in C code.
 - Do not use undeclared identifier.

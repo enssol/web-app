@@ -154,5 +154,8 @@
   "C_Cpp.default.cStandard": "c89",
   "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
   "C_Cpp.codeAnalysis.clangTidy.enabled": true,
-  "C_Cpp.default.browse.databaseFilename": "compile_commands.json"
+  "C_Cpp.default.browse.databaseFilename": "compile_commands.json",
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  }
 }
