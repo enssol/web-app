@@ -192,4 +192,3 @@ docker-compose.override.yml
 !CHANGELOG.md
 !AUTHORS
 !example/**/*
-.vscode/settings.json
