@@ -7,7 +7,7 @@ These instructions ensure Copilot's suggestions align with our project's technic
 ## **General Guidelines**
 - Adhere to **ISO/IEC 9899:1990 (C90 Standard)**, ** POSIX.1 (ISO/IEC 9945-1:1996 - IEEE Standard 1003.1)**, and **X/Open-500** compliance in all code suggestions.
 - Ensure code is **portable**, **cross-platform**, and **cross-architecture**:
-    - Prioritize compatibility with `musl libc`, and `gcc` (for Alpine) `musl-gcc` (for Trisquel).
+    - Prioritize compatibility with `musl libc`, and `gcc` (for Alpine)
     - Avoid features requiring `glibc` or non-portable platform-specific APIs.
 - Write code optimized for lightweight environments (e.g. `musl`).
 - Data oriented design is preferred over object oriented design.
@@ -41,7 +41,7 @@ These instructions ensure Copilot's suggestions align with our project's technic
 - Avoid previous declarations of variables.
 - C90 standard requiring declarations at start of blocks
 - ISO C90 forbids mixed declarations and code
-- Code must compile with gcc using: `-std=c90 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500 -Wall -ansi -Wextra -pedantic -Werror -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -fanalyzer -fstack-protector-strong -fstack-check -fdata-sections -ffunction-sections -fno-common -fstrict-aliasing -Warray-bounds -Wstack-protector -Wformat=2 -Wformat-security -Wformat-overflow=2 -Wformat-truncation=2 -Walloca -Wvla -fno-omit-frame-pointer`
+- Code must compile with gcc using: `-static -std=c90 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500 -Wall -ansi -Wextra -pedantic -Werror -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -fanalyzer -fstack-protector-strong -fstack-check -fdata-sections -ffunction-sections -fno-common -fstrict-aliasing -Warray-bounds -Wstack-protector -Wformat=2 -Wformat-security -Wformat-overflow=2 -Wformat-truncation=2 -Walloca -Wvla -fno-omit-frame-pointer`
 - Code Safety Requirements:
     - No VLAs (enforced by -Wvla)
     - No array bounds violations (enforced by -Warray-bounds)
