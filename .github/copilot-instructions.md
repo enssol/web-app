@@ -11,6 +11,7 @@ These instructions ensure Copilot's suggestions align with our project's technic
     - Avoid features requiring `glibc` or non-portable platform-specific APIs.
 - Write code optimized for lightweight environments (e.g. `musl`).
 - Data oriented design is preferred over object oriented design.
+- I dont want improvements, please only review and check they integrate well (consolidate) and cover the basic use-case functionality with simplicity without conflicts and duplication (cleanup code).
 - Never overcomplicate the code generated.
     - Keep generated code as simple and straightforward as possible.
     - Avoid complex control structures and nested loops.
