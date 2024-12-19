@@ -19,12 +19,12 @@ COMMON_FLAGS = -std=c90 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500 -Wall -ans
 
 # Production flags (static linking)
 PROD_CFLAGS = $(COMMON_FLAGS) -static
-PROD_LDFLAGS = -Wl,--gc-sections -static
+PROD_LDFLAGS = -Wl,--gc-sections -static -lcrypt
 
 # Test flags (dynamic linking)
 TEST_CFLAGS = $(COMMON_FLAGS)
 TEST_LDFLAGS = -Wl,--gc-sections
-TEST_LIBS = -lcunit
+TEST_LIBS = -lcunit -lcrypt
 
 # Source files
 SRC = $(wildcard $(SRCDIR)/*.c)

@@ -1,21 +1,56 @@
-<!--
- Copyright 2024 Enveng Group - Simon French-Bluhm and Adrian Gallo.
- SPDX-License-Identifier: 	AGPL-3.0-or-later
--->
-# Web Server
+# EnvEng Web Server
 
-This is a basic web server implementation in C89, compliant with POSIX standards, serving static HTML files.
+A lightweight HTTP web server implementation in ANSI C (C89), focusing on POSIX compliance and minimal dependencies.
 
 ## Features
-- Serves `index.html` over HTTP.
-- Designed for lightweight environments using musl-libc.
-- Thorough error handling and static binary production.
+- Static file serving over HTTP/1.0
+- Basic authentication and session management
+- POSIX-compliant, musl libc based implementation
+- Minimal footprint with static binary output
 
 ## Prerequisites
-- musl-libc (`musl-gcc`).
-- CUnit (for tests).
+- gcc compiler
+- musl libc
+- GNU Make
+- CUnit testing framework
 
-## Build Instructions
-### Production Binary
+## Building
+
+### Production Build
 ```bash
-make
+make clean && make
+```
+
+### Run Tests
+```bash
+make clean && make test
+```
+
+## Project Structure
+```
+.
+├── bin/                # Binary outputs
+├── include/           # Header files
+├── src/              # Source code
+├── test/             # Test suite
+└── www/              # Static web content
+```
+
+## Usage
+Start the server:
+```bash
+./bin/web_server
+```
+
+Access via browser:
+- Login page: http://localhost:8080
+- Test page: http://localhost:8080/test_index.html
+
+## Technical Details
+- Compliant with ISO/IEC 9899:1990 (C90)
+- POSIX.1 (IEEE 1003.1) compliance
+- Static linking with musl libc
+- Thorough error handling
+
+## License
+AGPL-3.0-or-later

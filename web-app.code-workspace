@@ -187,7 +187,8 @@
             "cfg",
             "Makefile",
             "Makefile.am",
-            "Makefile.in"
+            "Makefile.in",
+            "auth.passwd"
         ],
         "licenser.license": "AGPLv3",
         "licenser.projectName": "Enveng Group - Obligation Register",

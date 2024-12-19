@@ -6,7 +6,12 @@
 #include "../include/web_server.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>  /* For memset */
 #include <signal.h>
+#include <errno.h>   /* For errno and EINTR */
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
 
 static volatile sig_atomic_t server_running = 1;
 static int server_socket = -1;
