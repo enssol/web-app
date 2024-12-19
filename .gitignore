@@ -39,7 +39,7 @@
 
 # IDE and editor files
 .idea/
-.vscode/*
+.vscode/
 *.swp
 *.swo
 *~
@@ -192,3 +192,4 @@ docker-compose.override.yml
 !CHANGELOG.md
 !AUTHORS
 !example/**/*
+.vscode/settings.json
