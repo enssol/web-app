@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,7 +32,6 @@
             display: flex;
             width: 100%;
             height: 100%;
-            padding: 0px 20px;
             justify-content: flex-start;
             align-items: center;
             flex-shrink: 0;
@@ -75,7 +75,7 @@
             font-size: 13px;
             font-style: normal;
             font-weight: 600;
-            line-height: 139%;
+            line-height: 200%;
         }
 
         .content {
@@ -87,33 +87,80 @@
             color: var(--TextSecondaryDark, #303030);
             text-align: center;
             font-family: Ubuntu;
-            font-size: 11px;
+            font-size: 13px;
             font-style: normal;
             font-weight: 400;
             line-height: 139%; /* 19.46px */
             padding: 2px 10px;
         }
+        /* The container <div> - needed to position the dropdown content */
+        .dropbtn {
+            color: rgb(12, 8, 8);
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            background: none; /* Remove background */
+            padding: 0; /* Remove padding */
+        }
 
+        /* The container <div> - needed to position the dropdown content */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
 
-        /* Chevron icon size adjusted for consistency */
-        .icon-chevron-down {
-            width: 14px;
-            height: 14px;
-            fill: currentColor;
+        /* Dropdown Content (Hidden by Default) */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: black;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        /* Change color of dropdown links on hover */
+        .dropdown-content a:hover {
+            background-color: #575757;
+        }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Style for the "^" shape */
+        .dropbtn::after {
+            content: "^";
+            font-size: 18px;
         }
 
         .footer {
+            width: 64%; /* Set width to 100% to stretch across the page */
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-            gap: 10px;
-            align-self: stretch;
+            align-self: center;
+            gap: 30px;
+            align-items: stretch;
             border-radius: 8px 8px 0px 0px;
             background: var(--GreenPrimary, #909E77);
         }
 
         .footercontent {
+            width: 231.767px;
+            color: #FFF;
+            font-family: Ubuntu;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 139%; /* 19.46px */
             display: flex;
             align-items: center;
         }
@@ -145,8 +192,9 @@
             background-size: cover;
             background-position: left;
             margin-left: 400px;
+            position: relative; /* Added to position dropdown correctly */
         }
-
+        /* For role and description */
         .content-right {
             align-self: stretch;
             color: var(--TextPrimaryDark, #000);
@@ -160,82 +208,142 @@
 
     </style>
 </head>
-    <div class="header">
+<body>
+    <header>
         <div class="header-padding">
             <div class="header-left"></div>
             <div class="header-content">Environmental Compliance Management System</div>
-            <div class="header-right" style="background-image: url('https://s3-alpha-sig.figma.com/img/408a/0553/85b58402aa6e392cd297249b2cb600c7?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=NWFYXZeW9dfkYvcvuTtmBQHTmJeMB~ymZOIM3QCJvORRZLu-hJIJ764tozGXfbXJ0nwSJhI1xek1pmKQNo9QA84F3Iw064LGxvqcH~CNnY4OyMfHLi24-Tbwv2ydpU8n1x3dptFHGZHkxNsmAzLemjDH~wWM7SIcdf1jWuvhH20JCxbjA-Y0DS4G8ohMOi-tlxlC-GoTT0dnhpv~e2OyZ7mkWTuCMLLvhxv2jMjDtrJIgqrN99RgSEm-~lma3KCk87HB4cJ-A-2MmecjyKQWwVyy8PKFXciO9Bfvxmr4kt-koG0H9fzyzDftFG8YW5UFc9OcvG~5udMmvmAsW7N~IA__');"></div>
+            <div class="header-right dropdown" style="background-image: url('https://s3-alpha-sig.figma.com/img/408a/0553/85b58402aa6e392cd297249b2cb600c7?Expires=1734912000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=NWFYXZeW9dfkYvcvuTtmBQHTmJeMB~ymZOIM3QCJvORRZLu-hJIJ764tozGXfbXJ0nwSJhI1xek1pmKQNo9QA84F3Iw064LGxvqcH~CNnY4OyMfHLi24-Tbwv2ydpU8n1x3dptFHGZHkxNsmAzLemjDH~wWM7SIcdf1jWuvhH20JCxbjA-Y0DS4G8ohMOi-tlxlC-GoTT0dnhpv~e2OyZ7mkWTuCMLLvhxv2jMjDtrJIgqrN99RgSEm-~lma3KCk87HB4cJ-A-2MmecjyKQWwVyy8PKFXciO9Bfvxmr4kt-koG0H9fzyzDftFG8YW5UFc9OcvG~5udMmvmAsW7N~IA__');">
+                <div class="dropdown-content">
+                    <a href="#">Link 1</a>
+                    <a href="#">Link 2</a>
+                    <a href="#">Link 3</a>
+                </div>
+            </div>
             <div class="content-right">
                 <div class="content-right">Name</div>
                 <div class="content-right">Role</div>
             </div>
         </div>
-    </div>
+    </header>
 
-    <div class="sub-header">
+    <div class="sub-header" jfjk>
         <div class="sub-header-content">Select Category</div>
-        <svg class="icon-chevron-down" viewBox="0 0 24 24">
-            <path d="M12 15.5l-7.071-7.071 1.414-1.414L12 12.671l5.657-5.656 1.414 1.414z"></path>
-        </svg>
-        <div class="content">
-            14 Day Lookahead
-            <svg class="icon-chevron-down" viewBox="0 0 24 24">
-                <path d="M12 15.5l-7.071-7.071 1.414-1.414L12 12.671l5.657-5.656 1.414 1.414z"></path>
-            </svg>
+        <div class="dropdown">
+            <button class="dropbtn"></button>
+            <div class="dropdown-content">
+            <a href="#">Link 1</a>
+            <a href="#">Link 2</a>
+            <a href="#">Link 3</a>
+            </div>
         </div>
-
+        <div class="content">14 Day Lookahead</div>
+        <div class="dropdown">
+            <button class="dropbtn"></button>
+            <div class="dropdown-content">
+            <a href="#">Link 1</a>
+            <a href="#">Link 2</a>
+            <a href="#">Link 3</a>
+            </div>
+        </div>
     </div>
 
+    <main>
+        <!-- Your main content goes here -->
+    </main>
+
+<footer>
     <div class="footer">
         <div class="footercontent">
             Primary Environmental Mechanism
-            <svg class="icon-chevron-down" viewBox="0 0 24 24">
-                <path d="M12 15.5l-7.071-7.071 1.414-1.414L12 12.671l5.657-5.656 1.414 1.414z"></path>
-            </svg>
+            <div class="dropdown">
+                <button class="dropbtn"></button>
+                <div class="dropdown-content">
+                    <a href="#">Link 1</a>
+                    <a href="#">Link 2</a>
+                    <a href="#">Link 3</a>
+                </div>
+            </div>
         </div>
         <div class="footercontent">
             Obligation
-            <svg class="icon-chevron-down" viewBox="0 0 24 24">
-                <path d="M12 15.5l-7.071-7.071 1.414-1.414L12 12.671l5.657-5.656 1.414 1.414z"></path>
-            </svg>
+            <div class="dropdown">
+                <button class="dropbtn"></button>
+                <div class="dropdown-content">
+                    <a href="#">Link 1</a>
+                    <a href="#">Link 2</a>
+                    <a href="#">Link 3</a>
+                </div>
+            </div>
         </div>
         <div class="footercontent">
             Accountability
-            <svg class="icon-chevron-down" viewBox="0 0 24 24">
-                <path d="M12 15.5l-7.071-7.071 1.414-1.414L12 12.671l5.657-5.656 1.414 1.414z"></path>
-            </svg>
+            <div class="dropdown">
+                <button class="dropbtn"></button>
+                <div class="dropdown-content">
+                    <a href="#">Link 1</a>
+                    <a href="#">Link 2</a>
+                    <a href="#">Link 3</a>
+                </div>
+            </div>
         </div>
         <div class="footercontent">
             Responsibility
-            <svg class="icon-chevron-down" viewBox="0 0 24 24">
-                <path d="M12 15.5l-7.071-7.071 1.414-1.414L12 12.671l5.657-5.656 1.414 1.414z"></path>
-            </svg>
+            <div class="dropdown">
+                <button class="dropbtn"></button>
+                <div class="dropdown-content">
+                    <a href="#">Link 1</a>
+                    <a href="#">Link 2</a>
+                    <a href="#">Link 3</a>
+                </div>
+            </div>
         </div>
         <div class="footercontent">
             Project Plan
-            <svg class="icon-chevron-down" viewBox="0 0 24 24">
-                <path d="M12 15.5l-7.071-7.071 1.414-1.414L12 12.671l5.657-5.656 1.414 1.414z"></path>
-            </svg>
+            <div class="dropdown">
+                <button class="dropbtn"></button>
+                <div class="dropdown-content">
+                    <a href="#">Link 1</a>
+                    <a href="#">Link 2</a>
+                    <a href="#">Link 3</a>
+                </div>
+            </div>
         </div>
         <div class="footercontent">
             Action Due Date
-            <svg class="icon-chevron-down" viewBox="0 0 24 24">
-                <path d="M12 15.5l-7.071-7.071 1.414-1.414L12 12.671l5.657-5.656 1.414 1.414z"></path>
-            </svg>
+            <div class="dropdown">
+                <button class="dropbtn"></button>
+                <div class="dropdown-content">
+                    <a href="#">Link 1</a>
+                    <a href="#">Link 2</a>
+                    <a href="#">Link 3</a>
+                </div>
+            </div>
         </div>
         <div class="footercontent">
             Status
-            <svg class="icon-chevron-down" viewBox="0 0 24 24">
-                <path d="M12 15.5l-7.071-7.071 1.414-1.414L12 12.671l5.657-5.656 1.414 1.414z"></path>
-            </svg>
+            <div class="dropdown">
+                <button class="dropbtn"></button>
+                <div class="dropdown-content">
+                    <a href="#">Link 1</a>
+                    <a href="#">Link 2</a>
+                    <a href="#">Link 3</a>
+                </div>
+            </div>
         </div>
         <div class="footercontent">
             Compliance Comments
-            <svg class="icon-chevron-down" viewBox="0 0 24 24">
-                <path d="M12 15.5l-7.071-7.071 1.414-1.414L12 12.671l5.657-5.656 1.414 1.414z"></path>
-            </svg>
+            <div class="dropdown">
+                <button class="dropbtn"></button>
+                <div class="dropdown-content">
+                    <a href="#">Link 1</a>
+                    <a href="#">Link 2</a>
+                    <a href="#">Link 3</a>
+                </div>
+            </div>
         </div>
     </div>
+</footer>
 
     <div class="subfooter">
         <div class="subfootercontent">
@@ -263,5 +371,13 @@
             Compliance Comments
         </div>
     </div>
+
+    <script>
+        // JavaScript to toggle the dropdown
+        document.querySelector('.header-right').addEventListener('click', function() {
+            var dropdownContent = this.querySelector('.dropdown-content');
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        });
+    </script>
 </body>
 </html>
