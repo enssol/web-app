@@ -1,0 +1,2 @@
+# Format: Username:Password:UID:GID:FullName:HomeDir:Shell:IsAdmin
+john:smith:1000:1000:John Smith:/home/john:/bin/sh:0
