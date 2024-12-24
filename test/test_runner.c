@@ -14,6 +14,8 @@ int
 main(void)
 {
     CU_pSuite web_server_suite;
+    CU_pSuite constant_suite;
+    CU_pSuite struct_suite;
 
     /* Initialize CUnit registry */
     if (CU_initialize_registry() != CUE_SUCCESS) {
@@ -21,14 +23,25 @@ main(void)
     }
 
     /* Create suites */
+    constant_suite = CU_add_suite("Constant Tests", NULL, NULL);
+    struct_suite = CU_add_suite("Struct Tests", NULL, NULL);
     web_server_suite = CU_add_suite("Web Server Tests", NULL, NULL);
-    if (web_server_suite == NULL) {
+    
+    if (
+        web_server_suite == NULL || 
+        constant_suite == NULL || 
+        struct_suite == NULL
+    ) {
         CU_cleanup_registry();
         return CU_get_error();
     }
 
     /* Initialize test suites */
-    if (init_web_server_suite(web_server_suite) != 0) {
+    if (
+        init_web_server_suite(web_server_suite) != 0 ||
+        init_constant_suite(constant_suite) != 0 ||
+        init_struct_suite(struct_suite) != 0
+    ) {
         CU_cleanup_registry();
         return CU_get_error();
     }

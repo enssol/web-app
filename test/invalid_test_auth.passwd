@@ -1,0 +1,8 @@
+# Format: Username:Password:UID:GID:FullName:HomeDir:Shell:IsAdmin
+
+# Missing entries
+john:smith:::John Smith:/home/john:/bin/sh:0
+# Invalid types
+terry:davis:ptpepr:eesrs:Terry Davis:/home/terry:/bin/sh:86
+# Incorrect delimiter
+admin?secret?0040?7766?Administrator?/?/bin/sh?1
