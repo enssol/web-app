@@ -203,8 +203,8 @@ handle_client(int client_socket, const char *www_root)
     char method[16];
     char uri[256];
     char filepath[512];
-    char username[256];
-    char password[256];
+    char username[256] = {0};  /* Initialize to zero */
+    char password[256] = {0};  /* Initialize to zero */
     char *query;
     ssize_t bytes_read;
     struct stat st;
@@ -212,9 +212,9 @@ handle_client(int client_socket, const char *www_root)
     ssize_t read_bytes;
     ssize_t write_result;
     /* Variables used across multiple sections */
-    char fullname[256];
-    char email[256];
-    char project[256];
+    char fullname[256] = {0};  /* Initialize to zero */
+    char email[256] = {0};     /* Initialize to zero */
+    char project[256] = {0};   /* Initialize to zero */
     char *query_copy;
     char *token;
     char *saveptr;
@@ -225,10 +225,7 @@ handle_client(int client_socket, const char *www_root)
     const char *rec_path;
     int result;
 
-    /* Initialize strings */
-    memset(fullname, 0, sizeof(fullname));
-    memset(email, 0, sizeof(email));
-    memset(project, 0, sizeof(project));
+    /* Remove redundant initialization since we did it at declaration */
     rec_path = NULL;
 
     /* Read HTTP request */
@@ -534,9 +531,12 @@ handle_update_user(int client_socket, const char *username, const char *fullname
 int
 setup_server(int port)
 {
-    struct sockaddr_in server_addr;
     int server_socket;
     const int enable = 1;
+    union {
+        struct sockaddr sa;
+        struct sockaddr_in sin;
+    } addr;
 
     /* Create socket */
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -551,21 +551,20 @@ setup_server(int port)
         return -1;
     }
 
-    /* Configure server address */
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons((unsigned short)port);
+    /* Initialize server address structure */
+    memset(&addr, 0, sizeof(addr));
+    addr.sin.sin_family = AF_INET;
+    addr.sin.sin_addr.s_addr = INADDR_ANY;
+    addr.sin.sin_port = htons((unsigned short)port);
 
     /* Bind socket */
-    if (bind(server_socket, (struct sockaddr *)&server_addr,
-             sizeof(server_addr)) < 0) {
+    if (bind(server_socket, &addr.sa, sizeof(addr.sin)) < 0) {
         close(server_socket);
         return -1;
     }
 
     /* Listen for connections */
-    if (listen(server_socket, 10) < 0) {
+    if (listen(server_socket, SOMAXCONN) < 0) {
         close(server_socket);
         return -1;
     }
