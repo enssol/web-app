@@ -31,6 +31,8 @@ TEST_LIBS = -lcunit -lcrypt
 SRC = $(wildcard $(SRCDIR)/*.c)
 TEST_SRC = $(wildcard $(TESTDIR)/*.c)
 PROD_SRC = $(SRC)
+
+# Object files
 PROD_OBJ = $(PROD_SRC:$(SRCDIR)/%.c=$(OBJDIR)/prod/%.o)
 
 TEST_SRC_NO_MAIN = $(filter-out $(SRCDIR)/main.c,$(SRC))

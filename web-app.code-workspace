@@ -206,7 +206,6 @@
         },
         "workbench.preferredHighContrastColorTheme": "Default Dark Modern",
         "workbench.colorTheme": "GitHub Dark Default",
-        "workbench.colorTheme": "GitHub Dark Default",
         "diffEditor.ignoreTrimWhitespace": false,
         "search.exclude": {
             "**/node_modules": true,
@@ -252,7 +251,6 @@
         "github.copilot.chat.inlineChatHint.enabled": true,
         "snyk.folderConfigs": [
             {
-                "folderPath": "/devcontainer/web-app",
                 "folderPath": "/devcontainer/web-app",
                 "baseBranch": "main",
                 "localBranches": ["feature/boilerplate", "main"]
