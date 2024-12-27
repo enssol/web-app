@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>SCJV - Pilbara Ports Environmental Obligations</title>
+  <title>W6946 Environmental Obligations</title>
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   <style type="text/css">
     body {
@@ -349,8 +349,8 @@
         records.push(currentRecord);
       }
 
-      // Filter to only include SCJV - Pilbara Ports records
-      return records.filter(record => record.Project_Name === 'SCJV - Pilbara Ports');
+      // Filter to only include W6946 records
+      return records.filter(record => record.Project_Name === 'W6946');
     }
 
     // Update populateTable function to match reduced columns
@@ -392,20 +392,9 @@
       return true;
     }
 
-    function navigateToProfile() {
-      if (!checkSession()) return;
-      var username = getCookie('username');
-      window.location.href = 'profile.html?username=' + encodeURIComponent(username);
-    }
-
-    function navigateToProject(url) {
-      if (!checkSession()) return;
-      window.location.href = url;
-    }
-
     window.onload = function () {
       if (!checkSession()) return;
-      fetch('/scjv.rec')  // Changed from '../var/db/scjv.rec'
+      fetch('/w6946.rec')  // Changed from '../var/db/w6946.rec'
         .then(response => {
           if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -456,9 +445,6 @@
           case 'overdue':
             show = (daysDiff < 0);
             break;
-          case 'upcoming':
-            show = (daysDiff > -1 && daysDiff <= 28);
-            break;
           default:
             show = true;
         }
@@ -466,68 +452,22 @@
       }
     }
 
-    // Add to the project view pages
-    "use strict";
-
-    function makeEditable(cell) {
-      // Only allow editing if user has permissions
-      if (!checkEditPermissions()) return;
-
-      var displayEl = cell.querySelector('.display-value');
-      var editEl = cell.querySelector('.edit-value');
-
-      displayEl.style.display = 'none';
-      editEl.style.display = '';
-      editEl.value = displayEl.textContent;
-      editEl.focus();
-    }
-
-    function updateField(input) {
-      var cell = input.parentElement;
-      var recordId = cell.parentElement.getAttribute('data-id');
-      var field = cell.getAttribute('data-field');
-      var value = input.value;
-
-      // Simple update for status changes
-      fetch('/record/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: recordId,
-          field: field,
-          value: value,
-          username: getCookie('username')
-        })
-      })
-        .then(response => {
-          if (!response.ok) throw new Error('Update failed');
-
-          // Update display
-          var displayEl = cell.querySelector('.display-value');
-          displayEl.textContent = value;
-          displayEl.style.display = '';
-          input.style.display = 'none';
-
-          // Log the action
-          logAction('UPDATE_' + field.toUpperCase(), recordId);
-        })
-        .catch(error => {
-          alert('Error updating record: ' + error.message);
-        });
-    }
-
-    function checkEditPermissions() {
-      // Check if user has permission for quick edits
+    function navigateToProfile() {
+      if (!checkSession()) return;
       var username = getCookie('username');
-      // Add project-specific role checks
-      return username && isProjectMember(username);
+      window.location.href = 'profile.html?username=' + encodeURIComponent(username);
+    }
+
+    function navigateToProject(url) {
+      if (!checkSession()) return;
+      window.location.href = url;
     }
   </script>
 </head>
 
 <body>
   <div id="header">
-    <h1>SCJV - Pilbara Ports Environmental Obligations</h1>
+    <h1>W6946 Environmental Obligations</h1>
   </div>
 
   <div class="user-nav">
@@ -538,7 +478,6 @@
   <div class="filter-buttons">
     <button onclick="filterByDueDate('all')">All Records</button>
     <button onclick="filterByDueDate('warning')">Due Soon (14 Days)</button>
-    <button onclick="filterByDueDate('upcoming')">Upcoming (28 Days)</button>
     <button onclick="filterByDueDate('overdue')">Overdue</button>
   </div>
 
