@@ -10,7 +10,6 @@
 #include "test_suites.h"
 
 #define BUFFER_SIZE 1024
-#define TEST_PORT 8082
 #define TEST_WWW_ROOT "./test"
 
 /* Test fixture */

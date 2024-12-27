@@ -16,6 +16,10 @@
 int web_server_suite_init(void);
 int web_server_suite_cleanup(void);
 
+/* Test suite setup functions */
+int init_web_server_suite(CU_pSuite suite);
+int init_web_server_security_suite(CU_pSuite suite);
+
 /* Test case functions */
 void test_server_setup(void);
 void test_server_accept(void);

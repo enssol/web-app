@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>W6946 Environmental Obligations</title>
+  <title>SCJV - Pilbara Ports Environmental Obligations</title>
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   <style type="text/css">
     body {
@@ -349,8 +349,8 @@
         records.push(currentRecord);
       }
 
-      // Filter to only include W6946 records
-      return records.filter(record => record.Project_Name === 'W6946');
+      // Filter to only include scjv records
+      return records.filter(record => record.Project_Name === 'SCJV - Pilbara Ports');
     }
 
     // Update populateTable function to match reduced columns
@@ -394,13 +394,13 @@
 
     window.onload = function () {
       if (!checkSession()) return;
-      fetch('/w6946.rec')  // Changed from '../var/db/w6946.rec'
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.text();
-        })
+      fetch('/var/records/scjv.rec')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.text();
+      })
         .then(data => {
           const records = parseRecData(data);
           populateTable(records);
@@ -467,7 +467,7 @@
 
 <body>
   <div id="header">
-    <h1>W6946 Environmental Obligations</h1>
+    <h1>SCJV Environmental Obligations</h1>
   </div>
 
   <div class="user-nav">

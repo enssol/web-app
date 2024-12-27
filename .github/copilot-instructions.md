@@ -70,7 +70,7 @@ These instructions ensure Copilot's suggestions align with our project's technic
 - Avoid previous declarations of variables.
 - C90 standard requiring declarations at start of blocks
 - ISO C90 forbids mixed declarations and code
-- Code must compile with gcc using: `-static -std=c90 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500 -Wall -ansi -Wextra -pedantic -Werror -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -fanalyzer -fstack-protector-strong -fstack-check -fdata-sections -ffunction-sections -fno-common -fstrict-aliasing -Warray-bounds -Wstack-protector -Wformat=2 -Wformat-security -Wformat-overflow=2 -Wformat-truncation=2 -Walloca -Wvla -fno-omit-frame-pointer -finput-charset=iso-8859-1 -fexec-charset=iso-8859-1 -fwide-exec-charset=iso-8859-1`
+- Code must compile with gcc using: `-static -O3 std=c90 -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500 -Wall -ansi -Wextra -pedantic -Werror -Wshadow -Wconversion -Wstrict-prototypes -Wmissing-prototypes -Warray-bounds -Wformat=2 -Wformat-security -Wformat-overflow=2 -Wformat-truncation=2 -Wvla -Wbad-function-cast -Wstrict-aliasing=2 -Wnull-dereference -Wdouble-promotion -Wfloat-equal -Wpointer-arith -Wwrite-strings -Wcast-align -Wcast-qual -Wredundant-decls -Wundef -Wmissing-include-dirs -Winit-self -Wswitch-enum -Wmissing-declarations -Wsign-conversion -fstack-protector-strong -fstack-check -fPIE -fstack-protector-all -fdata-sections -ffunction-sections -fno-common -fstrict-aliasing -fno-strict-overflow -fanalyzer -fno-omit-frame-pointer -finput-charset=iso-8859-1 -fexec-charset=iso-8859-1 -fwide-exec-charset=iso-8859-1`
 - Code Safety Requirements:
     - No VLAs (enforced by -Wvla)
     - No array bounds violations (enforced by -Warray-bounds)

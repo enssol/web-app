@@ -7,28 +7,40 @@
 #include "../include/web_server.h"
 #include "test_suites.h"
 
-/* Declarations of test suite initialization functions */
-int init_web_server_suite(CU_pSuite suite);
-
 int
 main(void)
 {
     CU_pSuite web_server_suite;
+    CU_pSuite web_server_security_suite;
 
     /* Initialize CUnit registry */
     if (CU_initialize_registry() != CUE_SUCCESS) {
         return CU_get_error();
     }
 
-    /* Create suites */
+    /* Create web server suite */
     web_server_suite = CU_add_suite("Web Server Tests", NULL, NULL);
     if (web_server_suite == NULL) {
         CU_cleanup_registry();
         return CU_get_error();
     }
 
+    /* Create security suite */
+    web_server_security_suite = CU_add_suite("Web Server Security Tests",
+                                           web_server_suite_init,
+                                           web_server_suite_cleanup);
+    if (web_server_security_suite == NULL) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+
     /* Initialize test suites */
     if (init_web_server_suite(web_server_suite) != 0) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+
+    if (init_web_server_security_suite(web_server_security_suite) != 0) {
         CU_cleanup_registry();
         return CU_get_error();
     }
