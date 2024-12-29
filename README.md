@@ -19,36 +19,40 @@ A lightweight HTTP web server implementation in ANSI C (C89), focusing on POSIX 
 - GNU Make
 - CUnit testing framework
 
-## Building
+## Build Commands
 
-### Production Build
+### Basic Build Commands
 ```bash
-make ENV=prod
-```
+make                # Default build (verifies musl and builds production)
+make prod          # Build production binary
+make test          # Build and run tests with coverage
+make check         # Build and run tests without coverage
+make debug         # Build tests and launch GDB debugger
+make clean         # Clean build artifacts
 
-### Development Build
-```bash
-make ENV=dev
-```
+# Clean previous builds and create new release package
+make release
 
-### Run Tests
-```bash
-make test
+# Create t4g-optimized release
+make t4g-release
+
+# The optimized package will be at:
+# dist/web-app-0.0.1.tar.gz
 ```
 
 ## Project Structure
 ```
 .
-├── bin/                # Binary outputs
-├── etc/               # Configuration files
-├── include/           # Header files
-├── lib/               # Libraries
-├── src/              # Source code
-├── test/             # Test suite
-└── www/              # Static web content
-    ├── assets/       # Static assets
-    ├── error/        # Error pages
-    └── templates/    # HTML templates
+??? bin/                # Binary outputs
+??? etc/               # Configuration files
+??? include/           # Header files
+??? lib/               # Libraries
+??? src/              # Source code
+??? test/             # Test suite
+??? www/              # Static web content
+    ??? assets/       # Static assets
+    ??? error/        # Error pages
+    ??? templates/    # HTML templates
 ```
 
 ## Usage

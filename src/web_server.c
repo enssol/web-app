@@ -48,9 +48,9 @@ rotate_log(const char *logname)
     /* Rotate existing logs */
     for (i = LOG_MAX_FILES - 1; i > 0; i--) {
         snprintf(oldpath, sizeof(oldpath), "%s/%s.%d%s",
-                 LOG_DIR, logname, i, LOG_ARCHIVE_SUFFIX);
+                LOG_DIR, logname, i, LOG_ARCHIVE_SUFFIX);
         snprintf(newpath, sizeof(newpath), "%s/%s.%d%s",
-                 LOG_DIR, logname, i + 1, LOG_ARCHIVE_SUFFIX);
+                LOG_DIR, logname, i + 1, LOG_ARCHIVE_SUFFIX);
         rename(oldpath, newpath);
     }
 
@@ -77,49 +77,39 @@ log_message(int severity, const char *username, const char *action, const char *
     char logpath[PATH_MAX];
     int ret;
 
-    /* Parameter validation */
+    /* Validate parameters */
     if (!username || !action || !message) {
         return ERR_PARAM;
     }
 
-    /* Construct log path */
-    snprintf(logpath, sizeof(logpath), "%s/web%s", LOG_DIR, LOG_SUFFIX);
+    /* Format timestamp */
+    now = time(NULL);
+    if (strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S",
+                localtime(&now)) == 0) {
+        return ERR_INTERNAL;
+    }
 
     /* Check log size and rotate if needed */
-    if (check_log_size(logpath) == 1) {
+    snprintf(logpath, sizeof(logpath), "%s/web%s", LOG_DIR, LOG_SUFFIX);
+    if (check_log_size(logpath)) {
         ret = rotate_log("web");
         if (ret != ERR_NONE) {
             return ret;
         }
     }
 
-    /* Open log file with exclusive lock */
+    /* Open log file in append mode */
     fp = fopen(logpath, "a");
     if (!fp) {
         return ERR_IO;
     }
 
-    /* Get timestamp */
-    now = time(NULL);
-    if (strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S",
-        localtime(&now)) == 0) {
-        fclose(fp);
-        return ERR_INTERNAL;
-    }
-
-    /* Lock file for writing */
-    if (flock(fileno(fp), LOCK_EX) == 0) {
-        /* Write log entry */
-        fprintf(fp, "%s|%d|%s|%s|%s\n",
-                timestamp, severity, username, action, message);
-        flock(fileno(fp), LOCK_UN);
-        ret = ERR_NONE;
-    } else {
-        ret = ERR_IO;
-    }
+    /* Write log entry */
+    fprintf(fp, "%s|%d|%s|%s|%s\n",
+            timestamp, severity, username, action, message);
 
     fclose(fp);
-    return ret;
+    return ERR_NONE;
 }
 
 int
@@ -448,11 +438,8 @@ delete_record_from_file(FILE *fp, const char *obligation_number)
     char line[MAX_BUFFER_SIZE];
     char temp_file[PATH_MAX];
     FILE *temp_fp;
-    char *start;
-    char *end;
-    char current_obligation[64];
+    int in_target_record = 0;
     int found = 0;
-    int ret = ERR_NONE;
 
     /* Parameter validation */
     if (!fp || !obligation_number) {
@@ -460,9 +447,7 @@ delete_record_from_file(FILE *fp, const char *obligation_number)
     }
 
     /* Create temporary file */
-    if (snprintf(temp_file, sizeof(temp_file), "%s.tmp", ENDPOINT_READ) < 0) {
-        return ERR_INTERNAL;
-    }
+    snprintf(temp_file, sizeof(temp_file), "%s.tmp", ENDPOINT_READ);
 
     temp_fp = fopen(temp_file, "w");
     if (!temp_fp) {
@@ -472,45 +457,39 @@ delete_record_from_file(FILE *fp, const char *obligation_number)
     /* Reset file position to start */
     rewind(fp);
 
-    /* Process each line */
+    /* Process file line by line */
     while (fgets(line, sizeof(line), fp)) {
-        start = strstr(line, "Obligation_Number=");
-        if (start) {
-            start += 17;
-            end = strchr(start, '|');
-            if (end) {
-                size_t len = (size_t)(end - start);
-                if (len >= sizeof(current_obligation)) {
-                    fclose(temp_fp);
-                    remove(temp_file);
-                    return ERR_INTERNAL;
-                }
-                strncpy(current_obligation, start, len);
-                current_obligation[len] = '\0';
-
-                if (strcmp(current_obligation, obligation_number) == 0) {
-                    found = 1;
-                    continue;
-                }
+        /* Check for start of record */
+        if (strstr(line, "Obligation_Number:")) {
+            /* If we find the target record, set flag */
+            if (strstr(line, obligation_number)) {
+                in_target_record = 1;
+                found = 1;
+                continue;
+            } else {
+                in_target_record = 0;
             }
         }
-        fputs(line, temp_fp);
+
+        /* Only write lines that aren't part of the target record */
+        if (!in_target_record) {
+            fputs(line, temp_fp);
+        }
     }
 
     fclose(temp_fp);
 
-    /* Only replace the file if we found and deleted a record */
+    /* Only replace if we found and deleted a record */
     if (found) {
         if (rename(temp_file, ENDPOINT_READ) != 0) {
             remove(temp_file);
-            ret = ERR_IO;
+            return ERR_IO;
         }
-    } else {
-        remove(temp_file);
-        ret = ERR_NOTFOUND;
+        return ERR_NONE;
     }
 
-    return ret;
+    remove(temp_file);
+    return ERR_NOTFOUND;
 }
 
 int
@@ -666,57 +645,97 @@ handle_update_record(int client_socket, const char *data)
     return result;
 }
 
+
 int
 handle_delete_record(int client_socket, const char *data)
 {
     FILE *fp;
-    char filepath[PATH_MAX];
-    char *obligation_number;
-    int ret;
+    char username[256] = {0};
+    const char *body;
+    const char *username_header;
+    const char *ob_line;
+    char obligation_number[64] = {0};
+    size_t i;
+    int result;
 
-    /* Validate parameters */
-    if (!data) {
-        return ERR_PARAM;
+    /* Response messages */
+    const char success_response[] =
+        "HTTP/1.0 200 OK\r\n"
+        "Content-Type: application/json\r\n"
+        "Access-Control-Allow-Origin: *\r\n"
+        "Access-Control-Allow-Headers: Content-Type, X-Username\r\n\r\n"
+        "{\"status\":\"success\",\"message\":\"Record deleted successfully\"}\r\n";
+
+    const char error_response[] =
+        "HTTP/1.0 400 Bad Request\r\n"
+        "Content-Type: application/json\r\n"
+        "Access-Control-Allow-Origin: *\r\n"
+        "Access-Control-Allow-Headers: Content-Type, X-Username\r\n\r\n"
+        "{\"status\":\"error\",\"message\":\"Invalid request parameters\"}\r\n";
+
+    /* Parameter validation */
+    if (!data || client_socket < 0) {
+        write(client_socket, error_response, strlen(error_response));
+        return -1;
     }
+
+    /* Extract username from header */
+    username_header = strstr(data, "X-Username: ");
+    if (!username_header) {
+        write(client_socket, error_response, strlen(error_response));
+        return -1;
+    }
+
+    username_header += 11; /* Skip "X-Username: " */
+    for (i = 0; i < sizeof(username) - 1 && username_header[i] != '\r' && username_header[i] != '\n'; i++) {
+        username[i] = username_header[i];
+    }
+    username[i] = '\0';
+
+    /* Find request body */
+    body = strstr(data, "\r\n\r\n");
+    if (!body || strlen(body) < 5) {
+        write(client_socket, error_response, strlen(error_response));
+        return -1;
+    }
+    body += 4;
 
     /* Extract obligation number */
-    obligation_number = strstr(data, "Obligation_Number");
-    if (!obligation_number) {
-        return ERR_PARAM;
+    ob_line = strstr(body, "Obligation_Number:");
+    if (!ob_line || sscanf(ob_line, "Obligation_Number: %63s", obligation_number) != 1) {
+        write(client_socket, error_response, strlen(error_response));
+        return -1;
     }
 
-    /* Create filepath */
-    ret = snprintf(filepath, sizeof(filepath), "var/records/scjv.rec");
-    if (ret < 0 || (size_t)ret >= sizeof(filepath)) {
-        return ERR_INTERNAL;
-    }
-
-    /* Open file for writing */
-    fp = fopen(filepath, "r+");
+    /* Open records file */
+    fp = fopen(ENDPOINT_READ, "r+");
     if (!fp) {
-        return ERR_IO;
+        write(client_socket, error_response, strlen(error_response));
+        log_message(LOG_ERROR, username, "DELETE_RECORD", "Failed to open records file");
+        return -1;
     }
 
-    /* Lock file for writing */
-    ret = flock(fileno(fp), LOCK_EX);
-    if (ret == 0) {
-        /* Delete record */
-        ret = delete_record_from_file(fp, obligation_number);
+    /* Get exclusive lock and delete record */
+    if (flock(fileno(fp), LOCK_EX) == 0) {
+        result = delete_record_from_file(fp, obligation_number);
         flock(fileno(fp), LOCK_UN);
     } else {
-        ret = ERR_IO;
+        result = -1;
     }
 
     fclose(fp);
 
-    /* Send response */
-    if (ret == ERR_NONE) {
-        dprintf(client_socket, "HTTP/1.0 200 OK\r\n\r\n");
-    } else {
-        dprintf(client_socket, "HTTP/1.0 500 Internal Server Error\r\n\r\n");
+    if (result == 0) {
+        log_message(LOG_INFO, username, "DELETE_RECORD",
+                   "Record deleted successfully");
+        write(client_socket, success_response, strlen(success_response));
+        return 0;
     }
 
-    return ret;
+    write(client_socket, error_response, strlen(error_response));
+    log_message(LOG_ERROR, username, "DELETE_RECORD",
+               "Failed to delete record");
+    return -1;
 }
 
 int
