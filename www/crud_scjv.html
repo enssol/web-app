@@ -277,59 +277,6 @@
       xhr.send();
     }
 
-    /* Format delete payload using exact server format */
-    function formatDeletePayload(recordText) {
-      return recordText.trim();
-    }
-
-    /* Modified delete function */
-    function deleteRecord() {
-      var obligationNumber = document.getElementById("update_obligation_number").value;
-
-      /* Basic validation */
-      if (!obligationNumber) {
-        showError("No record selected to delete");
-        return false;
-      }
-
-      /* Confirmation */
-      if (!confirm("Are you sure you want to delete record " + obligationNumber + "?")) {
-        return false;
-      }
-
-      /* Get exact format and send delete */
-      getRecordFormat(obligationNumber, function (recordText) {
-        var deleteData = formatDeletePayload(recordText);
-
-        try {
-          var xhr = new XMLHttpRequest();
-          xhr.open("POST", "/delete_record", true);
-          xhr.setRequestHeader("Content-Type", "text/plain");
-          xhr.setRequestHeader("X-Username", getCookie("username"));
-
-          xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-              if (xhr.status === 200) {
-                alert("Record deleted successfully");
-                document.getElementById("updateForm").style.display = "none";
-                document.getElementById("search_obligation").value = "";
-                window.location.reload();
-              } else {
-                showError("Failed to delete record: " +
-                  (xhr.responseText || "Unknown error"));
-              }
-            }
-          };
-
-          xhr.send(deleteData);
-        } catch (err) {
-          showError("Error sending delete request: " + err.message);
-        }
-      });
-
-      return false;
-    }
-
     // Navigation
     function goBack() {
       window.location.href = 'dashboard.html';
@@ -528,11 +475,6 @@
 
       <div class="form-group">
         <input type="submit" value="Update Record">
-      </div>
-
-      <!-- Add this in the search results form -->
-      <div class="form-group">
-        <button type="button" onclick="deleteRecord()" class="delete-button">Delete Record</button>
       </div>
     </form>
   </div>

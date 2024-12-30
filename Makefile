@@ -59,7 +59,7 @@ WARN_FLAGS = -Wall -Wextra -Werror -Wshadow -Wconversion \
 
 # Security flags
 SEC_FLAGS = -fstack-protector-strong -fstack-clash-protection \
-	-fstack-check -fPIE -fstack-protector-all -fcf-protection=full \
+	-fstack-check -fPIE -fstack-protector-all \
 	-fno-delete-null-pointer-checks -ftrivial-auto-var-init=zero \
 	-fno-allow-store-data-races -fwrapv -fno-strict-volatile-bitfields \
 	-finput-charset=iso-8859-1 -fexec-charset=iso-8859-1 \

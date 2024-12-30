@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>User Profile Management</title>
+  <title>Audit Log Viewer</title>
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   <style type="text/css">
     :root {
@@ -14,47 +14,119 @@
       --border-color: #ddd;
     }
 
-    /* ...existing styles... */
-
-    .user-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      font-size: 16px;
     }
 
-    .user-table th,
-    .user-table td {
-      border: 1px solid #ccc;
+    #header {
+      background: var(--primary-color);
+      color: #fff;
+      padding: 15px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+
+    #header h1 {
+      margin: 0;
+      font-size: 1.2em;
+      padding-right: 100px;
+    }
+
+    .container {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      margin-top: 60px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th,
+    td {
       padding: 8px;
+      border: 1px solid var(--border-color);
       text-align: left;
     }
 
-    .user-table th {
-      background: #f4f7f2;
+    th {
+      background: var(--primary-color);
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
 
-    .button-small {
-      padding: 2px 8px;
+    .filter-row input {
+      width: 90%;
+      padding: 4px;
       margin: 2px;
-      background: #2f4f2f;
-      color: #fff;
-      border: 1px solid #1a2f1a;
+    }
+
+    .back-button {
+      margin: 20px;
+      padding: 10px 20px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
       cursor: pointer;
     }
 
-    .password-display {
-      background: #fffde7;
-      padding: 10px;
-      border: 1px solid #ffd700;
-      margin: 10px 0;
-      display: none;
+    .pagination {
+      margin: 20px 0;
+      text-align: center;
     }
 
-    .error {
-      color: #ff0000;
-      font-weight: bold;
-      padding: 10px;
-      display: none;
+    .pagination button {
+      margin: 0 5px;
+      padding: 5px 10px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .pagination button:disabled {
+      background: #ccc;
+      cursor: default;
+    }
+
+    .user-nav {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 5px;
+    }
+
+    .nav-button {
+      padding: 8px 12px;
+      background: #fff;
+      color: var(--primary-color);
+      border: 1px solid #fff;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    button,
+    input[type="button"],
+    input[type="submit"] {
+      padding: 8px 15px;
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9em;
     }
 
     .form-group {
@@ -69,172 +141,121 @@
       margin: 5px 0;
       box-sizing: border-box;
     }
+
+    .error {
+      color: var(--error-color);
+      font-weight: bold;
+      padding: 10px;
+      display: none;
+    }
+
+    /* Tablet Breakpoint */
+    @media screen and (min-width: 768px) {
+      .container {
+        padding: 20px;
+      }
+    }
+
+    /* Desktop Breakpoint */
+    @media screen and (min-width: 1024px) {
+      .container {
+        max-width: 1200px;
+        margin: 60px auto 0;
+      }
+    }
   </style>
   <script type="text/javascript">
     "use strict";
 
-    function generatePassword() {
-      var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-      var password = "";
-      for (var i = 0; i < 12; i++) {
-        password += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return password;
+    var pageSize = 50;
+    var currentPage = 1;
+    var totalPages = 1;
+    var auditData = [];
+
+    function goBack() {
+      window.location.href = 'dashboard.html';
     }
 
-    function deleteUser(username) {
-      if (!confirm("Delete user " + username + "?")) {
-        return;
-      }
-
+    function loadAuditLogs() {
       var xhr = new XMLHttpRequest();
-      xhr.open("GET", "/delete?username=" + encodeURIComponent(username), true);
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            alert("User deleted successfully");
-            loadUsers();
-          } else {
-            alert("Error deleting user");
-          }
+      xhr.open("GET", "/audit_log", true);
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          auditData = parseAuditLogs(xhr.responseText);
+          totalPages = Math.ceil(auditData.length / pageSize);
+          displayPage(1);
         }
       };
       xhr.send(null);
     }
 
-    function resetPassword(username) {
-      var newPassword = generatePassword();
-      var xhr = new XMLHttpRequest();
-      xhr.open("GET", "/resetpw?username=" + encodeURIComponent(username) +
-        "&password=" + encodeURIComponent(newPassword), true);
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            alert("New password for " + username + ": " + newPassword);
-          } else {
-            alert("Error resetting password");
-          }
-        }
-      };
-      xhr.send(null);
+    function parseAuditLogs(data) {
+      return data.split('\n')
+        .filter(line => line.trim())
+        .map(line => {
+          var parts = line.split('|');
+          return {
+            timestamp: parts[0] || '',
+            username: parts[1] || '',
+            action: parts[2] || ''
+          };
+        });
     }
 
-    function loadUsers() {
-      "use strict";
-      var xhr = new XMLHttpRequest();
-      xhr.open("GET", "/users", true);
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            try {
-              var lines = xhr.responseText.split("\n");
-              var table = document.getElementById("userTable");
-              var html = "<tr><th>Username</th><th>Full Name</th>" +
-                "<th>Home Directory</th><th>Shell</th>" +
-                "<th>Admin</th><th>Actions</th></tr>";
+    function displayPage(page) {
+      var tbody = document.getElementById('auditTable').getElementsByTagName('tbody')[0];
+      tbody.innerHTML = '';
 
-              lines.forEach(function (line) {
-                if (line.trim() && !line.startsWith('#')) {
-                  var parts = line.split(':');
-                  if (parts.length >= 7) {  // Changed from 8 to 7
-                    var isAdmin = parts.length > 7 ? parts[7].trim() === "1" : "0";
-                    html += "<tr><td>" + parts[0] + "</td><td>" +
-                      parts[4] + "</td><td>" + parts[5] + "</td><td>" +
-                      parts[6] + "</td><td>" + (isAdmin ? "Yes" : "No") +
-                      "</td><td>" +
-                      "<button class='button-small' onclick='editUser(\"" +
-                      parts[0] + "\", \"" + parts[4] + "\", \"\", \"\")'>Edit</button> " +
-                      "<button class='button-small' onclick='resetPassword(\"" +
-                      parts[0] + "\")'>Reset Password</button></td></tr>";
-                  }
-                }
-              });
-              table.innerHTML = html;
-            } catch (e) {
-              console.error("Error:", e, "Response:", xhr.responseText);
-              alert("Error loading users");
-            }
-          }
-        }
-      };
-      xhr.send(null);
+      var start = (page - 1) * pageSize;
+      var end = start + pageSize;
+      var pageData = auditData.slice(start, end);
+
+      pageData.forEach(entry => {
+        var row = tbody.insertRow();
+        row.insertCell().textContent = entry.timestamp;
+        row.insertCell().textContent = entry.username;
+        row.insertCell().textContent = entry.action;
+      });
+
+      currentPage = page;
+      updatePaginationControls();
     }
 
-    function createUser() {
-      var username = document.getElementById("newUsername").value;
-      var fullname = document.getElementById("newFullname").value;
-      var email = document.getElementById("newEmail").value;
-      var project = document.getElementById("newProject").value;
-      var password = generatePassword();
+    function updatePaginationControls() {
+      document.getElementById('currentPage').textContent =
+        'Page ' + currentPage + ' of ' + totalPages;
 
-      var xhr = new XMLHttpRequest();
-      xhr.open("GET", "/register?username=" + encodeURIComponent(username) +
-        "&password=" + encodeURIComponent(password) +
-        "&fullname=" + encodeURIComponent(fullname) +
-        "&email=" + encodeURIComponent(email) +
-        "&project=" + encodeURIComponent(project), true);
-
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            alert("User created successfully!\nUsername: " + username +
-              "\nPassword: " + password);
-            loadUsers();
-            document.getElementById("createUserForm").reset();
-          } else {
-            alert("Error creating user");
-          }
-        }
-      };
-      xhr.send(null);
-      return false;
+      document.getElementById('prevButton').disabled = (currentPage === 1);
+      document.getElementById('nextButton').disabled = (currentPage === totalPages);
     }
 
-    function editUser(username, fullname, email, project) {
-      document.getElementById("newUsername").value = username;
-      document.getElementById("newUsername").readOnly = true;
-      document.getElementById("newFullname").value = fullname;
-      document.getElementById("newEmail").value = email;
-      document.getElementById("newProject").value = project;
-      document.getElementById("submitBtn").value = "Update User";
-      document.getElementById("createUserForm").onsubmit = function (e) {
-        e.preventDefault();
-        return updateExistingUser();
+    function filterTable() {
+      var filters = {
+        timestamp: document.getElementById('timestampFilter').value.toLowerCase(),
+        username: document.getElementById('usernameFilter').value.toLowerCase(),
+        action: document.getElementById('actionFilter').value.toLowerCase()
       };
+
+      var filtered = auditData.filter(entry => {
+        return entry.timestamp.toLowerCase().includes(filters.timestamp) &&
+          entry.username.toLowerCase().includes(filters.username) &&
+          entry.action.toLowerCase().includes(filters.action);
+      });
+
+      auditData = filtered;
+      totalPages = Math.ceil(auditData.length / pageSize);
+      displayPage(1);
     }
 
-    function updateExistingUser() {
-      var username = document.getElementById("newUsername").value;
-      var fullname = document.getElementById("newFullname").value;
-      var email = document.getElementById("newEmail").value;
-      var project = document.getElementById("newProject").value;
-
-      var xhr = new XMLHttpRequest();
-      xhr.open("GET", "/update?" +
-        "username=" + encodeURIComponent(username) +
-        "&fullname=" + encodeURIComponent(fullname) +
-        "&email=" + encodeURIComponent(email) +
-        "&project=" + encodeURIComponent(project), true);
-
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            alert("User updated successfully!");
-            document.getElementById("newUsername").readOnly = false;
-            document.getElementById("createUserForm").reset();
-            document.getElementById("submitBtn").value = "Create User";
-            document.getElementById("createUserForm").onsubmit = createUser;
-            loadUsers();
-          } else {
-            alert("Error updating user");
-          }
-        }
-      };
-      xhr.send(null);
-      return false;
+    function sortTable(column) {
+      auditData.sort((a, b) => {
+        var valA = a[column] || '';
+        var valB = b[column] || '';
+        return valA.localeCompare(valB);
+      });
+      displayPage(currentPage);
     }
 
-    /* Add to all HTML files that need session management */
     function getCookie(name) {
       var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
       if (match) return match[2];
@@ -251,22 +272,6 @@
       return true;
     }
 
-    function goBackToProfile() {
-      var username = getCookie('username');
-      if (!username) {
-        window.location.href = 'dashboard.html';
-      } else {
-        window.location.href = 'profile.html?username=' + encodeURIComponent(username);
-      }
-    }
-
-    /* Add session check to window.onload */
-    window.onload = function () {
-      if (!checkSession()) return;
-      loadUsers();
-    };
-
-    /* Add to all pages with navigation */
     function navigateToProfile() {
       if (!checkSession()) return;
       var username = getCookie('username');
@@ -277,65 +282,55 @@
       if (!checkSession()) return;
       window.location.href = url;
     }
+
+    window.onload = function () {
+      if (!checkSession()) return;
+      loadAuditLogs();
+    };
+
+    function goBack() {
+      window.location.href = 'dashboard.html';
+    }
   </script>
 </head>
 
 <body>
+  <div id="header">
+    <h1>Audit Log Viewer</h1>
+  </div>
+
+  <div class="user-nav">
+    <button aria-label="Navigate to Profile" onclick="navigateToProfile()" class="nav-button">Profile</button>
+    <button aria-label="Go Back" onclick="goBack()" class="nav-button">Back</button>
+  </div>
+
   <div role="main" class="container">
-    <!-- main content -->
-  </div>
+    <button class="back-button" onclick="goBack()">Back to Dashboard</button>
 
-  <div class="main">
-    <h1>User Profile Management</h1>
-
-    <form id="createUserForm" onsubmit="return createUser();">
-      <div class="form-group">
-        <label for="newUsername">Username:</label>
-        <input type="text" id="newUsername" name="newUsername" required>
-      </div>
-
-      <div class="form-group">
-        <label for="newFullname">Full Name:</label>
-        <input type="text" id="newFullname" name="newFullname" required>
-      </div>
-
-      <div class="form-group">
-        <label for="newEmail">Email:</label>
-        <input type="text" id="newEmail" name="newEmail" required>
-      </div>
-
-      <div class="form-group">
-        <label for="newProject">Project:</label>
-        <select id="newProject" name="newProject" required>
-          <option value="">Select Project</option>
-          <option value="SCJV - Pilbara Ports">SCJV - Pilbara Ports</option>
-          <option value="W6946">W6946</option>
-          <option value="MS1180">MS1180</option>
-        </select>
-      </div>
-
-      <div class="button-group">
-        <input type="submit" id="submitBtn" value="Create User">
-        <button type="button" onclick="goBackToProfile();" class="nav-button">Back to Profile</button>
-      </div>
-    </form>
-
-    <h2>Existing Users</h2>
-    <table id="userTable" class="user-table">
-      <tr>
-        <th>Username</th>
-        <th>Full Name</th>
-        <th>Home Directory</th>
-        <th>Shell</th>
-        <th>Admin</th>
-        <th>Actions</th>
-      </tr>
+    <table id="auditTable">
+      <thead>
+        <tr>
+          <th onclick="sortTable('timestamp')">Timestamp</th>
+          <th onclick="sortTable('username')">Username</th>
+          <th onclick="sortTable('action')">Action</th>
+        </tr>
+        <tr class="filter-row">
+          <td><input type="text" id="timestampFilter" onkeyup="filterTable()"></td>
+          <td><input type="text" id="usernameFilter" onkeyup="filterTable()"></td>
+          <td><input type="text" id="actionFilter" onkeyup="filterTable()"></td>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Populated by JavaScript -->
+      </tbody>
     </table>
-  </div>
 
-  <!-- Add ARIA labels -->
-  <button aria-label="Navigate to Profile" onclick="navigateToProfile()">Profile</button>
-  <button aria-label="Go Back" onclick="goBack()">Back</button>
+    <div class="pagination">
+      <button id="prevButton" onclick="displayPage(currentPage - 1)">&lt; Previous</button>
+      <span id="currentPage">Page 1 of 1</span>
+      <button id="nextButton" onclick="displayPage(currentPage + 1)">Next &gt;</button>
+    </div>
+  </div>
 </body>
 
 </html>
