@@ -1,0 +1,203 @@
+# Build output directories
+/bin/
+/build/
+/dist/
+/lib/
+/obj/
+/out/
+
+# C build artifacts
+*.o
+*.ko
+*.obj
+*.elf
+*.lib
+*.a
+*.la
+*.lo
+*.dll
+*.so
+*.so.*
+*.dylib
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Dependency directories
+/deps/
+/vendor/
+/node_modules/
+
+# IDE and editor files
+.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+.project
+.cproject
+*.sublime-workspace
+*.sublime-project
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Configuration files that should not be tracked
+*.env
+!example.env
+.env.*
+!.env.example
+*.ini
+!example.ini
+*.conf
+!example.conf
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+
+# Documentation and text files (only if generated)
+/docs/generated/
+*.pdf
+*.doc
+*.docx
+
+# Web assets (only if generated)
+/dist/css/
+/dist/js/
+/dist/html/
+
+# Log files
+*.log
+log/
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# Specific to C development
+# Prerequisites
+*.d
+
+# Object files
+*.o
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# Custom project files that should not be tracked
+/config/local.*
+/config/private.*
+/secrets/
+
+# Test coverage reports
+/coverage/
+*.gcno
+*.gcda
+*.gcov
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Patch files
+*.patch
+*.diff
+
+# recfiles
+# *.rec
+*.rec~
+*.rec.bak
+
+# Allow specific example files
+!example.rec
+!example.conf
+!example.env
+!example.ini
+
+# Docker
+.docker/data/
+docker-compose.override.yml
+
+# Keep these files (add ! to track them even if ignored above)
+!.gitignore
+!.gitattributes
+!LICENSE
+!README.md
+!CHANGELOG.md
+!AUTHORS
+!bin/.gitkeep
+!build/debug/obj/.gitkeep
+!build/debug/deps/.gitkeep
+!build/release/obj/.gitkeep
+!build/release/deps/.gitkeep
+!man/.gitkeep
+!docs/.gitkeep
+!scripts/.gitkeep
+!tmp/.gitkeep
+!share/.gitkeep
