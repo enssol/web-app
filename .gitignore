@@ -39,7 +39,7 @@
 
 # IDE and editor files
 .idea/
-#.vscode/
+/.vscode/
 *.swp
 *.swo
 *~
@@ -191,4 +191,13 @@ docker-compose.override.yml
 !README.md
 !CHANGELOG.md
 !AUTHORS
-!example/**/*
+!bin/.gitkeep
+!build/debug/obj/.gitkeep
+!build/debug/deps/.gitkeep
+!build/release/obj/.gitkeep
+!build/release/deps/.gitkeep
+!man/.gitkeep
+!docs/.gitkeep
+!scripts/.gitkeep
+!tmp/.gitkeep
+!share/.gitkeep
