@@ -1,63 +1,33 @@
 # Core Build Tools (build-base contents)
-binutils           # GNU assembler, linker and binary utilities
-gcc                # GNU C Compiler (already provides cc)
-make               # GNU Make build tool
-libc-dev          # C library headers and static libraries
-musl-dev          # musl libc development files
-fortify-headers   # Fortify source headers
-patch             # Apply patches to source files
-
-# Build System Tools
-autoconf           # Generate configure scripts
-automake           # Generate Makefiles
-libtool            # Shared library tools
-pkgconfig          # Manage library compile/link flags
-
-# Parser/Lexer Tools
-flex               # Fast Lexical Analyzer
-bison              # YACC-compatible Parser Generator
+binutils >= 2.40.0    # GNU assembler, linker and binary utilities
+gcc >= 12.2.1         # GNU C Compiler (already provides cc)
+make >= 4.4.1         # GNU Make build tool
 
 # Version Control
-git                # Distributed version control
+git >= 2.40.0         # Distributed version control
 
 # Core Libraries
-musl               # C standard library implementation (Alpine's libc)
-recutils           # Text-based database utilities
+recutils >= 1.9       # Text-based database utilities
 
 # Development Tools
-gdb                # GNU Debugger
-git                # Version control
-valgrind           # Memory analysis
-shellcheck         # Shell script validator
-dropbear           # SSH client and server
-gpg                # GnuPG
-
-# Testing Tools
-cunit              # Unit testing framework
-gcov               # Code coverage
-gprof              # Performance profiler
-posixtestsuite     # POSIX compliance testing
+gdb >= 13.1          # GNU Debugger
+valgrind >= 3.21.0   # Memory analysis
+shellcheck >= 0.9.0   # Shell script validator
 
 # Code Analysis
-splint             # Static code analyzer
-cppcheck           # Static analysis tool
-checksec           # Binary security checker
+cppcheck >= 2.10.0    # Static analysis tool
 
 # Documentation
-doxygen            # Code documentation generator
-groff              # Manual page processor
+doxygen >= 1.9.6      # Code documentation generator
+groff >= 1.22.4       # Manual page processor
 
 # Character Encoding
-enca               # Character encoding validator
+enca >= 1.19          # Character encoding validator
 
 # Security
-bearssl            # SSL/TLS and crypto library
+bearssl >= 0.6        # SSL/TLS and crypto library
 
 # Environment Requirements
 LANG=en_AU.ISO8859-1
 LC_ALL=en_AU.ISO8859-1
 CHARSET=ISO-8859-1
-
-# Compiler Flags
-
-# Build Configuration

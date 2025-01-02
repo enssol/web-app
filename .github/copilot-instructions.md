@@ -903,9 +903,7 @@ config/                      # Configuration files and settings
         csp.conf            # Content Security Policy
     build/                  # Build configurations
         host.h              # Host-specific config
-        build.h             # Build environment
         config.h            # Main config header
-        args.h              # Build arguments
         machine.h           # Machine settings
         gcc.specs           # GCC spec file for build configuration
     mkconfig/               # Config generation

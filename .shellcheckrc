@@ -1,0 +1,53 @@
+# Set shell to POSIX sh for maximum portability
+shell=sh
+
+# Enable core POSIX checks
+enable=all
+
+# Disable non-POSIX features and extensions
+disable=SC2039  # POSIX-only shell features
+disable=SC2310  # Non-POSIX test commands
+disable=SC2311  # Non-POSIX test operators
+
+# Source handling configuration
+source-path=SCRIPTDIR
+external-sources=true
+
+# Set error handling level
+error-level=error
+severity=error
+
+# Critical safety checks
+enable=check-unassigned-uppercase
+enable=quote-safe-variables
+enable=require-variable-braces
+enable=check-set-e-suppressed
+enable=check-external-commands
+enable=require-function-declaration
+enable=check-unquoted-tilde
+enable=check-command-substitution-quoting
+enable=check-return-code
+enable=check-set-options
+enable=check-command-path
+
+# Variable and parameter handling
+enable=check-parameter-expansion
+enable=check-environment-variables
+enable=require-variable-declaration
+enable=check-word-splitting
+
+# File and directory operations
+enable=check-symlink-race
+enable=check-tempfile-race
+enable=check-cd-errors
+enable=check-pathname-expansion
+
+# Process and signal handling
+enable=check-signal-handler
+enable=check-trap-handler
+enable=check-job-control
+
+# Input/Output handling
+enable=check-redirect-printf
+enable=check-fd-leaked
+enable=check-fd-closed
