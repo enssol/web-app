@@ -87,8 +87,8 @@
 
 ## Security
 
-### OpenSSL
-- SSL/TLS implementation
+### BearSSL
+- lightweight SSL/TLS implementation
 - Certificate management and key generation
 - Cryptographic operations and secure communications
 - Optimized for embedded systems

@@ -29,7 +29,6 @@ gdb                # GNU Debugger
 git                # Version control
 valgrind           # Memory analysis
 shellcheck         # Shell script validator
-perl               # Required for some build scripts
 dropbear           # SSH client and server
 gpg                # GnuPG
 
@@ -52,7 +51,7 @@ groff              # Manual page processor
 enca               # Character encoding validator
 
 # Security
-openssl            # SSL/TLS and crypto library
+bearssl            # SSL/TLS and crypto library
 
 # Environment Requirements
 LANG=en_AU.ISO8859-1

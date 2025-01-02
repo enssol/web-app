@@ -19,9 +19,14 @@ P3: Low      - Nice to have
 - [ ] Core Build Tools Installation  
     - Files: Makefile, scripts/build/build.sh, scripts/build/make-release.sh, .github/workflows/build.yml, .vscode/tasks.json  
     - Acceptance Criteria:  
-        - Tools verified (musl-gcc, GNU Make, CUnit, BearSSL, valgrind)  
+        - Tools verified (musl-gcc, GNU Make, CUnit, BearSSL, valgrind)
         - Builds run cleanly in build/debug/ and build/release/  
-        - Scripts exit zero on success  
+        - Scripts exit zero on success
+    - Deferred Tools:
+        - checksec: Static analysis tool for ELF binaries
+        - splint: Static C code analysis tool
+        - posix-test-suite: POSIX compliance testing
+        - Note: These tools require complex build steps in container and will be addressed later  
 
 ### Development Setup
 - [ ] Environment Configuration  
@@ -168,4 +173,3 @@ P3: Low      - Nice to have
 - [ ] Code Standards  
     - Files: test/security/penetration_test.c, src/memory_management/pointer_allocator.c, src/http/http_request_parser.c  
     - Acceptance Criteria: Lint checks, no leaks, no vulnerabilities
-
