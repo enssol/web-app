@@ -1,0 +1,76 @@
+# Use the Alpine Linux base image
+FROM docker.io/alpine:3.18
+
+# Set environment
+ENV LANG=en_AU.ISO8859-1 \
+    LC_ALL=en_AU.ISO8859-1 \
+    CHARSET=ISO-8859-1
+
+# Install necessary packages
+RUN apk update && apk add --no-cache \
+    build-base \
+    git \
+    gpg \
+    dropbear \
+    dropbear-dbclient \
+    dropbear-ssh \
+    doxygen \
+    valgrind \
+    gdb \
+    shellcheck \
+    cppcheck \
+    enca \
+    groff \
+    cunit \
+    automake \
+    autoconf \
+    libtool \
+    flex \
+    bison \
+    perl \
+    openssl \
+    recutils \
+    && rm -rf /var/cache/apk/*
+
+# Build tools in a single layer to reduce image size
+RUN mkdir -p /tmp/build && cd /tmp/build && \
+    # Build and install splint
+    git clone https://github.com/splintchecker/splint.git && \
+    cd splint && \
+    ./configure --prefix=/usr && \
+    make && \
+    make install && \
+    cd .. && \
+    rm -rf splint && \
+    # Install POSIX test suite
+    wget https://sourceforge.net/projects/posixtest/files/posixtest/posixtestsuite-1.5.2/posixtestsuite-1.5.2.tar.gz && \
+    tar xf posixtestsuite-1.5.2.tar.gz && \
+    mv posixtestsuite-1.5.2 /usr/local/posixtestsuite && \
+    rm posixtestsuite-1.5.2.tar.gz && \
+    cd /usr/local/posixtestsuite && \
+    echo "-lpthread -lrt" > LDFLAGS && \
+    make && \
+    # Install checksec
+    cd /tmp/build && \
+    wget https://github.com/slimm609/checksec/tarball/main -O checksec.tar.gz && \
+    tar xf checksec.tar.gz && \
+    cd slimm609-checksec-* && \
+    install -m 755 checksec /usr/local/bin/ && \
+    cd .. && \
+    rm -rf slimm609-checksec-* checksec.tar.gz && \
+    # Cleanup
+    rm -rf /tmp/build
+
+# Add environment variables for tools
+ENV LARCH_PATH=/usr/lib \
+    LCLIMPORTDIR=/usr/imports \
+    PATH="/usr/local/bin:${PATH}"
+
+# Add a user for non-root execution
+RUN adduser -D appuser -u 1000 -g 1000 appuser
+
+# Switch to non-root user
+USER appuser
+
+# Reset working directory
+WORKDIR /home/appuser

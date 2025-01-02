@@ -354,14 +354,7 @@ RUNTIME_FILES = \
 	var/records/scjv.rec:var/records/scjv.rec \
 	var/records/w6946.rec:var/records/w6946.rec \
 	www/audit.html:www/audit.html \
-	www/crud_profile.html:www/crud_profile.html \
-	www/crud_scjv.html:www/crud_scjv.html \
-	www/dashboard.html:www/dashboard.html \
-	www/index.html:www/index.html \
-	www/ms1180.html:www/ms1180.html \
-	www/profile.html:www/profile.html \
-	www/scjv.html:www/scjv.html \
-	www/w6946.html:www/w6946.html
+	www/crud_profile.html:www/crud_profile.html
 
 t4g-release: clean-dist prod
 	@echo "Creating minimal release package..."

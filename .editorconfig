@@ -1,12 +1,12 @@
-# EditorConfig: https://editorconfig.org/
-
-# top-most EditorConfig file
+# Top-most EditorConfig file
 root = true
 
-# Default settings for all files
+# Global defaults
 [*]
-charset = ascii
+charset = iso-8859-1
 end_of_line = lf
+indent_style = space
+indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 max_line_length = 80
@@ -92,7 +92,9 @@ trim_trailing_whitespace = false
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-# Documentation
+# Markdown files - specific overrides while maintaining ISO-8859-1
 [*.md]
+charset = iso-8859-1
 trim_trailing_whitespace = false
 max_line_length = off
+insert_final_newline = true

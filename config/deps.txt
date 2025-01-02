@@ -1,0 +1,64 @@
+# Core Build Tools (build-base contents)
+binutils           # GNU assembler, linker and binary utilities
+gcc                # GNU C Compiler (already provides cc)
+make               # GNU Make build tool
+libc-dev          # C library headers and static libraries
+musl-dev          # musl libc development files
+fortify-headers   # Fortify source headers
+patch             # Apply patches to source files
+
+# Build System Tools
+autoconf           # Generate configure scripts
+automake           # Generate Makefiles
+libtool            # Shared library tools
+pkgconfig          # Manage library compile/link flags
+
+# Parser/Lexer Tools
+flex               # Fast Lexical Analyzer
+bison              # YACC-compatible Parser Generator
+
+# Version Control
+git                # Distributed version control
+
+# Core Libraries
+musl               # C standard library implementation (Alpine's libc)
+recutils           # Text-based database utilities
+
+# Development Tools
+gdb                # GNU Debugger
+git                # Version control
+valgrind           # Memory analysis
+shellcheck         # Shell script validator
+perl               # Required for some build scripts
+dropbear           # SSH client and server
+gpg                # GnuPG
+
+# Testing Tools
+cunit              # Unit testing framework
+gcov               # Code coverage
+gprof              # Performance profiler
+posixtestsuite     # POSIX compliance testing
+
+# Code Analysis
+splint             # Static code analyzer
+cppcheck           # Static analysis tool
+checksec           # Binary security checker
+
+# Documentation
+doxygen            # Code documentation generator
+groff              # Manual page processor
+
+# Character Encoding
+enca               # Character encoding validator
+
+# Security
+openssl            # SSL/TLS and crypto library
+
+# Environment Requirements
+LANG=en_AU.ISO8859-1
+LC_ALL=en_AU.ISO8859-1
+CHARSET=ISO-8859-1
+
+# Compiler Flags
+
+# Build Configuration
