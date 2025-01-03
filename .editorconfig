@@ -82,7 +82,7 @@ trim_trailing_whitespace = true
 
 # Security-sensitive files
 [{cert.pem,privkey.pem,passwd}]
-charset = utf-8
+charset = iso-8859-1-8
 end_of_line = lf
 insert_final_newline = false
 trim_trailing_whitespace = false

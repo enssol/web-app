@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <title>Modal Manager</title>
+    <style type="text/css">
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 16px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .modal-open .modal {
+            display: block;
+            opacity: 1;
+        }
+        .modal-open .modal-overlay {
+            display: block;
+        }
+    </style>
+    <script type="text/javascript">
+        "use strict";
+
+        var modalStack = [];
+
+        function openModal(modalId) {
+            var modal = document.getElementById(modalId);
+            var overlay = document.getElementById('modal-overlay');
+            if (modal && overlay) {
+                modalStack.push(modal);
+                document.body.className += ' modal-open';
+                modal.style.zIndex = 1000 + modalStack.length;
+                overlay.style.zIndex = 999 + modalStack.length;
+                modal.style.display = 'block';
+                overlay.style.display = 'block';
+                setTimeout(function() {
+                    modal.style.opacity = '1';
+                }, 10);
+                trapFocus(modal);
+            }
+        }
+
+        function closeModal() {
+            var modal = modalStack.pop();
+            if (modal) {
+                modal.style.opacity = '0';
+                setTimeout(function() {
+                    modal.style.display = 'none';
+                    if (modalStack.length === 0) {
+                        document.body.className = document.body.className.replace(' modal-open', '');
+                        document.getElementById('modal-overlay').style.display = 'none';
+                    }
+                }, 300);
+            }
+        }
+
+        function trapFocus(modal) {
+            var focusableElements = modal.querySelectorAll('a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
+            var firstElement = focusableElements[0];
+            var lastElement = focusableElements[focusableElements.length - 1];
+
+            modal.addEventListener('keydown', function(event) {
+                var isTabPressed = (event.key === 'Tab' || event.keyCode === 9);
+                if (!isTabPressed) {
+                    return;
+                }
+                if (event.shiftKey) {
+                    if (document.activeElement === firstElement) {
+                        lastElement.focus();
+                        event.preventDefault();
+                    }
+                } else {
+                    if (document.activeElement === lastElement) {
+                        firstElement.focus();
+                        event.preventDefault();
+                    }
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <div id="modal-overlay" class="modal-overlay"></div>
+    <div id="example-modal" class="modal">
+        <h2>Example Modal</h2>
+        <p>This is an example modal.</p>
+        <button onclick="closeModal()">Close</button>
+    </div>
+    <button onclick="openModal('example-modal')">Open Modal</button>
+</body>
+</html>

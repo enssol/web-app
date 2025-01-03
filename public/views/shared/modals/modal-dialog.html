@@ -1,0 +1,21 @@
+<!-- ...existing code... -->
+<link rel="stylesheet" type="text/css" href="/views/common/styles.html">
+<!--#include virtual="modal-base.html" -->
+<div id="modal-dialog" class="modal-overlay" role="dialog" aria-labelledby="dialog-title" aria-describedby="dialog-message" aria-hidden="true">
+    <div class="modal-content">
+        <h2 id="dialog-title">Dialog</h2>
+        <p id="dialog-message">This is a dialog message.</p>
+        <button onclick="hideModal('modal-dialog')">Close</button>
+    </div>
+</div>
+<script type="text/javascript">
+    "use strict";
+    function showDialog(message) {
+        var msgElem = document.getElementById('dialog-message');
+        if (msgElem) {
+            msgElem.innerHTML = message || msgElem.innerHTML;
+        }
+        showModal('modal-dialog');
+    }
+</script>
+<!-- ...existing code... -->

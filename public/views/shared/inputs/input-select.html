@@ -1,0 +1,24 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Select Input</title>
+    <link rel="stylesheet" type="text/css" href="../common/styles.html">
+    <script type="text/javascript" src="/views/common/scripts.html"></script>
+</head>
+<body>
+    <form>
+        <div class="form-field">
+            <label for="select-input">Select Option:</label>
+            <select id="select-input" name="select-input" onchange="validateSelect(this)" aria-describedby="select-input-error">
+                <option value="">Please select...</option>
+                <option value="option1">Option 1</option>
+                <option value="option2">Option 2</option>
+                <option value="option3">Option 3</option>
+            </select>
+            <span class="validation-message" id="select-input-error" role="alert"></span>
+        </div>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

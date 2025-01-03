@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Radio Input</title>
+    <link rel="stylesheet" type="text/css" href="../common/styles.html">
+    <script type="text/javascript" src="../common/scripts.html"></script>
+</head>
+<body>
+    <form onsubmit="return validateRadioInput();">
+        <fieldset class="form-field">
+            <legend>Select an option:</legend>
+            <label>
+                <input type="radio" name="radio-group" value="option1" onclick="validateRadioGroup(this.name)" aria-describedby="radio-group-error">
+                Option 1
+            </label>
+            <label>
+                <input type="radio" name="radio-group" value="option2" onclick="validateRadioGroup(this.name)" aria-describedby="radio-group-error">
+                Option 2
+            </label>
+            <label>
+                <input type="radio" name="radio-group" value="option3" onclick="validateRadioGroup(this.name)" aria-describedby="radio-group-error">
+                Option 3
+            </label>
+            <span class="validation-message" id="radio-group-error" role="alert"></span>
+        </fieldset>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

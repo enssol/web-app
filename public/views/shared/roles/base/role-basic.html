@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Basic Role</title>
+<link rel="stylesheet" type="text/css" href="/views/common/styles.html">
+</head>
+<body>
+<div class="role-indicator">
+    <script type="text/javascript">
+    "use strict";
+    function checkUserRole() {
+        var role = document.getElementById("userRole").value;
+        return role || "guest";
+    }
+    </script>
+    <input type="hidden" id="userRole" value="">
+    Current Role: <span id="roleDisplay"></span>
+</div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+    <title>Authentication Errors</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <!--#include virtual="/views/common/styles.html" -->
+    <!--#include virtual="/views/common/scripts.html" -->
+</head>
+<body>
+    <div id="errorMessage" class="error-message"></div>
+    <div id="validationFeedback" class="validation-feedback"></div>
+    <div id="timeoutError" class="timeout-error">Session timeout error</div>
+    <div id="networkError" class="network-error">Network error occurred</div>
+    <script type="text/javascript">
+        "use strict";
+        function showError(message) {
+            var errorDiv = document.getElementById('errorMessage');
+            errorDiv.innerHTML = message;
+        }
+
+        function showValidationFeedback(message) {
+            var feedbackDiv = document.getElementById('validationFeedback');
+            feedbackDiv.innerHTML = message;
+        }
+
+        function showTimeoutError() {
+            document.getElementById('timeoutError').style.display = 'block';
+        }
+
+        function showNetworkError() {
+            document.getElementById('networkError').style.display = 'block';
+        }
+
+        // Example usage
+        showError('Invalid username or password');
+        showValidationFeedback('Password must be at least 8 characters');
+        setTimeout(showTimeoutError, 300000); // 5 minutes
+        setTimeout(showNetworkError, 10000); // 10 seconds
+    </script>
+</body>
+</html>

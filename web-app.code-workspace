@@ -5,6 +5,7 @@
     }
   ],
   "settings": {
+    "git.enabled": false,
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 1000,
     "editor.codeActionsOnSave": {
@@ -13,31 +14,21 @@
     "editor.detectIndentation": false,
     "editor.formatOnSave": true,
     "[json]": {
-      "editor.tabSize": 2,
       "editor.insertSpaces": true
     },
     "[jsonc]": {
-      "editor.tabSize": 2,
       "editor.insertSpaces": true
     },
     "[markdown]": {
-      "editor.wordWrap": "on",
-      "editor.trimAutoWhitespace": false,
-      "editor.defaultFormatter": "vscode.markdown-language-features",
-      "files.encoding": "iso88591",
-      "files.autoGuessEncoding": false,
       "files.trimTrailingWhitespace": false
     },
     "[makefile]": {
-      "editor.tabSize": 4,
       "editor.insertSpaces": false
     },
     "[makefile.am]": {
-      "editor.tabSize": 4,
       "editor.insertSpaces": false
     },
     "[makefile.in]": {
-      "editor.tabSize": 4,
       "editor.insertSpaces": false
     },
     "editor.formatOnPaste": true,
@@ -60,8 +51,6 @@
     "editor.suggestSelection": "first",
     "editor.tabCompletion": "on",
     "editor.quickSuggestions": {
-      "other": true,
-      "comments": true,
       "strings": true
     },
     "editor.parameterHints.enabled": true,
@@ -71,92 +60,12 @@
     "explorer.compactFolders": true,
     "explorer.autoReveal": true,
     "files.associations": {
-      ".env*": "dotenv",
-      ".vscode": "json",
-      ".dockerignore": "dockerfile",
-      ".editorconfig": "editorconfig",
-      "webp": "image",
-      ".csv": "csv",
-      ".html": "html",
-      ".js": "javascript",
-      ".css": "css",
-      ".wasm": "wasm",
-      ".asm": "assembly",
-      ".a": "binary",
-      ".o": "binary",
-      ".s": "assembly",
-      ".so": "binary",
-      ".d": "c",
-      ".c": "c",
-      ".h": "c",
-      ".md": "markdown",
-      ".json": "json",
-      ".yml": "yaml",
-      ".ico": "image",
-      ".ini": "ini",
-      "containerfile": "dockerfile",
-      ".txt": "plaintext",
-      "*.h": "c",
-      "*.desc": "recfile",
-      "INSTALL": "markdown",
-      "NEWS": "markdown",
-      "AUTHORS": "markdown",
-      "*.am": "makefile",
-      "*.txt": "plaintext",
-      "*.ac": "makefile",
-      ".conf": "ini",
       ".rec": "recfile"
     },
-    "git.alwaysSignOff": true,
-    "git.autofetch": true,
-    "git.autofetchPeriod": 180,
-    "git.autorefresh": true,
-    "git.closeDiffOnOperation": true,
-    "git.confirmSync": false,
-    "git.enableCommitSigning": false,
-    "git.enableSmartCommit": true,
-    "git.enabled": true,
-    "git.fetchOnPull": true,
-    "git.inputValidation": true,
-    "git.mergeEditor": true,
-    "git.openRepositoryInParentFolders": "always",
-    "git.postCommitCommand": "sync",
-    "git.pruneOnFetch": true,
-    "git.pullBeforeCheckout": true,
-    "git.rebaseWhenSync": true,
-    "git.replaceTagsWhenPull": true,
-    "git.showProgress": true,
-    "git.verboseCommit": true,
-    "git.pullTags": true,
-    "git.confirmForcePush": true,
     "github.copilot.enable": {
-      "plaintext": true,
-      "markdown": true,
-      "css": true,
-      "diff": true,
-      "dockerfile": true,
-      "git": true,
-      "html": true,
-      "ini": true,
-      "javascript": true,
-      "json": true,
-      "yaml": true,
-      "dotenv": true,
-      "assembly": true,
-      "c": true,
-      "dockercompose": true,
-      "git-commit": true,
-      "git-rebase": true,
-      "makefile": true,
-      "shellscript": true,
-      "sql": true,
-      "xml": true,
-      "rec": true,
-      "sh": true,
       "containerfile": true
     },
     "github.copilot.editor.enableAutoCompletions": true,
-    "github.copilot.chat.edits.enabled": true,
     "github.copilot.chat.fixTestFailure.enabled": true,
     "github.copilot.chat.followUps": "always",
     "github.copilot.chat.reviewSelection.enabled": true,
@@ -178,88 +87,14 @@
     "workbench.preferredHighContrastColorTheme": "Default Dark Modern",
     "diffEditor.ignoreTrimWhitespace": false,
     "search.exclude": {
-      "**/node_modules": true,
-      "**/dist": true,
-      "**/coverage": true,
-      "**/bin": true,
-      "**/obj": true,
-      "**/build": true,
-      "**/tmp": true,
-      "**/var/records": true,
-      "**/archive/**": false,
-      "**/backup/**": false,
-      "**/checksums/**": false,
-      "**/config/**": false,
-      "**/charset/**": false,
-      "**/docs/**": false,
-      "**/include/**": false,
-      "**/lib/**": false,
-      "**/man/**": false,
-      "**/public/**": false,
-      "**/scripts/**": false,
-      "**/private/**": false,
-      "**/src/**": false,
-      "**/test/**": false,
       "**/var/**": false
     },
     "search.useIgnoreFiles": true,
     "search.useGlobalIgnoreFiles": true,
     "files.exclude": {
-      "**/.git": false,
-      "**/bin": false,
-      "**/obj": false,
-      "**/build": false,
-      "**/dist": false,
-      "**/coverage": false,
-      "**/tmp": false,
-      "**/test/*.o": false,
-      "**/src/*.o": false,
-      "**/archive/**": false,
-      "**/backup/**": false,
-      "**/checksums/**": false,
-      "**/config/**": false,
-      "**/charset/**": false,
-      "**/docs/**": false,
-      "**/include/**": false,
-      "**/lib/**": false,
-      "**/man/**": false,
-      "**/public/**": false,
-      "**/scripts/**": false,
-      "**/private/**": false,
-      "**/src/**": false,
-      "**/test/**": false,
       "**/var/**": false
     },
-    "editor.tokenColorCustomizations": {
-      "[*Light*]": {
-        "textMateRules": [
-          {
-            "scope": "ref.matchtext",
-            "settings": {
-              "foreground": "#000"
-            }
-          }
-        ]
-      },
-      "[*Dark*]": {
-        "textMateRules": [
-          {
-            "scope": "ref.matchtext",
-            "settings": {
-              "foreground": "#fff"
-            }
-          }
-        ]
-      },
-      "textMateRules": [
-        {
-          "scope": "keyword.other.dotenv",
-          "settings": {
-            "foreground": "#FF000000"
-          }
-        }
-      ]
-    },
+    "editor.tokenColorCustomizations": {},
     "terminal.integrated.defaultProfile.osx": "zsh",
     "github.gitProtocol": "ssh",
     "extensions.ignoreRecommendations": true,
@@ -317,31 +152,11 @@
     "application.experimental.rendererProfiling": true,
     "ipynb.experimental.serialization": true,
     "git.autoStash": true,
-    "microsoft.useMsal": true,
     "github.copilot.chat.scopeSelection": true,
     "github.copilot.chat.search.semanticTextResults": true,
     "markdown.preview.typographer": true,
     "merge-conflict.autoNavigateNextConflict.enabled": true,
-    "githubPullRequests.assignCreated": "${user}",
-    "githubPullRequests.defaultCreateOption": "createAutoMerge",
-    "githubPullRequests.defaultMergeMethod": "squash",
-    "githubPullRequests.experimental.chat": true,
-    "githubPullRequests.experimental.notificationsView": true,
-    "githubPullRequests.experimental.useQuickChat": true,
-    "githubPullRequests.notifications": "pullRequests",
-    "githubPullRequests.pullBranch": "always",
-    "githubPullRequests.pullPullRequestBranchBeforeCheckout": "pullAndUpdateBase",
-    "githubPullRequests.pullRequestDescription": "Copilot",
-    "githubPullRequests.pushBranch": "always",
-    "githubPullRequests.quickDiff": true,
-    "githubPullRequests.showPullRequestNumberInTree": true,
-    "githubPullRequests.terminalLinksHandler": "vscode",
     "chat.detectParticipant.enabled": false,
-    "shellcheck.enable": true,
-    "shellcheck.enableQuickFix": true,
-    "shellcheck.run": "onType",
-    "shellcheck.executablePath": "/usr/bin/shellcheck",
-    "shellcheck.logLevel": "error",
     "[shellcheckrc]": {
       "files.encoding": "iso88591",
       "files.autoGuessEncoding": false,
@@ -357,18 +172,14 @@
     },
     "[shellscript]": {
       "files.eol": "\n",
-      "editor.defaultColorDecorators": "auto",
+      "editor.defaultColorDecorators": "auto"
     },
-    "shellcheck.disableVersionCheck": true,
-    "shellcheck.useWorkspaceRootAsCwd": false
   },
   "extensions": {
     "recommendations": [
       "ms-vscode.cpptools",
-      "timonwong.shellcheck",
       "davidanson.vscode-markdownlint",
       "yzhang.markdown-all-in-one",
-      "github.vscode-pull-request-github",
       "github.vscode-github-actions",
       "your-publisher-name.recfile-syntax",
       "qiumingge.cpp-check-lint",

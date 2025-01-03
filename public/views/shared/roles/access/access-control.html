@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Access Control</title>
+<link rel="stylesheet" type="text/css" href="/views/common/styles.html">
+</head>
+<body>
+<div id="accessControl">
+    <form onsubmit="return checkAccess(document.getElementById('resourceId').value);">
+        <input type="hidden" id="userRole" value="user">
+        <input type="text" id="resourceId" placeholder="Enter resource">
+        <input type="submit" value="Check Access">
+    </form>
+    <div id="accessMessage"></div>
+</div>
+<script type="text/javascript">
+"use strict";
+function checkAccess(resource) {
+    var userRole = document.getElementById("userRole").value;
+    var accessMap = {
+        "admin": ["all"],
+        "user": ["profile", "dashboard"],
+        "guest": ["public"]
+    };
+    var hasAccess = accessMap[userRole] &&
+                    (accessMap[userRole].indexOf("all") !== -1 ||
+                     accessMap[userRole].indexOf(resource) !== -1);
+    document.getElementById("accessMessage").innerHTML = hasAccess ?
+        "<span class='access-granted'>Access Granted</span>" :
+        "<span class='access-denied'>Access Denied</span>";
+    return false;
+}
+</script>
+</body>
+</html>

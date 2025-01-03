@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN">
+<html>
+<head>
+    <title>Sign Up</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <!--#include virtual="/views/common/styles.html" -->
+</head>
+<body>
+    <div class="error-container" id="form-errors"></div>
+    <div class="auth-form">
+        <h1 class="auth-title">Sign Up</h1>
+        <form name="signupForm" action="signup-success.html" method="post" onsubmit="return validateForm();">
+            <div class="form-field required">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username">
+            </div>
+            <div class="form-field required">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password">
+            </div>
+            <div class="form-field required">
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email">
+            </div>
+            <input type="submit" value="Sign Up">
+        </form>
+    </div>
+    <!--#include virtual="/views/common/scripts.html" -->
+    <script type="text/javascript">
+    "use strict";
+    function validateForm() {
+        var fields = {
+            'username': 'Username is required',
+            'password': 'Password is required',
+            'email': 'Email is required'
+        };
+        var errorContainer = document.getElementById('form-errors');
+        var isValid = true;
+
+        errorContainer.innerHTML = '';
+
+        for (var id in fields) {
+            var field = document.getElementById(id);
+            if (!field.value) {
+                showError(fields[id]);
+                isValid = false;
+            }
+        }
+
+        var email = document.getElementById('email');
+        if (email.value && !/^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,6}$/.test(email.value)) {
+            showError('Invalid email format');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    function showError(message) {
+        var errorContainer = document.getElementById('form-errors');
+        errorContainer.innerHTML += '<div class="error">' + message + '</div>';
+    }
+    </script>
+</body>
+</html>

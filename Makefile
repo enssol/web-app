@@ -19,6 +19,9 @@ else
 	CC = musl-gcc
 endif
 
+# Source common settings
+include config/shared-config.sh
+
 SRCDIR = src
 TESTDIR = test
 OBJDIR = obj
@@ -26,162 +29,18 @@ BINDIR = bin
 INCLUDEDIR = include
 
 # Add version info
-MAJOR_VERSION = 0
-MINOR_VERSION = 0
-PATCH_VERSION = 2
-VERSION = $(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
-
-# Core language and standards flags
-LANG_FLAGS = -std=c90 -ansi -pedantic \
-	-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500 \
-	-D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 \
-	-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE \
-	-D_FORTIFY_SOURCE=2 -DVERSION=\"$(VERSION)\"
-
-# Warning flags
-WARN_FLAGS = -Wall -Wextra -Werror -Wshadow -Wconversion \
-	-Wstrict-prototypes -Wmissing-prototypes -Warray-bounds \
-	-Wformat=2 -Wformat-security -Wformat-overflow=2 \
-	-Wformat-truncation=2 -Wvla -Wbad-function-cast \
-	-Wstrict-aliasing=3 -Wnull-dereference -Wdouble-promotion \
-	-Wfloat-equal -Wpointer-arith -Wwrite-strings -Wcast-align=strict \
-	-Wcast-qual -Wredundant-decls -Wundef -Wmissing-include-dirs \
-	-Winit-self -Wswitch-enum -Wmissing-declarations -Wsign-conversion \
-	-Wmissing-noreturn -Wlogical-op -Wduplicated-cond -Wduplicated-branches \
-	-Wunsafe-loop-optimizations -Wstack-usage=8192 -Wpadded \
-	-Waggregate-return -Wattributes -Wbuiltin-macro-redefined \
-	-Wdeprecated -Wdiv-by-zero -Wendif-labels -Wexpansion-to-defined \
-	-Wformat-contains-nul -Wformat-extra-args -Wformat-zero-length \
-	-Wmultichar -Wnested-externs -Wno-format-nonliteral \
-	-Wno-unused-result -Woverflow -Wpointer-to-int-cast \
-	-Wpragmas -Wredundant-decls -Wvariadic-macros -Wvla-larger-than=4096 \
-	-Wwrite-strings -Wstack-protector
-
-# Security flags
-SEC_FLAGS = -fstack-protector-strong -fstack-clash-protection \
-	-fstack-check -fPIE -fstack-protector-all \
-	-fno-delete-null-pointer-checks -ftrivial-auto-var-init=zero \
-	-fno-allow-store-data-races -fwrapv -fno-strict-volatile-bitfields \
-	-finput-charset=iso-8859-1 -fexec-charset=iso-8859-1 \
-	-fwide-exec-charset=iso-8859-1 -fstack-protector
-
-# CPU-specific optimization flags
-ARCH_FLAGS = -march=native -mtune=native \
-	-msse4.2 -mavx2 -mfma -mavx512f \
-	-mpclmul -maes -msha \
-	-mprefer-vector-width=512
-
-# Cache optimization for Graviton2
-CACHE_FLAGS = -falign-functions=64 \
-	-falign-jumps=32 \
-	-falign-loops=32 \
-	-falign-labels=32
-
-# Network performance flags
-NET_FLAGS = -fno-schedule-insns \
-	-fno-schedule-insns2 \
-	-fomit-frame-pointer \
-	-fno-stack-check
-
-# Update ARCH_FLAGS for t4g
-ARCH_FLAGS = $(CACHE_FLAGS) $(NET_FLAGS)
-
-# Enhanced optimization flags
-OPT_FLAGS = -O3 -fdata-sections -ffunction-sections \
-	-fno-common -fstrict-aliasing -fno-strict-overflow \
-	-fno-plt -fPIC -fno-semantic-interposition \
-	-flto=auto -fno-fat-lto-objects \
-	-fdevirtualize-at-ltrans -fipa-pta \
-	-floop-nest-optimize -floop-parallelize-all \
-	-ftree-parallelize-loops=4 -ftree-vectorize \
-	-funroll-loops -ffast-math -fmerge-all-constants \
-	-fmodulo-sched -fmodulo-sched-allow-regmoves \
-	-fgcse-sm -fgcse-las -fipa-cp-clone \
-	-fira-loop-pressure -fivopts -flifetime-dse=2 \
-	-flive-range-shrinkage -fmath-errno -fpeephole2 \
-	-freciprocal-math -fsched-pressure -fsched-spec-load \
-	-fsched2-use-superblocks -ftree-loop-distribution \
-	-ftree-loop-im -ftree-loop-ivcanon -ftree-vectorize \
-	-fuse-linker-plugin -fwhole-program \
-	-falign-functions=32 -falign-jumps=32 \
-	-falign-loops=32 -falign-labels=32 \
-	-fcaller-saves -fcrossjumping -fcse-follow-jumps \
-	-fcse-skip-blocks -fdelete-null-pointer-checks \
-	-fdevirtualize -fexpensive-optimizations \
-	-ffinite-loops -fgcse-after-reload -fhoist-adjacent-loads \
-	-findirect-inlining -finline-functions \
-	-finline-small-functions -fipa-bit-cp -fipa-icf \
-	-fipa-icf-functions -fipa-icf-variables -fipa-profile \
-	-fipa-pure-const -fipa-ra -fipa-reference \
-	-fipa-reference-addressable -fipa-sra -fira-hoist-pressure \
-	-fisolate-erroneous-paths-dereference -flra-remat \
-	-foptimize-sibling-calls -fpartial-inlining \
-	-fpeel-loops -fpredictive-commoning \
-	-free -frename-registers -freorder-blocks \
-	-freorder-blocks-algorithm=stc -freorder-functions \
-	-frerun-cse-after-loop -fschedule-fusion -freschedule-modulo-scheduled-loops \
-	-fsplit-ivs-in-unroller -fssa-phiopt -fstore-merging \
-	-fstrict-aliasing -fthread-jumps -ftree-bit-ccp \
-	-ftree-builtin-call-dce -ftree-copy-prop -ftree-dce \
-	-ftree-dominator-opts -ftree-dse -ftree-forwprop \
-	-ftree-fre -ftree-loop-if-convert -ftree-loop-im \
-	-ftree-loop-ivcanon -ftree-loop-optimize \
-	-ftree-parallelize-loops=4 -ftree-pre -ftree-pta \
-	-ftree-reassoc -ftree-sink -ftree-slsr -ftree-sra \
-	-ftree-switch-conversion -ftree-tail-merge \
-	-ftree-ter -ftree-vrp -funit-at-a-time -funswitch-loops \
-	-fvariable-expansion-in-unroller -fvect-cost-model=dynamic \
-	-fversion-loops-for-strides $(ARCH_FLAGS)
+VERSION ?= $(shell . ./scripts/config/shared-config.sh && echo $$VERSION)
+MAJOR_VERSION ?= $(shell . ./scripts/config/shared-config.sh && echo $$MAJOR_VERSION)
+MINOR_VERSION ?= $(shell . ./scripts/config/shared-config.sh && echo $$MINOR_VERSION)
+PATCH_VERSION ?= $(shell . ./scripts/config/shared-config.sh && echo $$PATCH_VERSION)
 
 # Combine all CFLAGS
-PROD_CFLAGS = $(LANG_FLAGS) $(WARN_FLAGS) $(SEC_FLAGS) $(OPT_FLAGS) -static
-
-# Enhanced linker flags for performance
-PROD_LDFLAGS = -static -Wl,--gc-sections,-O3,--sort-common \
-	-Wl,--build-id=none,-z,relro,-z,now,-z,noexecstack \
-	-Wl,--sort-section=alignment,--strip-all,--warn-common \
-	-Wl,--no-undefined,--no-allow-shlib-undefined \
-	-Wl,--no-copy-dt-needed-entries,--as-needed \
-	-Wl,-z,separate-code,-z,text,-z,defs \
-	-Wl,-z,relro,-z,global \
-	-Wl,-z,noexecstack,-z,nocombreloc \
-	-Wl,--eh-frame-hdr,--exclude-libs,ALL \
-	-Wl,--sort-section=alignment \
-	-Wl,--relax \
-	-Wl,-O3 \
-	-lpthread -lcrypt -lrt -ldl
-
-# Test & Debug configuration flags
-TEST_BASIC = -std=c90 -ansi -pedantic \
-	-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=500 \
-	-Wall -Wextra -Werror -O0
-
-# Debug symbol flags for GDB
-TEST_DEBUG = -g3 -ggdb3 -gdwarf-4 \
-	-fno-eliminate-unused-debug-types \
-	-fno-omit-frame-pointer \
-	-fno-inline
-
-# Coverage flags
-TEST_COVERAGE = -fprofile-arcs -ftest-coverage \
-	-fprofile-generate -fvpt -funroll-loops
-
-# Refined analysis flags
-TEST_ANALYSIS = -fanalyzer -fno-omit-frame-pointer \
-	-fstack-check -fstack-protector-all -ftrapv
+PROD_CFLAGS ?= $(shell . ./scripts/config/shared-config.sh && echo $$PROD_CFLAGS)
+PROD_CFLAGS += $(LANG_FLAGS) $(WARN_FLAGS) $(SEC_FLAGS) $(OPT_FLAGS) -static
 
 # Combine all test CFLAGS
-TEST_CFLAGS = $(TEST_BASIC) $(TEST_DEBUG) \
-	$(TEST_COVERAGE) $(filter-out -O3,$(TEST_ANALYSIS))
-
-# Test libraries and linker flags
-TEST_LIBS = -lgcov -lcunit -lcrypt -lpthread -lrt
-TEST_LDFLAGS = -Wl,--warn-common \
-	-Wl,--no-undefined \
-	-Wl,--gc-sections \
-	-Wl,--build-id \
-	-Wl,--eh-frame-hdr \
-	$(TEST_LIBS)
+TEST_CFLAGS ?= $(shell . ./scripts/config/shared-config.sh && echo $$TEST_CFLAGS)
+TEST_CFLAGS += $(TEST_BASIC) $(TEST_DEBUG) $(TEST_COVERAGE) $(filter-out -O3,$(TEST_ANALYSIS))
 
 # Source files
 SRC = $(wildcard $(SRCDIR)/*.c)
@@ -200,7 +59,9 @@ TEST_OBJ = $(TEST_SRC_NO_MAIN:$(SRCDIR)/%.c=$(OBJDIR)/test/%.o) \
 # Dependency files
 DEPFILES := $(PROD_OBJ:.o=.d) $(TEST_OBJ:.o=.d)
 
+PROD_TARGET ?= $(shell . ./scripts/config/shared-config.sh && echo $$PROD_TARGET)
 PROD_TARGET = $(BINDIR)/web_server
+TEST_TARGET ?= $(shell . ./scripts/config/shared-config.sh && echo $$TEST_TARGET)
 TEST_TARGET = $(BINDIR)/test_web_server
 
 # Build directories
@@ -208,7 +69,7 @@ OBJDIRS = $(OBJDIR)/prod $(OBJDIR)/test
 BINDIRS = $(BINDIR)
 ALLDIRS = $(OBJDIRS) $(BINDIRS)
 
-.PHONY: all prod test dist clean-dist release clean check uninstall debug help distclean
+.PHONY: all prod test dist clean-dist release clean check uninstall debug help distclean reset verify-cleanup
 
 all: prod
 
@@ -276,8 +137,8 @@ $(PROD_OBJ): $(HDRS)
 $(TEST_OBJ): $(HDRS)
 
 # Include generated dependency files
--include $(PROD_OBJS:.o=.d)
--include $(TEST_OBJS:.o=.d)
+-include $(PROD_OBJ:.o=.d)
+-include $(TEST_OBJ:.o=.d)
 
 # Generate dependencies
 $(OBJDIR)/%.d: $(SRCDIR)/%.c
@@ -389,3 +250,32 @@ t4g-release: clean-dist prod
 
 clean:
 	rm -rf $(BUILDDIR) $(OBJDIR) $(BINDIR)/*.o $(BINDIR)/web_server $(BINDIR)test_web_server
+
+# Add checksum verification target
+.PHONY: verify-checksums
+verify-checksums:
+	./scripts/utils/verify-checksum.sh
+
+# Add checksum generation target
+.PHONY: generate-checksums
+generate-checksums:
+	./scripts/build/generate-checksums.sh
+
+# Add checksum generation to the release target
+release: clean-dist prod generate-checksums
+	@echo "Creating minimal release package..."
+	@rm -rf $(TMPDIR)
+	@mkdir -p $(TMPDIR)
+	# ...existing code...
+	@echo "Minimal release package created: $(DISTDIR)/$(RELEASE_NAME).tar.gz"
+
+reset:
+	./scripts/utils/shared-utils.sh reset_build_env
+
+verify-cleanup:
+	./scripts/utils/shared-utils.sh verify_cleanup
+
+# Target to generate manual pages
+.PHONY: man
+man:
+	./scripts/build/make-man.sh generate

@@ -1,0 +1,35 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up environment
+      run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+    - name: Configure build
+      run: ./scripts/build/build.sh setup-env
+
+    - name: Build debug
+      run: ./scripts/build/build.sh make-debug
+
+    - name: Build release
+      run: ./scripts/build/build.sh make-release
+
+    - name: Run tests
+      run: make test
+
+    - name: Verify checksums
+      run: ./scripts/utils/verify-checksum.sh

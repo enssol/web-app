@@ -1,25 +1,20 @@
 {
-    "shellcheck.enable": true,
-    "shellcheck.enableQuickFix": true,
-    "shellcheck.run": "onType",
-    "shellcheck.executablePath": "/usr/bin/shellcheck",
-    "[shellcheckrc]": {
-      "files.encoding": "iso88591",
-      "files.autoGuessEncoding": false,
-      "files.trimTrailingWhitespace": true
-    },
-    "[shellcheck-output]": {
-      "editor.wordWrap": "on",
-      "editor.trimAutoWhitespace": false,
-      "editor.defaultFormatter": "timonwong.shellcheck",
-      "files.encoding": "iso88591",
-      "files.autoGuessEncoding": false,
-      "files.trimTrailingWhitespace": false
-    },
-    "[shellscript]": {
-      "files.eol": "\n",
-      "editor.defaultColorDecorators": "auto",
-    },
-    "shellcheck.disableVersionCheck": true,
-    "shellcheck.useWorkspaceRootAsCwd": false
+  "[shellcheckrc]": {
+    "files.encoding": "iso88591",
+    "files.autoGuessEncoding": false,
+    "files.trimTrailingWhitespace": true
+  },
+  "[shellcheck-output]": {
+    "editor.wordWrap": "on",
+    "editor.trimAutoWhitespace": false,
+    "editor.defaultFormatter": "timonwong.shellcheck",
+    "files.encoding": "iso88591",
+    "files.autoGuessEncoding": false,
+    "files.trimTrailingWhitespace": false
+  },
+  "[shellscript]": {
+    "files.eol": "\n",
+    "editor.defaultColorDecorators": "auto"
+  },
+  "git.enabled": false
 }

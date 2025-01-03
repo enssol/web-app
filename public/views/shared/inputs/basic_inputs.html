@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN">
+<html>
+<head>
+    <title>Basic Input Components</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link rel="stylesheet" type="text/css" href="/views/common/styles.html">
+    <script type="text/javascript" src="/views/common/scripts.html"></script>
+</head>
+<body>
+    <form onsubmit="return validateForm();">
+        <div class="input-group">
+            <label for="text-input">Text Input:</label>
+            <input type="text" id="text-input" name="text-input">
+        </div>
+        <div class="input-group">
+            <label for="password-input">Password Input:</label>
+            <input type="password" id="password-input" name="password-input">
+        </div>
+        <div class="input-group">
+            <label for="select-dropdown">Select Dropdown:</label>
+            <select id="select-dropdown" name="select-dropdown">
+                <option value="option1">Option 1</option>
+                <option value="option2">Option 2</option>
+                <option value="option3">Option 3</option>
+            </select>
+        </div>
+        <div class="checkbox-group">
+            <label><input type="checkbox" name="checkbox" value="value1"> Checkbox with Label</label>
+        </div>
+        <div class="radio-group">
+            <label><input type="radio" name="radio-group" value="radio1"> Radio Button 1</label>
+            <label><input type="radio" name="radio-group" value="radio2"> Radio Button 2</label>
+        </div>
+        <div class="input-group">
+            <input type="submit" value="Submit">
+        </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>File Download</title>
+<link rel="stylesheet" type="text/css" href="/views/common/styles.html">
+<script type="text/javascript">
+"use strict";
+/* <![CDATA[ */
+function downloadFile(fileUrl) {
+    var statusElem = document.getElementById("downloadStatus");
+    var completeElem = document.getElementById("completeMsg");
+
+    statusElem.innerHTML = "Downloading...";
+
+    var iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    document.body.appendChild(iframe);
+
+    try {
+        iframe.src = fileUrl;
+        setTimeout(function() {
+            statusElem.innerHTML = "";
+            completeElem.style.display = "block";
+            document.body.removeChild(iframe);
+        }, 1000);
+    } catch (e) {
+        statusElem.innerHTML = "Download failed";
+    }
+}
+/* ]]> */
+</script>
+</head>
+<body>
+<div>
+    <span class="type-icon">[PDF]</span>
+    <button class="download-button" onclick="downloadFile('example.pdf')">
+        Download File
+    </button>
+    <div id="downloadStatus" class="download-status"></div>
+    <div id="completeMsg" class="complete-msg">Download Complete!</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!--#include virtual="modal-base.html" -->
+<!-- ...existing code... -->
+<div id="modal-alert" class="modal-overlay" role="alertdialog" aria-hidden="true">
+    <div class="modal-content" role="document">
+        <p id="alert-message">This is an alert message.</p>
+        <button onclick="hideModal('modal-alert')">OK</button>
+    </div>
+</div>
+<script type="text/javascript">
+    "use strict";
+    function showAlert(message) {
+        var msgElem = document.getElementById('alert-message');
+        if (msgElem) {
+            msgElem.innerHTML = message || msgElem.innerHTML;
+        }
+        showModal('modal-alert');
+    }
+</script>
+<!-- ...existing code... -->

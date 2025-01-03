@@ -2,25 +2,20 @@
 
 ## Core Build Tools
 
-### musl-gcc
-- Primary C compiler with musl libc support
-- Used for production builds with static linking
-- Ensures POSIX compliance and portability
+### Build-base
+- Essential build tools
+- Includes GCC, Make, Musl and others
+- Supports compilation and linking
 
-### GNU Make
-- Build automation system 
-- Handles compilation and linking
-- Manages build targets and dependencies
+### Busybox
+- Single binary with multiple utilities
+- Provides core Unix utilities
+- Simplifies system management
 
-### CUnit
-- Unit testing framework for C
-- Supports test suites and assertions
-- Integrated with build process
-
-### Valgrind
-- Memory analysis and debugging
-- Detects memory leaks and errors
-- Validates memory management
+### Binutils
+- Binary utilities for object files
+- Supports object file manipulation
+- Simplifies binary management
 
 ## Development Environment
 
@@ -34,10 +29,25 @@
 - Branch management
 - Collaboration support
 
-### Shellcheck
-- Shell script validator
-- Ensures script portability
-- Identifies common errors
+### Github-CLI
+- Command line interface for Github
+- Supports repository management
+- Simplifies pull requests and issues
+
+### Gcompat
+- Compatibility library for GNU extensions
+- Provides GNU extensions for musl libc
+- Ensures compatibility with GNU tools
+
+### Dropbear
+- Lightweight SSH client and server
+- Secure remote access
+- Simplifies file transfer
+
+### GPG
+- Encryption and signing tool
+- Secure data management
+- Supports key management
 
 ## Code Quality
 
@@ -56,6 +66,16 @@
 - Ensures ISO-8859-1 compliance
 - Checks file encodings
 
+### Valgrind
+- Memory analysis and debugging
+- Detects memory leaks and errors
+- Validates memory management
+
+### Shellcheck
+- Shell script validator
+- Ensures script portability
+- Identifies common errors
+
 ## Documentation
 
 ### Doxygen
@@ -69,6 +89,11 @@
 - Processes documentation
 
 ## Testing
+
+### CUnit
+- Unit testing framework for C
+- Supports test suites and assertions
+- Integrated with build process
 
 ### POSIX Test Suite (PTS)
 - POSIX compliance testing
@@ -98,6 +123,13 @@
 - Stack protection verification
 - Security feature validation
 
+## Tools
+
+### Recutils
+- Text-based database management
+- Supports structured data storage
+- Simplifies data management
+
 ## Build Requirements
 
 All tools must be configured for:
@@ -112,3 +144,4 @@ Required environment variables:
 LANG=en_AU.ISO8859-1
 LC_ALL=en_AU.ISO8859-1
 CHARSET=ISO-8859-1
+```

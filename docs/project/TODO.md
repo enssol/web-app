@@ -92,7 +92,7 @@ P3: Low      - Nice to have
 - [ ] Unit Testing  
     - Files: test/unit/core/server_core_test.c, test/unit/http/http_request_header_parser_test.c, test/unit/util/string_utils_test.c, test/unit/error_handling/error_logger_test.c  
     - Acceptance Criteria:  
-        - ≥80% function coverage  
+        - ?80% function coverage  
         - Clear pass/fail in test.sh  
         - Edge cases tested  
 
@@ -154,10 +154,10 @@ P3: Low      - Nice to have
         - Pre-update script scheduling  
 
 ## Dependencies
-- musl libc ≥ 1.2.3    
-- CUnit ≥ 2.1         
-- BearSSL ≥ 0.6       
-- GNU Make ≥ 4.3      
+- musl libc ? 1.2.3    
+- CUnit ? 2.1         
+- BearSSL ? 0.6       
+- GNU Make ? 4.3      
 
 ## Compliance Requirements
 - ISO-8859-1 encoding (charset/iso-8859-1.map)  

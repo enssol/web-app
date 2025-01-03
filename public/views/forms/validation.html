@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Form Validation</title>
+    <!--#include virtual="/views/common/styles.html" -->
+</head>
+<body>
+    <div class="error-container" id="form-errors"></div>
+    <form name="validationForm" id="validationForm" onsubmit="return validateForm();">
+        <div class="form-group">
+            <!--#include virtual="/views/shared/inputs/required_field.html" -->
+        </div>
+        <div class="form-group">
+            <!--#include virtual="/views/shared/inputs/optional_field.html" -->
+        </div>
+        <div class="form-group">
+            <!--#include virtual="/views/shared/inputs/input-text.html" -->
+        </div>
+        <div class="form-group">
+            <!--#include virtual="/views/shared/inputs/input-select.html" -->
+        </div>
+        <div class="form-group">
+            <div class="error-message" id="validation-error"></div>
+            <input type="submit" value="Submit" class="form-button">
+        </div>
+    </form>
+    <!--#include virtual="/views/common/scripts.html" -->
+    <script type="text/javascript">
+    "use strict";
+    function validateForm() {
+        var fields = {
+            'requiredField': 'Required field must be filled',
+            'text-input': 'Text input is required',
+            'select-input': 'Please select an option'
+        };
+        var errorContainer = document.getElementById('form-errors');
+        var isValid = true;
+
+        errorContainer.innerHTML = '';
+
+        for (var id in fields) {
+            var field = document.getElementById(id);
+            if (!field.value) {
+                showError(fields[id]);
+                isValid = false;
+            }
+        }
+
+        return isValid;
+    }
+
+    function showError(message) {
+        var errorContainer = document.getElementById('form-errors');
+        errorContainer.innerHTML += '<div class="error">' + message + '</div>';
+    }
+    </script>
+    <!--#include virtual="/views/shared/modals/modal-base.html" -->
+</body>
+</html>

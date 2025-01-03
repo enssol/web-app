@@ -12,40 +12,8 @@
 # Strict mode
 set -e
 
-#######################################
-# Constants
-#######################################
-
-# Environment setup
-LANG=en_AU.ISO8859-1
-LC_ALL=en_AU.ISO8859-1
-CHARSET=ISO-8859-1
-export LANG LC_ALL CHARSET
-
-# Exit codes
-EXIT_SUCCESS=0
-EXIT_FAILURE=1
-
-# Configuration file path
-DEPS_FILE="config/deps.txt"
-
-# Required minimum versions
-MIN_BINUTILS="2.40.0"
-MIN_GCC="12.2.1"
-MIN_GIT="2.40.0"
-MIN_VALGRIND="3.21.0"
-MIN_SHELLCHECK="0.9.0"
-MIN_CPPCHECK="2.10.0"
-MIN_ENCA="1.19"
-MIN_DOXYGEN="1.9.6"
-MIN_GROFF="1.22.4"
-MIN_BEARSSL="0.6"
-MIN_MAKE="4.4.1"
-MIN_GDB="13.1"
-MIN_RECUTILS="1.9"
-
-# Known tools
-KNOWN_TOOLS="gcc git valgrind shellcheck cppcheck enca doxygen groff bearssl make gdb recsel rec2csv recdel recfix recfmt recinf recins recset ar as ld nm objcopy objdump ranlib strip"
+# Load common configuration
+. ../config/shared-config.sh
 
 #######################################
 # Functions
@@ -62,9 +30,9 @@ log_info() {
 }
 
 # Add global variables for environment requirements
-REQUIRED_LANG="en_AU.ISO8859-1"
-REQUIRED_LC_ALL="en_AU.ISO8859-1"
-REQUIRED_CHARSET="ISO-8859-1"
+REQUIRED_LANG="${REQUIRED_LANG:-en_AU.ISO8859-1}"
+REQUIRED_LC_ALL="${REQUIRED_LC_ALL:-en_AU.ISO8859-1}"
+REQUIRED_CHARSET="${REQUIRED_CHARSET:-ISO-8859-1}"
 
 # Update parse_deps_file function
 parse_deps_file() {
@@ -102,6 +70,7 @@ parse_deps_file() {
             *"make >= "*)         MIN_MAKE=$(echo "${line}" | awk -F '>= ' '{print $2}' | awk '{print $1}') ;;
             *"gdb >= "*)          MIN_GDB=$(echo "${line}" | awk -F '>= ' '{print $2}' | awk '{print $1}') ;;
             *"recutils >= "*)     MIN_RECUTILS=$(echo "${line}" | awk -F '>= ' '{print $2}' | awk '{print $1}') ;;
+            *"gh >= "*)           MIN_GH=$(echo "${line}" | awk -F '>= ' '{print $2}' | awk '{print $1}') ;;
             *)
                 # Only log error for non-environment variables
                 if ! echo "${line}" | grep -q "^[A-Z_]*="; then
@@ -155,6 +124,10 @@ get_recutils_version() {
     recsel --version | awk 'NR==1 {print $4}'
 }
 
+get_gh_version() {
+    gh --version | awk '{print $3}'
+}
+
 check_versions() {
     # Check binutils version
     if ! command -v ar >/dev/null 2>&1 || \
@@ -201,6 +174,7 @@ check_versions() {
                 make)       version="${MIN_MAKE}" ;;
                 gdb)        version="${MIN_GDB}" ;;
                 recsel)     version="${MIN_RECUTILS}" ;;
+                gh)         version="${MIN_GH}" ;;
                 *)          log_error "Unknown tool: ${tool}"; return "${EXIT_FAILURE}" ;;
             esac
             log_error "${tool} >= ${version} is required"
@@ -218,6 +192,7 @@ check_versions() {
             make)       current_version=$(get_make_version) ;;
             gdb)        current_version=$(get_gdb_version) ;;
             recsel)     current_version=$(get_recutils_version) ;;
+            gh)         current_version=$(get_gh_version) ;;
             *)          log_error "Unknown tool: ${tool}"; return "${EXIT_FAILURE}" ;;
         esac
 
@@ -228,48 +203,25 @@ check_versions() {
         fi
     done
 
-# Add function to check BearSSL library path
-get_bearssl_version() {
-    # First try command-line tool
-    if command -v bearssl >/dev/null 2>&1; then
-        bearssl version | awk '{print $2}'
-        return 0
-    fi
-
-    # Fall back to checking library pathsß
-    for lib in \
-        /lib/libbearssl.so.* \
-        /usr/lib/libbearssl.so.* \
-        /usr/local/lib/libbearssl.so.*; do
-        if [ -f "${lib}" ]; then
-            # Extract version from library name
-            echo "${lib##*.}"
-            return 0
+    # Check BearSSL version
+    if command -v bearssl >/dev/null 2>&1 || get_bearssl_version >/dev/null 2>&1; then
+        bearssl_version=$(get_bearssl_version)
+        if ! version_greater_equal "${bearssl_version}" "${MIN_BEARSSL}"; then
+            if [ "${BEARSSL_REQUIRED}" = "true" ]; then
+                log_error "BearSSL ${bearssl_version} is too old, >= ${MIN_BEARSSL} is required"
+                return "${EXIT_FAILURE}"
+            else
+                log_info "WARNING: BearSSL ${bearssl_version} is older than recommended version ${MIN_BEARSSL}"
+            fi
         fi
-    done
-
-    return 1
-}
-
-# Update BearSSL check in check_versions()
-if command -v bearssl >/dev/null 2>&1 || get_bearssl_version >/dev/null 2>&1; then
-    bearssl_version=$(get_bearssl_version)
-    if ! version_greater_equal "${bearssl_version}" "${MIN_BEARSSL}"; then
+    else
         if [ "${BEARSSL_REQUIRED}" = "true" ]; then
-            log_error "BearSSL ${bearssl_version} is too old, >= ${MIN_BEARSSL} is required"
+            log_error "BearSSL >= ${MIN_BEARSSL} is required for SSL/TLS support"
             return "${EXIT_FAILURE}"
         else
-            log_info "WARNING: BearSSL ${bearssl_version} is older than recommended version ${MIN_BEARSSL}"
+            log_info "WARNING: BearSSL not found. SSL/TLS features will be disabled"
         fi
     fi
-else
-    if [ "${BEARSSL_REQUIRED}" = "true" ]; then
-        log_error "BearSSL >= ${MIN_BEARSSL} is required for SSL/TLS support"
-        return "${EXIT_FAILURE}"
-    else
-        log_info "WARNING: BearSSL not found. SSL/TLS features will be disabled"
-    fi
-fi
 
     return "${EXIT_SUCCESS}"
 }

@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Checkbox Input</title>
+    <link rel="stylesheet" type="text/css" href="../common/styles.html">
+    <script type="text/javascript" src="../common/scripts.html"></script>
+</head>
+<body>
+    <form onsubmit="return validateCheckboxInput();">
+        <div class="form-field">
+            <label>
+                <input type="checkbox" id="checkbox-input" name="checkbox-input" onclick="validateCheckbox(this)" aria-describedby="checkbox-input-error">
+                Checkbox Label
+            </label>
+            <span class="validation-message" id="checkbox-input-error" role="alert"></span>
+        </div>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
