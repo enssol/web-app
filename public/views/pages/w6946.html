@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+
+<head>
+  <title>W6946 Environmental Obligations</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <link rel="stylesheet" href="../common/styles.html">
+  <script type="text/javascript" src="../common/scripts.html"></script>
+</head>
+
+<body>
+  <div id="header">
+    <h1>W6946 Environmental Obligations</h1>
+  </div>
+
+  <div class="user-nav">
+    <button onclick="navigateToProfile()" class="nav-button">Profile</button>
+    <button onclick="goBack()" class="nav-button">Back</button>
+  </div>
+
+  <div class="filter-buttons">
+    <button onclick="filterByDueDate('all')">All Records</button>
+    <button onclick="filterByDueDate('warning')">Due Soon (14 Days)</button>
+    <button onclick="filterByDueDate('overdue')">Overdue</button>
+  </div>
+
+  <div class="container">
+    <table id="obligationsTable">
+      <tr>
+        <th onclick="sortTable(0)">Procedure</th>
+        <th onclick="sortTable(1)">Env Aspect</th>
+        <th onclick="sortTable(2)">Obligation #</th>
+        <th onclick="sortTable(3)">Responsibility</th>
+        <th onclick="sortTable(4)">Phase</th>
+        <th onclick="sortTable(5)">Due Date</th>
+        <th onclick="sortTable(6)">Status</th>
+        <th onclick="sortTable(7)">Recurring</th>
+        <th onclick="sortTable(8)">Frequency</th>
+      </tr>
+      <tr class="filter-row">
+        <td><input type="text" class="column-filter" onkeyup="filterTable()"></td>
+        <td><input type="text" class="column-filter" onkeyup="filterTable()"></td>
+        <td><input type="text" class="column-filter" onkeyup="filterTable()"></td>
+        <td><input type="text" class="column-filter" onkeyup="filterTable()"></td>
+        <td><input type="text" class="column-filter" onkeyup="filterTable()"></td>
+        <td><input type="text" class="column-filter" onkeyup="filterTable()"></td>
+        <td><input type="text" class="column-filter" onkeyup="filterTable()"></td>
+        <td><input type="text" class="column-filter" onkeyup="filterTable()"></td>
+        <td><input type="text" class="column-filter" onkeyup="filterTable()"></td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

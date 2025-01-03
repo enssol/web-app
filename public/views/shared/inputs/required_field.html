@@ -1,0 +1,16 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Required Field</title>
+    <link rel="stylesheet" type="text/css" href="/views/common/styles.html">
+    <script type="text/javascript" src="/views/common/scripts.html"></script>
+</head>
+<body>
+    <div class="form-field required">
+        <label for="requiredField">Required Field:</label>
+        <input type="text" id="requiredField" name="requiredField" class="required-field" onblur="validateRequired(this)">
+        <span class="validation-message" id="requiredField-error">This field is required.</span>
+    </div>
+</body>
+</html>

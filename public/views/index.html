@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+
+<head>
+  <title>Login - Secure Access</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <script type="text/javascript">
+    "use strict";
+    function validateForm() {
+      var username = document.getElementById("username").value;
+      var password = document.getElementById("password").value;
+      var errorDiv = document.getElementById("login-error");
+
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/auth?username=" + encodeURIComponent(username) +
+        "&password=" + encodeURIComponent(password), false);
+      xhr.send(null);
+
+      if (xhr.status === 200) {
+        errorDiv.style.display = "none";
+        // Set cookie for the session
+        document.cookie = "username=" + encodeURIComponent(username) +
+          ";path=/;max-age=3600";  // Expires in 1 hour
+        // Redirect after successful auth
+        window.location.href = 'dashboard.html';
+        return false;
+      } else {
+        errorDiv.style.display = "block";
+        return false;
+      }
+    }
+
+    function clearError() {
+      document.getElementById("login-error").style.display = "none";
+    }
+
+    function handleRegister(event) {
+      event.preventDefault();
+      var username = document.getElementById("reg-username").value;
+      var password = document.getElementById("reg-password").value;
+      var errorDiv = document.getElementById("register-error");
+
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/register?username=" + encodeURIComponent(username) +
+        "&password=" + encodeURIComponent(password), false);
+      xhr.send(null);
+
+      if (xhr.status === 200) {
+        errorDiv.style.display = "none";
+        alert("Registration successful! Please login.");
+        document.getElementById("registerForm").reset();
+        return false;
+      } else {
+        errorDiv.style.display = "block";
+        return false;
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div id="header">
+    <h1>Secure Access</h1>
+  </div>
+  <div role="main" class="container">
+    <div class="main">
+      <h1>Secure Login</h1>
+
+      <form id="loginForm" onsubmit="return validateForm();">
+        <div id="login-error" class="error">
+          Invalid username or password
+        </div>
+
+        <div class="form-group">
+          <label for="username">Username:</label>
+          <input type="text" id="username" name="username">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password">
+        </div>
+
+        <div class="form-group">
+          <input type="submit" value="Login">
+          <input type="reset" value="Clear" onclick="clearError();">
+        </div>
+      </form>
+
+      <div class="footer">
+        <p>Protected by security monitoring</p>
+        <p>Need help? Contact: <a href="mailto:support@enssol.com.au">support@enssol.com.au</a></p>
+      </div>
+    </div>
+    <!-- main content -->
+  </div>
+</body>
+
+</html>

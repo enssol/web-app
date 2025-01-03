@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Input Field</title>
+    <!--#include virtual="../common/styles.html" -->
+    <!--#include virtual="../common/modal-base.html" -->
+    <!--#include virtual="../common/modal-confirm.html" -->
+    <!--#include virtual="../common/modal-alert.html" -->
+    <!--#include virtual="../common/modal-dialog.html" -->
+</head>
+<body>
+    <form onsubmit="return validateInput();">
+        <!--#include virtual="../common/input.html" -->
+        <div class="form-field">
+            <input type="submit" value="Submit" class="form-button">
+        </div>
+    </form>
+    <!--#include virtual="../common/scripts.html" -->
+    <script type="text/javascript">
+        "use strict";
+        function validateInput() {
+            var input = document.getElementById('inputField');
+            if (input.value === "") {
+                showError("Please enter text.");
+                return false;
+            }
+            return true;
+        }
+
+        function showError(message) {
+            var errorDiv = document.querySelector('.error-message');
+            errorDiv.innerHTML = message;
+            errorDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

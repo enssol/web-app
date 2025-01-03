@@ -1,0 +1,207 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+
+<head>
+  <title>SCJV Records Management</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <link rel="stylesheet" type="text/css" href="../common/styles.html">
+  <script type="text/javascript" src="../common/scripts.html"></script>
+  <script type="text/javascript">
+    "use strict";
+    window.onload = function() {
+      scjvRecordManager.initializePage();
+    };
+  </script>
+</head>
+
+<body>
+  <div>
+    <h1>SCJV Records Management</h1>
+    <div id="record-error" class="error"></div>
+
+    <form id="recordForm" onsubmit="return scjvRecordManager.createRecord();" action="javascript:void(0);">
+      <div class="form-group">
+        <label for="mechanism">Environmental Mechanism:</label>
+        <select id="mechanism" required>
+          <option value="Portside CEMP">Portside CEMP</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="obligation_number">Obligation Number:</label>
+        <input type="text" id="obligation_number" readonly>
+      </div>
+
+      <div class="form-group">
+        <label for="procedure">Procedure:</label>
+        <input type="text" id="procedure" required>
+      </div>
+
+      <div class="form-group">
+        <label for="aspect">Environmental Aspect:</label>
+        <input type="text" id="aspect" required>
+      </div>
+
+      <div class="form-group">
+        <label for="obligation">Obligation:</label>
+        <input type="text" id="obligation" required>
+      </div>
+
+      <div class="form-group">
+        <label for="accountability">Accountability:</label>
+        <input type="text" id="accountability" required>
+      </div>
+
+      <div class="form-group">
+        <label for="responsibility">Responsibility:</label>
+        <select id="responsibility" required>
+          <option value="hssemgr">HSSE Manager</option>
+          <option value="envlead">Environmental Lead</option>
+          <option value="envadv">Lead Environmental Advisor</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="phase">Project Phase:</label>
+        <select id="phase" required>
+          <option value="Design and Construction">Design and Construction</option>
+          <option value="During Construction">During Construction</option>
+          <option value="Throughout the project">Throughout the project</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="due_date">Due Date:</label>
+        <input type="date" id="due_date" required>
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status:</label>
+        <select id="status" required>
+          <option value="Not Started">Not Started</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="recurring">Recurring:</label>
+        <select id="recurring" required>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="frequency">Frequency:</label>
+        <select id="frequency">
+          <option value="">None</option>
+          <option value="Daily">Daily</option>
+          <option value="Weekly">Weekly</option>
+          <option value="Monthly">Monthly</option>
+          <option value="Annual">Annual</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="inspection">Inspection Required:</label>
+        <select id="inspection" required>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="inspection_freq">Inspection Frequency:</label>
+        <select id="inspection_freq">
+          <option value="">None</option>
+          <option value="Daily">Daily</option>
+          <option value="Weekly">Weekly</option>
+          <option value="Monthly">Monthly</option>
+          <option value="Annual">Annual</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="location">Location:</label>
+        <select id="location" required>
+          <option value="Site">Site</option>
+          <option value="Desktop">Desktop</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="type">Obligation Type:</label>
+        <select id="type" required>
+          <option value="Site based">Site based</option>
+          <option value="Reporting">Reporting</option>
+          <option value="Training">Training</option>
+          <option value="Design">Design</option>
+          <option value="Procurement">Procurement</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <input type="submit" value="Create Record">
+        <button type="button" onclick="goBack();">Back</button>
+      </div>
+    </form>
+
+    <hr>
+    <h2>Update Record</h2>
+    <div class="form-group">
+      <label for="search_obligation">Search Obligation Number:</label>
+      <input type="text" id="search_obligation" placeholder="e.g. PCEMP-01">
+      <button onclick="scjvRecordManager.searchRecord()">Search</button>
+    </div>
+
+    <form id="updateForm" style="display:none;" onsubmit="return scjvRecordManager.updateRecord();" action="javascript:void(0);">
+      <div class="form-group">
+        <label for="update_mechanism">Environmental Mechanism:</label>
+        <select id="update_mechanism" required>
+          <option value="Portside CEMP">Portside CEMP</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="update_obligation_number">Obligation Number:</label>
+        <input type="text" id="update_obligation_number" readonly>
+      </div>
+
+      <div class="form-group">
+        <label for="update_procedure">Procedure:</label>
+        <input type="text" id="update_procedure" required>
+      </div>
+
+      <div class="form-group">
+        <label for="update_aspect">Environmental Aspect:</label>
+        <input type="text" id="update_aspect" required>
+      </div>
+
+      <div class="form-group">
+        <label for="update_obligation">Obligation:</label>
+        <input type="text" id="update_obligation" required>
+      </div>
+
+      <div class="form-group">
+        <label for="update_accountability">Accountability:</label>
+        <input type="text" id="update_accountability" required>
+      </div>
+
+      <div class="form-group">
+        <label for="update_responsibility">Responsibility:</label>
+        <select id="update_responsibility" required>
+          <option value="hssemgr">HSSE Manager</option>
+          <option value="envlead">Environmental Lead</option>
+          <option value="envadv">Lead Environmental Advisor</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <input type="submit" value="Update Record">
+      </div>
+    </form>
+  </div>
+</body>
+
+</html>

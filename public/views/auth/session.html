@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+    <title>Session Management</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <!--#include virtual="../../common/styles.html" -->
+</head>
+<body>
+    <div id="sessionState" class="session-state">Session active</div>
+    <div id="expirationNotification" class="expiration-notification">Session will expire soon</div>
+    <div id="logoutPrompt" class="logout-prompt">You have been logged out</div>
+    <script type="text/javascript">
+        "use strict";
+        var sessionDuration = 300000; // 5 minutes
+        var refreshInterval = 60000; // 1 minute
+
+        function checkSessionState() {
+            // Simulate session state check
+            var sessionActive = true;
+            if (!sessionActive) {
+                document.getElementById('sessionState').innerHTML = 'Session inactive';
+            }
+        }
+
+        function showExpirationNotification() {
+            document.getElementById('expirationNotification').style.display = 'block';
+        }
+
+        function showLogoutPrompt() {
+            document.getElementById('logoutPrompt').style.display = 'block';
+        }
+
+        setInterval(checkSessionState, refreshInterval);
+        setTimeout(showExpirationNotification, sessionDuration - 60000); // 1 minute before expiration
+        setTimeout(showLogoutPrompt, sessionDuration);
+    </script>
+</body>
+</html>

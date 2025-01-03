@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+
+<head>
+  <title>Profile Management</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <link rel="stylesheet" href="../common/styles.html">
+  <script type="text/javascript" src="../common/scripts.html"></script>
+</head>
+
+<body>
+  <div class="main">
+    <h1>Profile Management</h1>
+
+    <form id="profileForm" onsubmit="return updateProfile();">
+      <div id="profile-error" class="error">
+        Error updating profile
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" readonly>
+      </div>
+
+      <div class="form-group">
+        <label for="fullname">Full Name:</label>
+        <input type="text" id="fullname" name="fullname">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email">
+      </div>
+
+      <div class="form-group">
+        <label for="project">Project:</label>
+        <select id="project" name="project">
+          <option value="">Select Project</option>
+        </select>
+      </div>
+
+      <div class="button-group">
+        <input type="submit" value="Update Profile">
+        <input type="reset" value="Clear" onclick="clearError();">
+        <button type="button" onclick="goBack();" class="nav-button">Back to Dashboard</button>
+      </div>
+    </form>
+
+    <div class="admin-section">
+      <h2>Administrative Tools</h2>
+      <button type="button" onclick="location.href='crud_profile.html'" class="nav-button">Manage User Profiles</button>
+    </div>
+  </div>
+
+  <div role="main" class="container">
+    <!-- main content -->
+  </div>
+
+  <!-- Add ARIA labels -->
+  <button aria-label="Navigate to Profile" onclick="navigateToProfile()">Profile</button>
+  <button aria-label="Go Back" onclick="goBack()">Back</button>
+</body>
+
+</html>

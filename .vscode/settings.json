@@ -1,0 +1,20 @@
+{
+  "[shellcheckrc]": {
+    "files.encoding": "iso88591",
+    "files.autoGuessEncoding": false,
+    "files.trimTrailingWhitespace": true
+  },
+  "[shellcheck-output]": {
+    "editor.wordWrap": "on",
+    "editor.trimAutoWhitespace": false,
+    "editor.defaultFormatter": "timonwong.shellcheck",
+    "files.encoding": "iso88591",
+    "files.autoGuessEncoding": false,
+    "files.trimTrailingWhitespace": false
+  },
+  "[shellscript]": {
+    "files.eol": "\n",
+    "editor.defaultColorDecorators": "auto"
+  },
+  "git.enabled": false
+}

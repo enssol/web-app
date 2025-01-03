@@ -19,6 +19,48 @@ A lightweight HTTP web server implementation in ANSI C (C89), focusing on POSIX 
 - GNU Make
 - CUnit testing framework
 
+## Build Quick Start
+
+To build the project, follow these steps:
+
+1. **Clone the repository**:
+    ```sh
+    git clone https://github.com/your-repo/web-app.git
+    cd web-app
+    ```
+
+2. **Set up the environment**:
+    ```sh
+    export ENV=dev  # For development build
+    # or
+    export ENV=prod  # For production build
+    ```
+
+3. **Build the project**:
+    ```sh
+    make
+    ```
+
+4. **Install the project**:
+    ```sh
+    make install
+    ```
+
+5. **Clean build artifacts**:
+    ```sh
+    make clean
+    ```
+
+## Tool Requirements
+
+Ensure you have the following tools installed:
+
+- **GNU Make**: For building the project.
+- **GCC**: The GNU Compiler Collection, for compiling C code.
+- **musl libc**: A lightweight, POSIX-compliant standard C library.
+- **Git**: For version control.
+- **CUnit**: For unit testing.
+
 ## Build Commands
 
 ### Basic Build Commands
@@ -89,6 +131,77 @@ Access via browser:
 - Strict input validation
 - Safe string handling
 - Format string protection
+
+## Running Tests
+
+To ensure the quality and correctness of the web application, a comprehensive test suite has been implemented. Follow the steps below to set up and run the tests.
+
+### Prerequisites
+
+1. **Install Dependencies**: Ensure all necessary dependencies are installed. This includes the CUnit framework for unit testing.
+    ```sh
+    sudo apt-get update
+    sudo apt-get install libcunit1 libcunit1-doc libcunit1-dev
+    ```
+
+2. **Build the Project**: Compile the project with the appropriate flags.
+    ```sh
+    make ENV=dev
+    ```
+
+### Running Unit Tests
+
+Unit tests are located in the `test/unit` directory. To run the unit tests, execute the following command:
+```sh
+make test
+```
+
+### Running Integration Tests
+
+Integration tests are located in the `test/integration` directory. To run the integration tests, execute the following command:
+```sh
+make integration-test
+```
+
+### Running Performance Tests
+
+Performance tests are located in the `test/performance` directory. To run the performance tests, execute the following command:
+```sh
+make performance-test
+```
+
+### Running Security Tests
+
+Security tests are located in the `test/security` directory. To run the security tests, execute the following command:
+```sh
+make security-test
+```
+
+### Cleaning Up
+
+To clean up the build artifacts and temporary files after running the tests, execute the following command:
+```sh
+make clean
+```
+
+### Additional Notes
+
+- Ensure that the environment variables and configurations are correctly set up before running the tests.
+- Use `valgrind` or equivalent tools to check for memory leaks and other issues during testing.
+
+For more detailed information on the test suite and individual test cases, refer to the documentation in the `docs` directory.
+
+## Documentation Links
+
+- [API Documentation](docs/api/API.md)
+- [User Guide](docs/user/USER_GUIDE.md)
+- [Developer Guide](docs/dev/DEVELOPER_GUIDE.md)
+- [Installation Instructions](docs/user/INSTALL.md)
+- [Frequently Asked Questions](docs/user/FAQ.md)
+- [Support Information](docs/user/SUPPORT.md)
+- [Contributing Guidelines](docs/dev/CONTRIBUTING.md)
+- [Project Roadmap](docs/project/ROADMAP.md)
+- [Security Policies](docs/security/SECURITY.md)
 
 ## License
 AGPL-3.0-or-later

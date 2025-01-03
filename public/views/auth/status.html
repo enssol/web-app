@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+    <title>Authentication Status</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <!--#include virtual="/views/common/styles.html" -->
+    <!--#include virtual="/views/common/scripts.html" -->
+</head>
+<body>
+    <div id="loginState" class="status-message">Logged in</div>
+    <div id="sessionTimeoutWarning" class="timeout-warning">Session is about to expire</div>
+    <div id="authError" class="error-message">Authentication error occurred</div>
+    <div id="statusMessage" class="status-message"></div>
+    <script type="text/javascript">
+        "use strict";
+        var sessionTimeout = 300000; // 5 minutes
+        var warningTimeout = 240000; // 4 minutes
+
+        function showTimeoutWarning() {
+            document.getElementById('sessionTimeoutWarning').style.display = 'block';
+        }
+
+        function showAuthError(message) {
+            var errorDiv = document.getElementById('authError');
+            errorDiv.innerHTML = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function showStatusMessage(message) {
+            var statusDiv = document.getElementById('statusMessage');
+            statusDiv.innerHTML = message;
+        }
+
+        setTimeout(showTimeoutWarning, warningTimeout);
+        setTimeout(function() {
+            showAuthError('Session expired');
+        }, sessionTimeout);
+    </script>
+</body>
+</html>

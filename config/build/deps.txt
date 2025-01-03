@@ -1,0 +1,34 @@
+# Core Build Tools (build-base contents)
+binutils >= 2.40.0    # GNU assembler, linker and binary utilities
+gcc >= 12.2.1         # GNU C Compiler (already provides cc)
+make >= 4.4.1         # GNU Make build tool
+
+# Version Control
+git >= 2.40.0         # Distributed version control
+gh >= 2.29.0           # GitHub CLI
+
+# Tools
+recutils >= 1.9       # Text-based database utilities
+
+# Development Tools
+gdb >= 13.1          # GNU Debugger
+valgrind >= 3.21.0   # Memory analysis
+shellcheck >= 0.9.0   # Shell script validator
+
+# Code Analysis
+cppcheck >= 2.10.0    # Static analysis tool
+
+# Documentation
+doxygen >= 1.9.6      # Code documentation generator
+groff >= 1.22.4       # Manual page processor
+
+# Character Encoding
+enca >= 1.19          # Character encoding validator
+
+# Security
+bearssl >= 0.6        # SSL/TLS and crypto library
+
+# Environment Requirements
+LANG=en_AU.ISO8859-1
+LC_ALL=en_AU.ISO8859-1
+CHARSET=ISO-8859-1

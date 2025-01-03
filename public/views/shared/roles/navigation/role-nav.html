@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Role Navigation</title>
+<link rel="stylesheet" type="text/css" href="/views/common/styles.html">
+</head>
+<body>
+<form onsubmit="updateNavigation(); return false;">
+    <input type="hidden" id="userRole" value="user">
+    <input type="submit" value="Update Navigation">
+</form>
+<div id="roleNavigation">
+    <div class="nav-item" data-resource="admin">Admin Panel</div>
+    <div class="nav-item" data-resource="profile">Profile</div>
+    <div class="nav-item" data-resource="public">Public</div>
+</div>
+<script type="text/javascript">
+"use strict";
+function updateNavigation() {
+    var userRole = document.getElementById("userRole").value;
+    var navItems = document.getElementsByClassName("nav-item");
+    for (var i = 0; i < navItems.length; i++) {
+        var item = navItems[i];
+        if (checkAccess(item.getAttribute("data-resource"))) {
+            item.className = "nav-item nav-allowed";
+        }
+    }
+}
+function checkAccess(resource) {
+    var userRole = document.getElementById("userRole").value;
+    var accessMap = {
+        "admin": ["all"],
+        "user": ["profile", "dashboard"],
+        "guest": ["public"]
+    };
+    return accessMap[userRole] &&
+           (accessMap[userRole].indexOf("all") !== -1 ||
+            accessMap[userRole].indexOf(resource) !== -1);
+}
+</script>
+</body>
+</html>

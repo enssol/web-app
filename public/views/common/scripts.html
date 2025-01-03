@@ -1,0 +1,1540 @@
+<script type="text/javascript">
+"use strict";
+
+/* Session management functions */
+function startSession() {
+    var sessionId = generateSessionId();
+    setCookie('sessionId', sessionId, 1); // 1 day expiry
+    setCookie('sessionStart', new Date().getTime(), 1);
+}
+
+function endSession() {
+    deleteCookie('sessionId');
+    deleteCookie('sessionStart');
+    deleteCookie('username');
+    window.location.href = '/views/auth/signin/login.html';
+}
+
+function checkSession() {
+    var sessionId = getCookie('sessionId');
+    var sessionStart = getCookie('sessionStart');
+
+    if (!sessionId || !sessionStart) {
+        endSession();
+        return false;
+    }
+
+    var now = new Date().getTime();
+    var sessionAge = now - parseInt(sessionStart, 10);
+
+    if (sessionAge > 300000) { // 5 minutes
+        endSession();
+        return false;
+    }
+
+    // Extend session
+    setCookie('sessionStart', now, 1);
+    return true;
+}
+
+/* Cookie utilities */
+function setCookie(name, value, days) {
+    var expires = '';
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = '; expires=' + date.toUTCString();
+    }
+    document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/';
+}
+
+function getCookie(name) {
+    var nameEQ = name + '=';
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1, c.length);
+        }
+        if (c.indexOf(nameEQ) === 0) {
+            return decodeURIComponent(c.substring(nameEQ.length, c.length));
+        }
+    }
+    return null;
+}
+
+function deleteCookie(name) {
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
+}
+
+function generateSessionId() {
+    var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    var id = '';
+    for (var i = 0; i < 32; i++) {
+        id += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return id;
+}
+
+/* Authentication validation */
+function validateLogin(username, password) {
+    if (!username || username.length < 3) {
+        return 'Username must be at least 3 characters';
+    }
+    if (!password || password.length < 6) {
+        return 'Password must be at least 6 characters';
+    }
+    return '';
+}
+
+function validateSignup(username, password, confirmPassword, email) {
+    var error = validateLogin(username, password);
+    if (error) {
+        return error;
+    }
+
+    if (password !== confirmPassword) {
+        return 'Passwords do not match';
+    }
+
+    if (!validateEmail(email)) {
+        return 'Invalid email format';
+    }
+
+    return '';
+}
+
+function validateEmail(email) {
+    var re = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    return re.test(email);
+}
+
+function validatePasswordReset(email) {
+    if (!validateEmail(email)) {
+        return 'Invalid email format';
+    }
+    return '';
+}
+
+/* Session event handlers */
+function onSessionTimeout() {
+    alert('Your session has expired. Please log in again.');
+    endSession();
+}
+
+function onSessionWarning() {
+    var response = confirm('Your session will expire soon. Would you like to extend it?');
+    if (response) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/extend_session', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    setCookie('sessionStart', new Date().getTime(), 1);
+                } else {
+                    onSessionTimeout();
+                }
+            }
+        };
+        xhr.send('sessionId=' + encodeURIComponent(getCookie('sessionId')));
+    }
+}
+
+/* Authentication event handlers */
+function handleLoginSubmit(event) {
+    event.preventDefault();
+
+    var username = document.getElementById('username').value;
+    var password = document.getElementById('password').value;
+
+    var error = validateLogin(username, password);
+    if (error) {
+        showError(error);
+        return false;
+    }
+
+    // Form is valid - submit to server
+    document.getElementById('loginForm').submit();
+}
+
+function handleSignupSubmit(event) {
+    event.preventDefault();
+
+    var username = document.getElementById('username').value;
+    var password = document.getElementById('password').value;
+    var confirmPassword = document.getElementById('confirmPassword').value;
+    var email = document.getElementById('email').value;
+
+    var error = validateSignup(username, password, confirmPassword, email);
+    if (error) {
+        showError(error);
+        return false;
+    }
+
+    // Form is valid - submit to server
+    document.getElementById('signupForm').submit();
+}
+
+function handlePasswordResetSubmit(event) {
+    event.preventDefault();
+
+    var email = document.getElementById('email').value;
+
+    var error = validatePasswordReset(email);
+    if (error) {
+        showError(error);
+        return false;
+    }
+
+    // Form is valid - submit to server
+    document.getElementById('passwordResetForm').submit();
+}
+
+/* Initialize authentication pages */
+function initAuthPages() {
+    // Add event listeners to forms if present
+    var loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLoginSubmit);
+    }
+
+    var signupForm = document.getElementById('signupForm');
+    if (signupForm) {
+        signupForm.addEventListener('submit', handleSignupSubmit);
+    }
+
+    var resetForm = document.getElementById('passwordResetForm');
+    if (resetForm) {
+        resetForm.addEventListener('submit', handlePasswordResetSubmit);
+    }
+}
+
+// Initialize on page load
+window.addEventListener('load', initAuthPages);
+
+/* Navigation functions */
+function navigateTo(url) {
+    window.location.href = url;
+}
+
+function goBack() {
+    history.back();
+}
+
+function goForward() {
+    history.forward();
+}
+
+function getCurrentURL() {
+    return window.location.href;
+}
+
+function setCurrentURL(url) {
+    window.location.href = url;
+}
+
+function detectBrowser() {
+    var ua = navigator.userAgent;
+    if (ua.indexOf('MSIE') !== -1) {
+        return 'Internet Explorer';
+    } else if (ua.indexOf('Firefox') !== -1) {
+        return 'Firefox';
+    } else if (ua.indexOf('Chrome') !== -1) {
+        return 'Chrome';
+    } else if (ua.indexOf('Safari') !== -1) {
+        return 'Safari';
+    } else {
+        return 'Unknown';
+    }
+}
+
+function addNavigationEventListener(handler) {
+    if (window.addEventListener) {
+        window.addEventListener('popstate', handler, false);
+    } else if (window.attachEvent) {
+        window.attachEvent('onpopstate', handler);
+    }
+}
+
+/* Form validation functions */
+function validateForm() {
+    var textInput = document.getElementById('text-input').value;
+    var passwordInput = document.getElementById('password-input').value;
+    if (textInput === '') {
+        alert('Text input cannot be empty');
+        return false;
+    }
+    if (passwordInput.length < 6) {
+        alert('Password must be at least 6 characters long');
+        return false;
+    }
+    return true;
+}
+
+function validatePasswordInput() {
+    var input = document.getElementById('password-input');
+    var error = document.getElementById('error-message');
+    if (input.value.length < 6) {
+        error.style.display = 'block';
+        return false;
+    } else {
+        error.style.display = 'none';
+        return true;
+    }
+}
+
+function showError(message) {
+    var errorMessage = document.getElementById('errorMessage');
+    errorMessage.innerHTML = message;
+    errorMessage.style.display = 'block';
+}
+
+function validateRequiredField() {
+    var field = document.getElementById('requiredField');
+    var indicator = document.getElementById('validationIndicator');
+    if (field.value === '') {
+        indicator.style.display = 'inline';
+    } else {
+        indicator.style.display = 'none';
+    }
+}
+
+function validateTextInput() {
+    var input = document.getElementById('text-input');
+    var error = document.getElementById('error-message');
+    if (input.value === '') {
+        error.style.display = 'block';
+        return false;
+    } else {
+        error.style.display = 'none';
+        return true;
+    }
+}
+
+/* Error handling functions */
+function handleError(errorMessage) {
+    alert("Error: " + errorMessage);
+}
+
+/* Data formatting functions */
+function formatDate(date) {
+    var day = date.getDate();
+    var month = date.getMonth() + 1;
+    var year = date.getFullYear();
+    return day + "/" + month + "/" + year;
+}
+
+/* Modal functions */
+function showModal(modalId) {
+    var modal = document.getElementById(modalId);
+    modal.style.display = "block";
+}
+
+function closeModal(modalId) {
+    var modal = document.getElementById(modalId);
+    modal.style.display = "none";
+}
+
+window.onclick = function(event) {
+    var modals = document.getElementsByClassName("modal");
+    for (var i = 0; i < modals.length; i++) {
+        if (event.target == modals[i]) {
+            modals[i].style.display = "none";
+        }
+    }
+}
+
+/* Window API functions */
+function showAlert(message) {
+    alert(message);
+}
+
+function showConfirm(message) {
+    return confirm(message);
+}
+
+function showPrompt(message, defaultValue) {
+    return prompt(message, defaultValue);
+}
+
+function setTimer(callback, delay) {
+    return setTimeout(callback, delay);
+}
+
+function clearTimer(timerId) {
+    clearTimeout(timerId);
+}
+
+function setInterval(callback, interval) {
+    return setInterval(callback, interval);
+}
+
+function clearInterval(intervalId) {
+    clearInterval(intervalId);
+}
+
+function checkWindowState() {
+    return {
+        width: window.innerWidth || document.documentElement.clientWidth,
+        height: window.innerHeight || document.documentElement.clientHeight
+    };
+}
+
+function scrollToTop() {
+    window.scrollTo(0, 0);
+}
+
+function scrollToBottom() {
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function addResizeEventListener(handler) {
+    if (window.addEventListener) {
+        window.addEventListener('resize', handler, false);
+    } else if (window.attachEvent) {
+        window.attachEvent('onresize', handler);
+    }
+}
+
+/* Event management functions */
+function addEvent(element, event, handler) {
+    if (element.addEventListener) {
+        element.addEventListener(event, handler, false);
+    } else if (element.attachEvent) {
+        element.attachEvent('on' + event, handler);
+    }
+}
+
+function removeEvent(element, event, handler) {
+    if (element.removeEventListener) {
+        element.removeEventListener(event, handler, false);
+    } else if (element.detachEvent) {
+        element.detachEvent('on' + event, handler);
+    }
+}
+
+function delegateEvent(parent, event, selector, handler) {
+    addEvent(parent, event, function(e) {
+        var target = e.target || e.srcElement;
+        while (target && target !== parent) {
+            if (target.matches(selector)) {
+                handler.call(target, e);
+                break;
+            }
+            target = target.parentNode;
+        }
+    });
+}
+
+function triggerCustomEvent(element, eventName, detail) {
+    var event;
+    if (document.createEvent) {
+        event = document.createEvent('CustomEvent');
+        event.initCustomEvent(eventName, true, true, detail);
+    } else if (document.createEventObject) {
+        event = document.createEventObject();
+        event.eventType = eventName;
+    }
+    event.eventName = eventName;
+    if (element.dispatchEvent) {
+        element.dispatchEvent(event);
+    } else if (element.fireEvent) {
+        element.fireEvent('on' + event.eventType, event);
+    }
+}
+
+/* DOM utilities */
+function getElementById(id) {
+    return document.getElementById(id);
+}
+
+function getElementsByClassName(className) {
+    return document.getElementsByClassName(className);
+}
+
+function getElementsByTagName(tagName) {
+    return document.getElementsByTagName(tagName);
+}
+
+function createElement(tagName) {
+    return document.createElement(tagName);
+}
+
+function setElementText(element, text) {
+    if (element) {
+        element.innerText = text;
+    }
+}
+
+function addClass(element, className) {
+    if (element && element.className.indexOf(className) === -1) {
+        element.className += ' ' + className;
+    }
+}
+
+function removeClass(element, className) {
+    if (element) {
+        element.className = element.className.replace(new RegExp('(?:^|\\s)' + className + '(?!\\S)', 'g'), '');
+    }
+}
+
+function addEventListener(element, event, handler) {
+    if (element.addEventListener) {
+        element.addEventListener(event, handler, false);
+    } else if (element.attachEvent) {
+        element.attachEvent('on' + event, handler);
+    }
+}
+
+/* CSSOM utilities */
+function setStyle(element, property, value) {
+    if (element) {
+        element.style[property] = value;
+    }
+}
+
+function getStyle(element, property) {
+    if (element && element.currentStyle) {
+        return element.currentStyle[property];
+    } else if (window.getComputedStyle) {
+        return window.getComputedStyle(element, null).getPropertyValue(property);
+    }
+    return null;
+}
+
+function toggleDisplay(element) {
+    if (element) {
+        if (element.style.display === 'none') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+}
+
+function getDimensions(element) {
+    if (element) {
+        return {
+            width: element.offsetWidth,
+            height: element.offsetHeight
+        };
+    }
+    return null;
+}
+
+/* Sort table function */
+function sortTable(header) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = header.parentNode.parentNode.parentNode;
+    switching = true;
+    dir = "asc";
+    while (switching) {
+        switching = false;
+        rows = table.getElementsByTagName("TR");
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[header.cellIndex];
+            y = rows[i + 1].getElementsByTagName("TD")[header.cellIndex];
+            if (dir === "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir === "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount === 0 && dir === "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+    var sortIcon = header.getElementsByTagName("span")[1];
+    sortIcon.innerHTML = dir === "asc" ? "&#9650;" : "&#9660;";
+}
+
+/* Pagination functions */
+var currentPage = 1;
+var rowsPerPage = 10;
+
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        changePage(currentPage);
+    }
+}
+
+function nextPage() {
+    var table, rows, totalPages;
+    table = document.getElementById("data-table");
+    rows = table.getElementsByTagName("TR");
+    totalPages = Math.ceil((rows.length - 1) / rowsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        changePage(currentPage);
+    }
+}
+
+function changePage(page) {
+    var table, rows, start, end, i;
+    table = document.getElementById("data-table");
+    rows = table.getElementsByTagName("TR");
+    start = (page - 1) * rowsPerPage + 1;
+    end = start + rowsPerPage;
+    for (i = 1; i < rows.length; i++) {
+        if (i >= start && i < end) {
+            rows[i].style.display = "";
+        } else {
+            rows[i].style.display = "none";
+        }
+    }
+    document.getElementById("page-info").innerHTML = "Page " + page;
+}
+window.onload = function() {
+    changePage(1);
+};
+
+/* Filter table function */
+function filterTable(input) {
+    var filter, table, tr, td, i, j, txtValue;
+    filter = input.value.toLowerCase();
+    table = input.parentNode.parentNode.parentNode.parentNode;
+    tr = table.getElementsByTagName("TR");
+    for (i = 1; i < tr.length; i++) {
+        tr[i].style.display = "none";
+        td = tr[i].getElementsByTagName("TD");
+        for (j = 0; j < td.length; j++) {
+            if (td[j]) {
+                txtValue = td[j].textContent || td[j].innerText;
+                if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                    break;
+                }
+            }
+        }
+    }
+}
+
+/* CRUD functions */
+function handleCreate() {
+    alert('Create action');
+}
+
+function handleRead() {
+    alert('Read action');
+}
+
+function handleUpdate() {
+    alert('Update action');
+}
+
+function handleDelete() {
+    alert('Delete action');
+}
+
+/* Button actions */
+function handleSubmit() {
+    alert('Form submitted');
+}
+
+function handleCancel() {
+    alert('Form cancelled');
+}
+
+/* Audit log viewer functions */
+var auditLogViewer = {
+    pageSize: 50,
+    currentPage: 1,
+    totalPages: 1,
+    auditData: [],
+
+    loadAuditLogs: function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/audit_log", true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                auditLogViewer.auditData = auditLogViewer.parseAuditLogs(xhr.responseText);
+                auditLogViewer.totalPages = Math.ceil(auditLogViewer.auditData.length / auditLogViewer.pageSize);
+                auditLogViewer.displayPage(1);
+            }
+        };
+        xhr.send(null);
+    },
+
+    parseAuditLogs: function(data) {
+        return data.split('\n')
+            .filter(function(line) { return line.trim(); })
+            .map(function(line) {
+                var parts = line.split('|');
+                return {
+                    timestamp: parts[0] || '',
+                    username: parts[1] || '',
+                    action: parts[2] || ''
+                };
+            });
+    },
+
+    displayPage: function(page) {
+        var tbody = document.getElementById('auditTable').getElementsByTagName('tbody')[0];
+        tbody.innerHTML = '';
+
+        var start = (page - 1) * this.pageSize;
+        var end = start + this.pageSize;
+        var pageData = this.auditData.slice(start, end);
+
+        pageData.forEach(function(entry) {
+            var row = tbody.insertRow();
+            row.insertCell().textContent = entry.timestamp;
+            row.insertCell().textContent = entry.username;
+            row.insertCell().textContent = entry.action;
+        });
+
+        this.currentPage = page;
+        this.updatePaginationControls();
+    },
+
+    updatePaginationControls: function() {
+        document.getElementById('currentPage').textContent =
+            'Page ' + this.currentPage + ' of ' + this.totalPages;
+
+        document.getElementById('prevButton').disabled = (this.currentPage === 1);
+        document.getElementById('nextButton').disabled = (this.currentPage === this.totalPages);
+    },
+
+    filterTable: function() {
+        var filters = {
+            timestamp: document.getElementById('timestampFilter').value.toLowerCase(),
+            username: document.getElementById('usernameFilter').value.toLowerCase(),
+            action: document.getElementById('actionFilter').value.toLowerCase()
+        };
+
+        this.auditData = this.auditData.filter(function(entry) {
+            return entry.timestamp.toLowerCase().includes(filters.timestamp) &&
+                entry.username.toLowerCase().includes(filters.username) &&
+                entry.action.toLowerCase().includes(filters.action);
+        });
+        this.totalPages = Math.ceil(this.auditData.length / this.pageSize);
+        this.displayPage(1);
+    },
+
+    sortTable: function(column) {
+        this.auditData.sort(function(a, b) {
+            var valA = a[column] || '';
+            var valB = b[column] || '';
+            return valA.localeCompare(valB);
+        });
+        this.displayPage(this.currentPage);
+    }
+};
+
+/* Initialize audit page if present */
+function initAuditPage() {
+    if (document.getElementById('auditTable')) {
+        if (!checkSession()) return;
+        auditLogViewer.loadAuditLogs();
+    }
+}
+
+window.onload = function() {
+    initAuditPage();
+};
+
+/* User Profile Management Functions */
+function generatePassword() {
+    var chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    var password = "";
+    for (var i = 0; i < 12; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+}
+
+function deleteUser(username) {
+    if (!confirm("Delete user " + username + "?")) {
+        return;
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/delete?username=" + encodeURIComponent(username), true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                alert("User deleted successfully");
+                loadUsers();
+            } else {
+                alert("Error deleting user");
+            }
+        }
+    };
+    xhr.send(null);
+}
+
+function loadUsers() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/users", true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    var lines = xhr.responseText.split("\n");
+                    var table = document.getElementById("userTable");
+                    var html = "<tr><th>Username</th><th>Full Name</th>" +
+                        "<th>Home Directory</th><th>Shell</th>" +
+                        "<th>Admin</th><th>Actions</th></tr>";
+
+                    lines.forEach(function(line) {
+                        if (line.trim() && !line.startsWith('#')) {
+                            var parts = line.split(':');
+                            if (parts.length >= 7) {
+                                var isAdmin = parts.length > 7 ? parts[7].trim() === "1" : "0";
+                                html += "<tr><td>" + parts[0] + "</td><td>" +
+                                    parts[4] + "</td><td>" + parts[5] + "</td><td>" +
+                                    parts[6] + "</td><td>" + (isAdmin ? "Yes" : "No") +
+                                    "</td><td>" +
+                                    "<button class='button-small' onclick='editUser(\"" +
+                                    parts[0] + "\", \"" + parts[4] + "\", \"\", \"\")'>Edit</button> " +
+                                    "<button class='button-small' onclick='resetPassword(\"" +
+                                    parts[0] + "\")'>Reset Password</button></td></tr>";
+                            }
+                        }
+                    });
+                    table.innerHTML = html;
+                } catch (e) {
+                    console.error("Error:", e, "Response:", xhr.responseText);
+                    alert("Error loading users");
+                }
+            }
+        }
+    };
+    xhr.send(null);
+}
+
+function createUser() {
+    var username = document.getElementById("newUsername").value;
+    var fullname = document.getElementById("newFullname").value;
+    var email = document.getElementById("newEmail").value;
+    var project = document.getElementById("newProject").value;
+    var password = generatePassword();
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "/register?username=" + encodeURIComponent(username) +
+        "&password=" + encodeURIComponent(password) +
+        "&fullname=" + encodeURIComponent(fullname) +
+        "&email=" + encodeURIComponent(email) +
+        "&project=" + encodeURIComponent(project), true);
+
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                alert("User created successfully!\nUsername: " + username +
+                    "\nPassword: " + password);
+                loadUsers();
+                document.getElementById("createUserForm").reset();
+            } else {
+                alert("Error creating user");
+            }
+        }
+    };
+    xhr.send(null);
+    return false;
+}
+
+/* Record Management Functions */
+function handleServerError(error, context) {
+    var errorDiv = document.getElementById('record-error');
+    if (!errorDiv) return;
+
+    var message = 'Operation failed';
+    switch (error.status) {
+        case 403:
+            message = 'Permission denied';
+            break;
+        case 404:
+            message = 'Record not found';
+            break;
+        case 500:
+            message = 'Server error';
+            break;
+    }
+
+    errorDiv.innerHTML = context + ': ' + message;
+    errorDiv.style.display = 'block';
+    setTimeout(function() {
+        errorDiv.style.display = 'none';
+    }, 5000);
+}
+
+function parseRecordData(data, projectFilter) {
+    var records = [];
+    var currentRecord = {};
+    var lines = data.split('\n');
+
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+
+        if (!line || line.startsWith('%')) {
+            continue;
+        }
+
+        var colonIndex = line.indexOf(':');
+        if (colonIndex > -1) {
+            var field = line.substring(0, colonIndex).trim();
+            var value = line.substring(colonIndex + 1).trim();
+
+            if (field === 'Project_Name') {
+                if (Object.keys(currentRecord).length > 0) {
+                    records.push(currentRecord);
+                }
+                currentRecord = {};
+            }
+            currentRecord[field] = value;
+        }
+    }
+
+    if (Object.keys(currentRecord).length > 0) {
+        records.push(currentRecord);
+    }
+
+    return records.filter(function(record) {
+        return record.Project_Name === projectFilter;
+    });
+}
+
+/* SCJV Record Management Functions */
+var scjvRecordManager = {
+    errorDiv: null,
+
+    showError: function(message) {
+        if (!this.errorDiv) {
+            this.errorDiv = document.getElementById("record-error");
+        }
+        this.errorDiv.innerHTML = message;
+        this.errorDiv.style.display = "block";
+    },
+
+    getNextObligationNumber: function() {
+        return new Promise(function(resolve, reject) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/get_next_number", true);
+            xhr.setRequestHeader("X-Username", getCookie("username"));
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    resolve(xhr.responseText.trim());
+                } else {
+                    reject(new Error("Failed to get obligation number: " + xhr.responseText));
+                }
+            };
+
+            xhr.onerror = function() {
+                reject(new Error("Network error getting obligation number"));
+            };
+
+            xhr.send();
+        });
+    },
+
+    validateForm: function() {
+        var obligation = document.getElementById("obligation").value;
+        if (!obligation) {
+            this.showError("Obligation description is required");
+            return false;
+        }
+        return true;
+    },
+
+    initializeForm: async function() {
+        try {
+            var obligationNumber = await this.getNextObligationNumber();
+            document.getElementById("obligation_number").value = obligationNumber;
+            document.getElementById("record-error").style.display = "none";
+        } catch (err) {
+            this.showError("Error getting obligation number: " + err.message);
+        }
+    },
+
+    formatRecordData: function(type) {
+        var prefix = type === "create" ? "" : "update_";
+        return "%rec: Project\n\n" +
+            "Project_Name: SCJV - Pilbara Ports\n" +
+            "Primary_Environmental_Mechanism: " + document.getElementById(prefix + "mechanism").value + "\n" +
+            "Procedure: " + document.getElementById(prefix + "procedure").value + "\n" +
+            "Environmental_Aspect: " + document.getElementById(prefix + "aspect").value + "\n" +
+            "Obligation_Number: " + document.getElementById(prefix + "obligation_number").value + "\n" +
+            "Obligation: " + document.getElementById(prefix + "obligation").value + "\n" +
+            "Accountability: " + document.getElementById(prefix + "accountability").value + "\n" +
+            "Responsibility: " + document.getElementById(prefix + "responsibility").value + "\n" +
+            "ProjectPhase: Design and Construction\n" +
+            "Action_DueDate: " + (type === "create" ? document.getElementById("due_date").value : new Date().toISOString().split('T')[0]) + "\n" +
+            "Status: " + (type === "create" ? document.getElementById("status").value : "Not Started") + "\n" +
+            "Recurring_Obligation: " + (type === "create" ? document.getElementById("recurring").value : "No") + "\n" +
+            "Site_or_Desktop: " + (type === "create" ? document.getElementById("location").value : "Desktop") + "\n" +
+            "Obligation_Type: " + (type === "create" ? document.getElementById("type").value : "Site based");
+    },
+
+    createRecord: function() {
+        if (!this.validateForm()) {
+            return false;
+        }
+
+        try {
+            var obligationNumber = document.getElementById("obligation_number").value;
+            if (!obligationNumber) {
+                throw new Error("No obligation number present");
+            }
+
+            var recData = this.formatRecordData("create");
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/create_record", true);
+            xhr.setRequestHeader("Content-Type", "text/plain");
+            xhr.setRequestHeader("X-Username", getCookie("username"));
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        alert("Record created successfully");
+                        document.getElementById("recordForm").reset();
+                        scjvRecordManager.initializeForm();
+                    } else {
+                        scjvRecordManager.showError("Failed to create record: " + xhr.responseText);
+                    }
+                }
+            };
+
+            xhr.send(recData);
+        } catch (err) {
+            this.showError(err.message);
+        }
+        return false;
+    },
+
+    searchRecord: function() {
+        var obligation = document.getElementById("search_obligation").value;
+        if (!obligation) {
+            this.showError("Please enter an obligation number");
+            return;
+        }
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/var/records/scjv.rec", true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var records = xhr.responseText.split("\n\n");
+                    var found = false;
+
+                    for (var i = 0; i < records.length; i++) {
+                        if (records[i].includes("Obligation_Number: " + obligation)) {
+                            found = true;
+                            scjvRecordManager.fillUpdateForm(records[i]);
+                            document.getElementById("updateForm").style.display = "block";
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        scjvRecordManager.showError("Record not found");
+                        document.getElementById("updateForm").style.display = "none";
+                    }
+                } else {
+                    scjvRecordManager.showError("Error searching record");
+                }
+            }
+        };
+        xhr.send();
+    },
+
+    fillUpdateForm: function(record) {
+        var lines = record.split("\n");
+        var fields = {};
+
+        for (var i = 0; i < lines.length; i++) {
+            var parts = lines[i].split(": ");
+            if (parts.length === 2) {
+                fields[parts[0].trim()] = parts[1].trim();
+            }
+        }
+
+        document.getElementById("update_mechanism").value = fields["Primary_Environmental_Mechanism"] || "";
+        document.getElementById("update_obligation_number").value = fields["Obligation_Number"] || "";
+        document.getElementById("update_procedure").value = fields["Procedure"] || "";
+        document.getElementById("update_aspect").value = fields["Environmental_Aspect"] || "";
+        document.getElementById("update_obligation").value = fields["Obligation"] || "";
+        document.getElementById("update_accountability").value = fields["Accountability"] || "";
+        document.getElementById("update_responsibility").value = fields["Responsibility"] || "";
+    },
+
+    updateRecord: function() {
+        try {
+            var data = this.formatRecordData("update");
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/update_record", true);
+            xhr.setRequestHeader("Content-Type", "text/plain");
+            xhr.setRequestHeader("X-Username", getCookie("username"));
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        alert("Record updated successfully");
+                        document.getElementById("updateForm").style.display = "none";
+                        document.getElementById("search_obligation").value = "";
+                    } else {
+                        scjvRecordManager.showError("Failed to update record: " + xhr.responseText);
+                    }
+                }
+            };
+
+            xhr.send(data);
+        } catch (err) {
+            this.showError("Error updating record: " + err.message);
+        }
+        return false;
+    },
+
+    initializePage: function() {
+        if (!checkSession()) return;
+        this.initializeForm();
+    }
+};
+
+/* Dashboard Management Functions */
+var dashboardManager = {
+    currentDataset: 'all',
+    cachedRecords: {},
+
+    confirmLogout: function() {
+        return window.confirm("Logout?");
+    },
+
+    navigateToProject: function(url) {
+        if (!checkSession()) return;
+        window.location.href = url;
+    },
+
+    navigateToProfile: function() {
+        if (!checkSession()) return;
+        var username = getCookie('username');
+        window.location.href = '/views/pages/profile.html?username=' + encodeURIComponent(username);
+    },
+
+    analyzeRecords: function(records) {
+        var now = new Date();
+        var stats = {
+            dueDates: {
+                overdue: 0,
+                due14days: 0,
+                upcoming: 0
+            },
+            status: {},
+            phases: {},
+            aspects: {},
+            types: {}
+        };
+
+        records.forEach(function(record) {
+            var dueDate = new Date(record.Action_DueDate);
+            var daysDiff = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+
+            if (daysDiff < 0) {
+                stats.dueDates.overdue++;
+            } else if (daysDiff <= 14) {
+                stats.dueDates.due14days++;
+            } else {
+                stats.dueDates.upcoming++;
+            }
+
+            stats.status[record.Status] = (stats.status[record.Status] || 0) + 1;
+            stats.phases[record.ProjectPhase] = (stats.phases[record.ProjectPhase] || 0) + 1;
+            stats.aspects[record.Environmental_Aspect] = (stats.aspects[record.Environmental_Aspect] || 0) + 1;
+            stats.types[record.Obligation_Type] = (stats.types[record.Obligation_Type] || 0) + 1;
+        });
+
+        return stats;
+    },
+
+    createPieChart: function(data, title, colors) {
+        // ...existing pie chart code from dashboard.html...
+    },
+
+    checkOverdueItems: function(records) {
+        // ...existing overdue check code from dashboard.html...
+    },
+
+    updateCharts: function(dataset) {
+        this.currentDataset = dataset;
+        var records = [];
+
+        if (dataset === 'all') {
+            Object.keys(this.cachedRecords).forEach(function(key) {
+                records = records.concat(this.cachedRecords[key]);
+            }, this);
+        } else {
+            records = this.cachedRecords[dataset] || [];
+        }
+
+        this.checkOverdueItems(records);
+        var stats = this.analyzeRecords(records);
+        // ...rest of chart update code...
+    },
+
+    loadAllRecords: function() {
+        var projects = {
+            'scjv': '/var/records/trans-scjv.rec',
+            'ms1180': '/var/records/trans-ms1180.rec',
+            'w6946': '/var/records/trans-w6946.rec'
+        };
+
+        Promise.all(Object.keys(projects).map(function(project) {
+            return fetch(projects[project])
+                .then(function(response) { return response.text(); })
+                .then(function(data) {
+                    var records = this.parseRecData(data);
+                    this.cachedRecords[project] = records;
+                    return records;
+                }.bind(this));
+        }.bind(this))).then(function() {
+            this.updateCharts('all');
+            this.initializeDatasetButtons();
+            this.createActionList(this.cachedRecords);
+        }.bind(this));
+    },
+
+    initializeDatasetButtons: function() {
+        // ...existing dataset buttons initialization code...
+    },
+
+    parseRecData: function(recData) {
+        // ...existing record parsing code...
+    },
+
+    createActionList: function(records) {
+        // ...existing action list creation code...
+    },
+
+    takeAction: function(id, action) {
+        // ...existing take action code...
+    },
+
+    initializeDashboard: function() {
+        if (!checkSession()) return;
+        this.loadAllRecords();
+    }
+};
+
+// Add to window.onload handler
+var originalOnload = window.onload;
+window.onload = function() {
+    if (originalOnload) {
+        originalOnload();
+    }
+    if (document.getElementById('dashboard')) {
+        dashboardManager.initializeDashboard();
+    }
+};
+
+/* Page specific initialization */
+var pageInitializer = {
+    initFaqPage: function() {
+        if (!checkSession()) return;
+        // FAQ page specific initialization
+    },
+
+    initMs1180Page: function() {
+        if (!checkSession()) return;
+        // MS1180 page specific initialization
+    },
+
+    initWs4696Page: function() {
+        if (!checkSession()) return;
+        // WS4696 page specific initialization
+    },
+
+    initializePage: function() {
+        var path = window.location.pathname;
+        if (path.includes('faq.html')) {
+            this.initFaqPage();
+        } else if (path.includes('crud_ms1180.html')) {
+            this.initMs1180Page();
+        } else if (path.includes('crud_ws4696.html')) {
+            this.initWs4696Page();
+        }
+    }
+};
+
+// Update window.onload to include page initialization
+var originalOnload = window.onload;
+window.onload = function() {
+    if (originalOnload) {
+        originalOnload();
+    }
+    pageInitializer.initializePage();
+};
+
+/* Project Record Management */
+var projectRecordManager = {
+    currentSortColumn: -1,
+    currentSortDir: "asc",
+    filterTimeout: null,
+
+    parseRecData: function(recData, projectName) {
+        const records = [];
+        let currentRecord = {};
+        const lines = recData.split(/\r?\n/);
+
+        for (let line of lines) {
+            if (!line.trim() || line.startsWith('%')) {
+                continue;
+            }
+
+            const colonIndex = line.indexOf(':');
+            if (colonIndex > -1) {
+                const field = line.substring(0, colonIndex).trim();
+                let value = line.substring(colonIndex + 1).trim();
+
+                if (field === 'Project_Name') {
+                    if (Object.keys(currentRecord).length > 0) {
+                        records.push(currentRecord);
+                    }
+                    currentRecord = {};
+                }
+
+                if (value.startsWith('+ ')) {
+                    value = value.substring(2);
+                    if (currentRecord[field]) {
+                        currentRecord[field] += '\n' + value;
+                    } else {
+                        currentRecord[field] = value;
+                    }
+                } else {
+                    currentRecord[field] = value;
+                }
+            }
+        }
+
+        if (Object.keys(currentRecord).length > 0) {
+            records.push(currentRecord);
+        }
+
+        return records.filter(record =>
+            record.Project_Name &&
+            record.Project_Name.toLowerCase() === projectName.toLowerCase()
+        );
+    },
+
+    populateTable: function(records) {
+        var table = document.getElementById('obligationsTable');
+        if (!table) return;
+
+        records.forEach(function(record) {
+            var row = document.createElement('tr');
+            row.innerHTML = [
+                record.Procedure || '',
+                record.Environmental_Aspect || '',
+                record.Obligation_Number || '',
+                record.Responsibility || '',
+                record.ProjectPhase || '',
+                record.Action_DueDate || '',
+                record.Status || '',
+                record.Recurring_Obligation || '',
+                record.Recurring_Frequency || ''
+            ].map(function(cell) {
+                return '<td>' + cell + '</td>';
+            }).join('');
+            table.appendChild(row);
+        });
+    },
+
+    checkDueDates: function() {
+        const table = document.getElementById('obligationsTable');
+        if (!table) return;
+
+        const rows = table.getElementsByTagName("tr");
+        if (!rows || rows.length < 3) return;
+
+        const today = new Date();
+
+        for (let i = 2; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName("td");
+            if (!cells || cells.length < 8) continue;
+
+            const dueDateCell = cells[5];
+            if (!dueDateCell || !dueDateCell.textContent) continue;
+
+            const dueDate = new Date(dueDateCell.textContent);
+            if (isNaN(dueDate.getTime())) continue;
+
+            const timeDiff = dueDate - today;
+            const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+            if (daysDiff < 0) {
+                rows[i].classList.add("overdue");
+            } else if (daysDiff <= 14) {
+                rows[i].classList.add("warning");
+            }
+        }
+    },
+
+    sortTable: function(n) {
+        // ...existing sortTable code from individual files...
+    },
+
+    filterTable: function() {
+        // ...existing filterTable code from individual files...
+    },
+
+    filterByDueDate: function(filter) {
+        // ...existing filterByDueDate code from individual files...
+    },
+
+    loadProjectRecords: function(projectKey, recordFile) {
+        if (!checkSession()) return;
+
+        fetch(recordFile)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Unable to load record file');
+                }
+                return response.text();
+            })
+            .then(data => {
+                if (!data || !data.trim()) {
+                    document.getElementById('obligationsTable').innerHTML +=
+                        '<tr><td colspan="9">No data available</td></tr>';
+                    return;
+                }
+                const records = this.parseRecData(data, projectKey);
+                if (records && records.length > 0) {
+                    this.populateTable(records);
+                    setTimeout(this.checkDueDates, 100);
+                } else {
+                    document.getElementById('obligationsTable').innerHTML +=
+                        '<tr><td colspan="9">No records found for ' + projectKey + '</td></tr>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading records:', error);
+                document.getElementById('obligationsTable').innerHTML +=
+                    '<tr><td colspan="9">Error loading data: ' + error.message + '</td></tr>';
+            });
+    }
+};
+
+/* Profile Management */
+var profileManager = {
+    // ...move existing profile management code here...
+};
+
+/* Project Record Management */
+var projectRecordManager = {
+    currentSortColumn: -1,
+    currentSortDir: "asc",
+    filterTimeout: null,
+
+    // Common initialization for all project pages
+    initProjectPage: function(projectKey, recordFile) {
+        if (!checkSession()) return;
+        this.loadProjectRecords(projectKey, recordFile);
+    },
+
+    // Load project records from file
+    loadProjectRecords: function(projectKey, recordFile) {
+        fetch(recordFile)
+            .then(response => {
+                if (!response.ok) throw new Error('Unable to load record file');
+                return response.text();
+            })
+            .then(data => this.handleRecordData(data, projectKey))
+            .catch(error => this.handleError(error));
+    },
+
+    // Handle loaded record data
+    handleRecordData: function(data, projectKey) {
+        if (!data || !data.trim()) {
+            this.showNoDataMessage();
+            return;
+        }
+        const records = this.parseRecData(data, projectKey);
+        if (records && records.length > 0) {
+            this.populateTable(records);
+            setTimeout(() => this.checkDueDates(), 100);
+        } else {
+            this.showNoRecordsMessage(projectKey);
+        }
+    },
+
+    // Parse record data
+    parseRecData: function(recData, projectKey) {
+        // ...existing parseRecData code from individual files...
+    },
+
+    // Populate table with records
+    populateTable: function(records) {
+        // ...existing populateTable code from individual files...
+    },
+
+    // Check due dates
+    checkDueDates: function() {
+        // ...existing checkDueDates code from individual files...
+    },
+
+    // Error handling
+    handleError: function(error) {
+        console.error('Error loading records:', error);
+        const table = document.getElementById('obligationsTable');
+        if (table) {
+            table.innerHTML += '<tr><td colspan="9">Error loading data: ' + error.message + '</td></tr>';
+        }
+    },
+
+    // Display messages
+    showNoDataMessage: function() {
+        const table = document.getElementById('obligationsTable');
+        if (table) {
+            table.innerHTML += '<tr><td colspan="9">No data available</td></tr>';
+        }
+    },
+
+    showNoRecordsMessage: function(projectKey) {
+        const table = document.getElementById('obligationsTable');
+        if (table) {
+            table.innerHTML += '<tr><td colspan="9">No records found for ' + projectKey + '</td></tr>';
+        }
+    }
+};
+
+/* Initialize page based on path */
+function initializePage() {
+    var path = window.location.pathname;
+
+    if (path.includes('w6946.html')) {
+        projectRecordManager.initProjectPage('w6946', '/var/records/trans-w6946.rec');
+    }
+    else if (path.includes('scjv.html')) {
+        projectRecordManager.initProjectPage('SCJV - Pilbara Ports', '/var/records/trans-scjv.rec');
+    }
+    else if (path.includes('ms1180.html')) {
+        projectRecordManager.initProjectPage('MS1180', '/var/records/trans-ms1180.rec');
+    }
+    else if (path.includes('profile.html')) {
+        if (!checkSession()) return;
+        loadCurrentProfile();
+    }
+}
+
+// Update window onload
+var existingOnload = window.onload;
+window.onload = function() {
+    if (existingOnload) existingOnload();
+    initializePage();
+};
+</script>

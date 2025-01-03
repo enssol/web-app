@@ -1,0 +1,73 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+/* Version information */
+#define VERSION "@VERSION@"
+#define MAJOR_VERSION @MAJOR_VERSION@
+#define MINOR_VERSION @MINOR_VERSION@
+#define PATCH_VERSION @PATCH_VERSION@
+
+/* Compiler settings */
+#define CC "@CC@"
+#define CFLAGS "@CFLAGS@"
+#define LDFLAGS "@LDFLAGS@"
+
+/* Directories */
+#define SRCDIR "@SRCDIR@"
+#define TESTDIR "@TESTDIR@"
+#define INCLUDEDIR "@INCLUDEDIR@"
+#define LOGDIR "@LOGDIR@"
+#define BUILDDIR "@BUILDDIR@"
+#define BINDIR "@BINDIR@"
+#define LIBDIR "@LIBDIR@"
+#define MANDIR "@MANDIR@"
+#define DOCSDIR "@DOCSDIR@"
+#define CONFIGDIR "@CONFIGDIR@"
+#define SCRIPTDIR "@SCRIPTDIR@"
+#define CACHEDIR "@CACHEDIR@"
+#define PIDDIR "@PIDDIR@"
+#define TMPDIR "@TMPDIR@"
+#define VARDIR "@VARDIR@"
+#define PRIVATEDIR "@PRIVATEDIR@"
+#define PUBLICDIR "@PUBLICDIR@"
+
+/* Build directories */
+#define DEBUG_DIR "@DEBUG_DIR@"
+#define DEBUG_DEPS_DIR "@DEBUG_DEPS_DIR@"
+#define DEBUG_OBJ_DIR "@DEBUG_OBJ_DIR@"
+#define RELEASE_DIR "@RELEASE_DIR@"
+#define RELEASE_DEPS_DIR "@RELEASE_DEPS_DIR@"
+#define RELEASE_OBJ_DIR "@RELEASE_OBJ_DIR@"
+#define DIST_DIR "@DIST_DIR@"
+
+/* Library directories */
+#define PKGCONFIG_DIR "@PKGCONFIG_DIR@"
+#define STATIC_LIB_DIR "@STATIC_LIB_DIR@"
+
+/* Documentation directories */
+#define MAN1_DIR "@MAN1_DIR@"
+#define MAN3_DIR "@MAN3_DIR@"
+#define MAN5_DIR "@MAN5_DIR@"
+#define MAN8_DIR "@MAN8_DIR@"
+
+/* Data directories */
+#define CHARSET_DIR "@CHARSET_DIR@"
+#define CHECKSUMS_DIR "@CHECKSUMS_DIR@"
+#define ARCHIVE_DIR "@ARCHIVE_DIR@"
+#define BACKUP_DIR "@BACKUP_DIR@"
+
+/* Runtime directories */
+#define VAR_DB_DIR "@VAR_DB_DIR@"
+#define VAR_LOG_DIR "@VAR_LOG_DIR@"
+#define VAR_DATA_DIR "@VAR_DATA_DIR@"
+#define VAR_RECORDS_DIR "@VAR_RECORDS_DIR@"
+
+/* SSL directories */
+#define SSL_DIR "@SSL_DIR@"
+#define SSL_CERTS_DIR "@SSL_CERTS_DIR@"
+
+/* Public web directories */
+#define PUBLIC_ASSETS_DIR "@PUBLIC_ASSETS_DIR@"
+#define PUBLIC_VIEWS_DIR "@PUBLIC_VIEWS_DIR@"
+
+#endif /* CONFIG_H */

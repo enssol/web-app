@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+
+<head>
+  <title>Audit Log Viewer</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <!--#include virtual="../common/styles.html" -->
+  <!--#include virtual="../common/scripts.html" -->
+</head>
+
+<body>
+  <div id="header">
+    <h1>Audit Log Viewer</h1>
+  </div>
+
+  <div class="user-nav">
+    <button aria-label="Navigate to Profile" onclick="navigateToProfile()" class="nav-button">Profile</button>
+    <button aria-label="Go Back" onclick="goBack()" class="nav-button">Back</button>
+  </div>
+
+  <div role="main" class="container">
+    <button class="back-button" onclick="goBack()">Back to Dashboard</button>
+
+    <table id="auditTable">
+      <thead>
+        <tr>
+          <th onclick="auditLogViewer.sortTable('timestamp')">Timestamp</th>
+          <th onclick="auditLogViewer.sortTable('username')">Username</th>
+          <th onclick="auditLogViewer.sortTable('action')">Action</th>
+        </tr>
+        <tr class="filter-row">
+          <td><input type="text" id="timestampFilter" onkeyup="auditLogViewer.filterTable()"></td>
+          <td><input type="text" id="usernameFilter" onkeyup="auditLogViewer.filterTable()"></td>
+          <td><input type="text" id="actionFilter" onkeyup="auditLogViewer.filterTable()"></td>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Populated by JavaScript -->
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <button id="prevButton" onclick="auditLogViewer.displayPage(auditLogViewer.currentPage - 1)">&lt; Previous</button>
+      <span id="currentPage">Page 1 of 1</span>
+      <button id="nextButton" onclick="auditLogViewer.displayPage(auditLogViewer.currentPage + 1)">Next &gt;</button>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,136 @@
+<!-- Basic Table Structure -->
+<table id="data-table" border="1" style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <!-- Include Sortable Column Headers -->
+            <!-- ...existing code... -->
+            <th onclick="sortTable(this)">Header 1 <span>&#9650;</span></th>
+            <th onclick="sortTable(this)">Header 2 <span>&#9650;</span></th>
+            <th onclick="sortTable(this)">Header 3 <span>&#9650;</span></th>
+            <!-- ...existing code... -->
+        </tr>
+        <!-- Include Filter Inputs Row -->
+        <!-- ...existing code... -->
+        <tr>
+            <td><input type="text" onkeyup="filterTable(this)" placeholder="Filter Column 1"></td>
+            <td><input type="text" onkeyup="filterTable(this)" placeholder="Filter Column 2"></td>
+            <td><input type="text" onkeyup="filterTable(this)" placeholder="Filter Column 3"></td>
+        </tr>
+        <!-- ...existing code... -->
+    </thead>
+    <tbody>
+        <!-- Table Data Rows -->
+        <!-- ...existing code... -->
+        <tr>
+            <td>Data 1</td>
+            <td>Data 2</td>
+            <td>Data 3</td>
+        </tr>
+        <!-- ...existing code... -->
+    </tbody>
+</table>
+<!-- Include Pagination Controls -->
+<div style="text-align: center; margin-top: 10px;">
+    <button onclick="prevPage()" style="margin-right: 5px;">&laquo; Previous</button>
+    <span id="page-info">Page 1</span>
+    <button onclick="nextPage()" style="margin-left: 5px;">Next &raquo;</button>
+</div>
+<script type="text/javascript">
+"use strict";
+var currentPage = 1;
+var rowsPerPage = 10;
+
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
+        changePage(currentPage);
+    }
+}
+
+function nextPage() {
+    var table, rows, totalPages;
+    table = document.getElementById("data-table");
+    rows = table.getElementsByTagName("TR");
+    totalPages = Math.ceil((rows.length - 1) / rowsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        changePage(currentPage);
+    }
+}
+
+function changePage(page) {
+    var table, rows, start, end, i;
+    table = document.getElementById("data-table");
+    rows = table.getElementsByTagName("TR");
+    start = (page - 1) * rowsPerPage + 1;
+    end = start + rowsPerPage;
+    for (i = 1; i < rows.length; i++) {
+        if (i >= start && i < end) {
+            rows[i].style.display = "";
+        } else {
+            rows[i].style.display = "none";
+        }
+    }
+    document.getElementById("page-info").innerHTML = "Page " + page;
+}
+window.onload = function() {
+    changePage(1);
+};
+function filterTable(input) {
+    var filter, table, tr, td, i, j, txtValue;
+    filter = input.value.toLowerCase();
+    table = input.parentNode.parentNode.parentNode.parentNode;
+    tr = table.getElementsByTagName("TR");
+    for (i = 1; i < tr.length; i++) {
+        tr[i].style.display = "none";
+        td = tr[i].getElementsByTagName("TD");
+        for (j = 0; j < td.length; j++) {
+            if (td[j]) {
+                txtValue = td[j].textContent || td[j].innerText;
+                if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                    break;
+                }
+            }
+        }
+    }
+}
+function sortTable(header) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = header.parentNode.parentNode.parentNode;
+    switching = true;
+    dir = "asc";
+    while (switching) {
+        switching = false;
+        rows = table.getElementsByTagName("TR");
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[header.cellIndex];
+            y = rows[i + 1].getElementsByTagName("TD")[header.cellIndex];
+            if (dir === "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir === "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount === 0 && dir === "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+    var sortIcon = header.getElementsByTagName("span")[1];
+    sortIcon.innerHTML = dir === "asc" ? "&#9650;" : "&#9660;";
+}
+</script>

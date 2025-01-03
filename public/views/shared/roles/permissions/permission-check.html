@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Permission Check</title>
+<style type="text/css">
+.permission-denied { display: none; }
+.permission-granted { display: block; }
+</style>
+</head>
+<body>
+<script type="text/javascript">
+"use strict";
+function checkPermission(permission) {
+    var userRole = document.getElementById("userRole").value;
+    var permissions = {
+        "admin": ["read", "write", "delete"],
+        "user": ["read", "write"],
+        "guest": ["read"]
+    };
+    return permissions[userRole] && permissions[userRole].indexOf(permission) !== -1;
+}
+</script>
+<div id="permissionControl">
+    <input type="hidden" id="requiredPermission" value="">
+    <div id="permissionMessage"></div>
+</div>
+</body>
+</html>

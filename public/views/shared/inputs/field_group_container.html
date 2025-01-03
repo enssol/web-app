@@ -1,0 +1,26 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Field Group Container</title>
+    <link rel="stylesheet" type="text/css" href="../common/styles.html">
+    <script type="text/javascript" src="../common/scripts.html"></script>
+</head>
+<body>
+    <form onsubmit="return validateFieldGroup();">
+        <div class="field-group">
+            <div class="form-field">
+                <label for="field1">Field 1:</label>
+                <input type="text" id="field1" name="field1" onblur="validateField(this)">
+                <span class="validation-message" id="field1-error"></span>
+            </div>
+            <div class="form-field">
+                <label for="field2">Field 2:</label>
+                <input type="text" id="field2" name="field2" onblur="validateField(this)">
+                <span class="validation-message" id="field2-error"></span>
+            </div>
+        </div>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

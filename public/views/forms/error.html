@@ -1,0 +1,26 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Error Message</title>
+    <!--#include virtual="../common/styles.html" -->
+    <!--#include virtual="../common/modal-base.html" -->
+    <!--#include virtual="../common/modal-confirm.html" -->
+    <!--#include virtual="../common/modal-alert.html" -->
+    <!--#include virtual="../common/modal-dialog.html" -->
+</head>
+<body>
+    <div id="errorMessage" class="error-message hidden">
+        An error has occurred. Please try again.
+    </div>
+    <!--#include virtual="../common/scripts.html" -->
+    <script type="text/javascript">
+        "use strict";
+        function showError(message) {
+            var errorDiv = document.getElementById('errorMessage');
+            errorDiv.innerHTML = message;
+            errorDiv.className = 'error-message';
+        }
+    </script>
+</body>
+</html>

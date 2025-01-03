@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+
+<head>
+    <title>Environmental Dashboard</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <!--#include virtual="/views/common/styles.html" -->
+    <!--#include virtual="/views/common/scripts.html" -->
+</head>
+
+<body id="dashboard">
+    <div id="header">
+        <h1>Environmental Dashboard</h1>
+    </div>
+
+    <div class="container">
+        <div class="action-panel">
+            <h2 class="action-header">Priority Actions Required</h2>
+            <div id="overdueList" class="action-list"></div>
+        </div>
+        <div class="project-selector">
+            <input type="button" class="project-button" value="SCJV - Pilbara Ports"
+                onclick="dashboardManager.navigateToProject('/views/pages/scjv.html');">
+            <input type="button" class="project-button" value="MS1180"
+                onclick="dashboardManager.navigateToProject('/views/pages/ms1180.html');">
+            <input type="button" class="project-button" value="W6946"
+                onclick="dashboardManager.navigateToProject('/views/pages/w6946.html');">
+        </div>
+
+        <div class="user-controls">
+            <input type="button" class="control-button" value="Manage Profile"
+                onclick="dashboardManager.navigateToProfile();">
+            <input type="button" class="control-button" value="View Audit Log"
+                onclick="window.location.href='/views/pages/audit.html';">
+        </div>
+    </div>
+
+    <div class="logout">
+        <a href="/views/pages/index.html" onclick="return dashboardManager.confirmLogout();">Logout</a>
+    </div>
+
+    <div class="user-nav">
+        <button onclick="dashboardManager.navigateToProfile();" class="nav-button">Profile</button>
+        <button onclick="goBack()" class="nav-button">Back</button>
+    </div>
+</body>
+
+</html>

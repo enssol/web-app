@@ -1,0 +1,87 @@
+# Project Directory Structure
+
+## Root Directory
+- **bin/**: Essential user binaries
+- **sbin/**: Essential system binaries
+- **lib/**: Shared libraries for essential binaries
+- **etc/**: System configuration files
+- **dev/**: Device files
+- **tmp/**: Temporary files
+- **var/**: Variable data
+- **usr/**: Secondary hierarchy for user programs
+- **home/**: User home directories
+- **opt/**: Optional software packages
+- **mnt/**: Mount points for temporary filesystems
+- **proc/**: Virtual filesystem for processes
+- **sys/**: Virtual filesystem for system information
+- **boot/**: Bootloader files
+
+## Web Application Directory
+- **www/**: Web root
+  - **views/**: HTML templates
+  - **static/**: Static assets (JS, CSS, images)
+  - **routes/**: Route handlers
+
+## Documentation Directory
+- **docs/**: Project documentation
+  - **api/**: API documentation
+  - **user/**: End-user documentation
+  - **dev/**: Developer documentation
+  - **project/**: Project management documentation
+  - **security/**: Security documentation
+  - **technical/**: Technical documentation
+
+## Source Code Directory
+- **src/**: C source code files
+  - **core/**: Core server functionality
+  - **http/**: HTTP protocol handling
+  - **compat/**: POSIX compatibility functions
+  - **error_handling/**: Error handling
+  - **validation/**: Validation functions
+  - **memory_management/**: Memory management
+  - **threading/**: Thread management
+  - **io/**: Input/Output operations
+  - **cache/**: Cache management
+  - **garbage_collection/**: Garbage collection
+  - **system/**: System initialization and cleanup
+  - **documentation/**: Documentation generation
+  - **scripting/**: Script execution and validation
+  - **permissions/**: Permission management
+  - **authentication/**: User authentication
+  - **encryption/**: Data encryption and decryption
+  - **encoding/**: Data encoding and decoding
+  - **recutils/**: Recutils file operations
+  - **archive/**: Archive management
+  - **backup/**: Backup management
+  - **checksum/**: Checksum calculation and verification
+  - **configuration/**: Configuration management
+  - **logging/**: Logging
+  - **monitoring/**: System monitoring
+  - **network/**: Network management
+  - **database/**: Database management
+  - **file_system/**: File system operations
+  - **system_info/**: System information
+  - **process_management/**: Process management
+  - **sys_config/**: System configuration
+  - **util/**: Utility functions
+
+## Test Directory
+- **test/**: Unit tests
+  - **unit/**: Unit test files
+  - **integration/**: Integration tests
+  - **performance/**: Performance tests
+  - **security/**: Security tests
+  - **mocks/**: Test doubles
+  - **fixtures/**: Test fixture data
+
+## Temporary Directory
+- **tmp/**: Temporary files
+  - **build/**: Build-related temporary files
+
+## Variable Data Directory
+- **var/**: Variable data
+  - **records/**: System records
+  - **log/**: Logging root directory
+  - **data/**: Application data
+  - **db/**: Database files
+  - **exports/**: Data exports

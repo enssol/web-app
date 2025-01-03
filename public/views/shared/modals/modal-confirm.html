@@ -1,0 +1,30 @@
+<!--#include virtual="modal-base.html" -->
+<div id="modal-confirm" class="modal-overlay" role="dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message" aria-hidden="true">
+    <div class="modal-content">
+        <h2 id="confirm-title">Confirmation</h2>
+        <p id="confirm-message">Are you sure?</p>
+        <button onclick="confirmAction()">Yes</button>
+        <button onclick="hideModal('modal-confirm')">No</button>
+    </div>
+</div>
+<script type="text/javascript">
+    "use strict";
+    var confirmCallback = null;
+
+    function showConfirm(message, callback) {
+        var msgElem = document.getElementById('confirm-message');
+        if (msgElem) {
+            msgElem.innerHTML = message || msgElem.innerHTML;
+        }
+        confirmCallback = callback || function(){};
+        showModal('modal-confirm');
+    }
+
+    function confirmAction() {
+        hideModal('modal-confirm');
+        if (typeof confirmCallback === 'function') {
+            confirmCallback();
+        }
+    }
+</script>
+<!-- ...existing code... -->

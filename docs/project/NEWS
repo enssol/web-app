@@ -1,0 +1,30 @@
+# Project News
+
+## 2024-01-01
+### Initial Release
+- The first version of the EnvEng Web Application has been released.
+- Features include basic user authentication, project management, and reporting capabilities.
+
+## 2024-03-01
+### Security Update
+- Implemented AES encryption for data protection.
+- Added token-based authentication for enhanced security.
+- Conducted security audits and testing.
+
+## 2024-06-01
+### Feature Expansion
+- Added user profile management.
+- Implemented new project management features.
+- Enhanced reporting capabilities with new metrics and charts.
+
+## 2024-09-01
+### Performance Optimization
+- Optimized memory usage to improve efficiency.
+- Improved response times for better user experience.
+- Conducted load testing to ensure stability under high traffic.
+
+## 2024-12-01
+### Mobile Support
+- Implemented responsive design for mobile devices.
+- Optimized the application for various mobile platforms.
+- Tested across different mobile browsers and devices.

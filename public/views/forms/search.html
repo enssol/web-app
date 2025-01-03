@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Search Form</title>
+    <!--#include virtual="../common/styles.html" -->
+    <!--#include virtual="../common/modal-base.html" -->
+    <!--#include virtual="../common/modal-confirm.html" -->
+    <!--#include virtual="../common/modal-alert.html" -->
+    <!--#include virtual="../common/modal-dialog.html" -->
+</head>
+<body>
+    <!--#include virtual="../common/base.html" -->
+    <div class="content">
+        <div class="error-container" id="form-errors"></div>
+        <form name="searchForm" method="GET" action="/search" onsubmit="return validateSearch();">
+            <div class="form-field required">
+                <label for="query">Search:</label>
+                <input type="text" id="query" name="query" class="form-input">
+            </div>
+            <div class="form-field">
+                <div class="error-message" id="search-error"></div>
+                <input type="submit" value="Search" class="form-button">
+            </div>
+        </form>
+    </div>
+    <!--#include virtual="../common/scripts.html" -->
+    <script type="text/javascript">
+        "use strict";
+        function validateSearch() {
+            var query = document.getElementById('query');
+            var errorContainer = document.getElementById('form-errors');
+
+            errorContainer.innerHTML = '';
+
+            if (!query.value) {
+                showError('Please enter a search query');
+                return false;
+            }
+            return true;
+        }
+
+        function showError(message) {
+            var errorContainer = document.getElementById('form-errors');
+            errorContainer.innerHTML += '<div class="error">' + message + '</div>';
+        }
+    </script>
+</body>
+</html>

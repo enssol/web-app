@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Role Manager</title>
+<link rel="stylesheet" type="text/css" href="/views/common/styles.html">
+</head>
+<body>
+<div class="role-list">
+    <form onsubmit="return updateRole(document.getElementById('userId').value, document.getElementById('roleSelect').value);">
+        <select id="roleSelect">
+            <option value="admin">Administrator</option>
+            <option value="user">User</option>
+            <option value="guest">Guest</option>
+        </select>
+        <input type="hidden" id="userId" value="123">
+        <input type="submit" value="Update Role">
+    </form>
+    <div id="roleStatus"></div>
+</div>
+<script type="text/javascript">
+"use strict";
+function updateRole(userId, newRole) {
+    if (!checkPermission("admin")) {
+        alert("Permission denied");
+        return false;
+    }
+    document.getElementById("roleStatus").innerHTML = "Role updated";
+    return true;
+}
+function checkPermission(role) {
+    // Dummy function for permission check
+    return role === "admin";
+}
+</script>
+</body>
+</html>

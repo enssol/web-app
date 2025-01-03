@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>Contact Form</title>
+    <!--#include virtual="../common/styles.html" -->
+    <!--#include virtual="../common/modal-base.html" -->
+    <!--#include virtual="../common/modal-confirm.html" -->
+    <!--#include virtual="../common/modal-alert.html" -->
+    <!--#include virtual="../common/modal-dialog.html" -->
+</head>
+<body>
+    <!--#include virtual="../common/base.html" -->
+    <div class="content">
+        <div class="error-container" id="form-errors"></div>
+        <form name="contactForm" onsubmit="return validateContactForm();">
+            <div class="form-field required">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" class="form-input">
+            </div>
+            <div class="form-field required">
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email" class="form-input">
+            </div>
+            <div class="form-field required">
+                <label for="message">Message:</label>
+                <textarea id="message" name="message" class="form-input"></textarea>
+            </div>
+            <div class="form-field">
+                <div class="error-message" id="contact-error"></div>
+                <input type="submit" value="Submit" class="form-button">
+            </div>
+        </form>
+    </div>
+    <!--#include virtual="../common/scripts.html" -->
+    <script type="text/javascript">
+    "use strict";
+    function validateContactForm() {
+        var name = document.getElementById('name');
+        var email = document.getElementById('email');
+        var message = document.getElementById('message');
+        var errorContainer = document.getElementById('form-errors');
+        var isValid = true;
+
+        errorContainer.innerHTML = '';
+
+        if (!name.value) {
+            showError('Name is required');
+            isValid = false;
+        }
+
+        if (!email.value) {
+            showError('Email is required');
+            isValid = false;
+        }
+
+        if (!message.value) {
+            showError('Message is required');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    function showError(message) {
+        var errorContainer = document.getElementById('form-errors');
+        errorContainer.innerHTML += '<div class="error">' + message + '</div>';
+    }
+    </script>
+</body>
+</html>
